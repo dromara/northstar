@@ -6,9 +6,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.DynamicParams;
+import org.dromara.northstar.common.model.core.CancelOrderReq;
 import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Order;
 import org.dromara.northstar.common.model.core.SubmitOrderReq;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.utils.TradeHelper;
@@ -16,7 +17,6 @@ import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.OrderRequestFilter;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
-import org.dromara.northstar.strategy.constant.PriceType;
 
 @StrategicComponent(CtpSimTestAutomatedStrategy.NAME)
 public class CtpSimTestAutomatedStrategy extends AbstractStrategy implements TradeStrategy {
@@ -83,44 +83,48 @@ public class CtpSimTestAutomatedStrategy extends AbstractStrategy implements Tra
 	private void tradeTest() {
 		if(state == TestState.BuyOpenTest && ctx.getState().isEmpty()) {
 			logger.info("============ 正在进行交易测试：买开 ============");
-			hlp.doBuyOpen(1);
+			hlp.buyOpen(1);
 			state = TestState.SellCloseTest;
 			return;
 		}
 		
 		if(state == TestState.SellCloseTest && ctx.getState().isHolding()) {
 			logger.info("============ 正在进行交易测试：卖平 ============");
-			hlp.doSellClose(1);
+			hlp.sellClose(1);
 			state = TestState.SellOpenTest;
 			return;
 		}
 		
 		if(state == TestState.SellOpenTest && ctx.getState().isEmpty()) {
 			logger.info("============ 正在进行交易测试：卖开 ============");
-			hlp.doSellOpen(1);
+			hlp.sellOpen(1);
 			state = TestState.BuyCloseTest;
 			return;
 		}
 		
 		if(state == TestState.BuyCloseTest && ctx.getState().isHolding()) {
 			logger.info("============ 正在进行交易测试：买平 ============");
-			hlp.doBuyClose(1);
+			hlp.buyClose(1);
 			state = TestState.OrderAndWithdrawTest;
 		}
 		
 	}
 	
-	private Optional<String> orderId = Optional.empty();
+	private Optional<Order> orderOpt = Optional.empty();
 	
 	private void orderCounterTest(Tick t) {
 		// 挂单，自动撤单
 		if(state == TestState.OrderAndWithdrawTest) {
 			if(ctx.getState().isEmpty()) {
 				logger.info("============ 正在进行委托及撤单测试 ============");
-				orderId = ctx.submitOrderReq(c, SignalOperation.BUY_OPEN, PriceType.LIMIT_PRICE, 1, t.lastPrice() - t.contract().priceTick() * 20);
-			} else if (ctx.getState().isOrdering() && orderId.isPresent()) {
-				ctx.cancelOrder(orderId.get());
-				orderId = Optional.empty();
+				hlp.buyOpen(t.lastPrice() - 30 * t.contract().priceTick(), numOfBarsToPrepare);;
+			} else if (ctx.getState().isOrdering() && orderOpt.isPresent()) {
+				ctx.cancelOrder(CancelOrderReq.builder()
+						.gatewayId(orderOpt.get().gatewayId())
+						.originOrderId(orderOpt.get().originOrderId())
+						.orderId(orderOpt.get().orderId())
+						.build());
+				orderOpt = Optional.empty();
 			}
 		}
 	}
@@ -129,14 +133,14 @@ public class CtpSimTestAutomatedStrategy extends AbstractStrategy implements Tra
 		if(state == TestState.OrderCheckingTest) {
 			try {
 				logger.info("============ 正在进行无效挂单测试：无效委托量 ============");
-				ctx.submitOrderReq(c, SignalOperation.BUY_OPEN, PriceType.LIMIT_PRICE, -1, t.lastPrice());
+//				ctx.submitOrderReq(c, SignalOperation.BUY_OPEN, PriceType.LIMIT_PRICE, -1, t.lastPrice());
 			} catch (Exception e) {
 				logger.error("捕获到无效订单异常，主动拦截委托单：{}", e.getMessage());
 			}
 			
 			try {
 				logger.info("============ 正在进行无效挂单测试：无效委托价 ============");
-				ctx.submitOrderReq(c, SignalOperation.BUY_OPEN, PriceType.LIMIT_PRICE, 1, t.lastPrice() + t.contract().priceTick() * 0.3);
+//				ctx.submitOrderReq(c, SignalOperation.BUY_OPEN, PriceType.LIMIT_PRICE, 1, t.lastPrice() + t.contract().priceTick() * 0.3);
 			} catch (Exception e) {
 				logger.info("捕获到无效订单异常，主动拦截委托单：{}", e.getMessage());
 			}

@@ -1,14 +1,15 @@
 package org.dromara.northstar.strategy;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.dromara.northstar.common.TransactionAware;
-import org.dromara.northstar.common.model.core.Account;
+import org.dromara.northstar.common.exception.TradeException;
+import org.dromara.northstar.common.model.core.CancelOrderReq;
 import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Order;
 import org.dromara.northstar.common.model.core.Position;
 import org.dromara.northstar.common.model.core.SubmitOrderReq;
-import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeGateway;
 
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
@@ -17,16 +18,18 @@ public interface IAccount extends TransactionAware{
 	
 	/**
 	 * 下单
-	 * @param orderReq	委托请求
-	 * @return			订单ID（originOrderId）
+	 * 所有的下单请求会先发账户发送，账户校验订单没问题后再转发去交易网关
+	 * @param orderReq
+	 * @throws TradeException	当委托单请求校验不通过时，会抛出这个异常
 	 */
-	String submitOrder(SubmitOrderReq orderReq);
+	void submitOrder(SubmitOrderReq orderReq) throws TradeException;
 	/**
 	 * 撤单
-	 * @param originOrderId	订单ID
-	 * @return
+	 * 所有的撤单请求会先发账户发送，账户确保订单处于可撤单状态，才会转发去交易网关
+	 * @param cancelReq	撤单请求
+	 * @return	
 	 */
-	boolean cancelOrder(String originOrderId);
+	boolean cancelOrder(CancelOrderReq cancelReq);
 	/**
 	 * 账户权益
 	 * @return
@@ -36,45 +39,12 @@ public interface IAccount extends TransactionAware{
 	 * 实际可用余额
 	 * @return
 	 */
-	double availableAmount();
-	/**
-	 * 账户风险度
-	 * 风险度取值范围为0到1之间，风险度越高，被强平的风险越大
-	 * @return	[0, 1)
-	 */
-	double degreeOfRisk();
-	/**
-	 * 锁定账户金额
-	 * 适用于多个模组同时抢占金额，使账户金额利用率最大化
-	 * @return	lockID
-	 */
-	Optional<UUID> tryLockAmount(double amount);
-	/**
-	 * 解锁账户金额
-	 * @param lockId
-	 */
-	void unlockAmount(UUID lockId);
-	/**
-	 * 响应账户事件
-	 * @param account
-	 */
-	void onAccount(Account account);
-	/**
-	 * 响应持仓事件
-	 * @param position
-	 */
-	void onPosition(Position position);
+	double availableBalance();
 	/**
 	 * 账户ID
 	 * @return
 	 */
-	String accountId();
-	/**
-	 * 获取某合约的净持仓
-	 * @param unifiedSymbol	合约代码
-	 * @return				净持仓：正数代表净多头，负数代表净空头
-	 */
-	int netPosition(Contract contract);
+	String getId();
 	/**
 	 * 获取某合约的持仓信息
 	 * @param posDirection
@@ -83,10 +53,10 @@ public interface IAccount extends TransactionAware{
 	 */
 	Optional<Position> getPosition(PositionDirectionEnum posDirection, Contract contract);
 	/**
-	 * 获取账户绑定的行情网关
+	 * 获取未完成订单
 	 * @return
 	 */
-	MarketGateway getMarketGateway();
+	List<Order> getPendingOrders();
 	/**
 	 * 获取账户绑定的交易网关
 	 * @return

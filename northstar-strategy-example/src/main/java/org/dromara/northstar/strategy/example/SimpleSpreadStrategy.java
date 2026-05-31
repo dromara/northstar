@@ -83,20 +83,20 @@ public class SimpleSpreadStrategy extends AbstractStrategy implements TradeStrat
 			if(holding == 0) {
 				if(ThreadLocalRandom.current().nextBoolean()) {
 					holding = 1;
-					hlp1.doBuyOpen(1);
-					hlp2.doSellOpen(1);
+					hlp1.buyOpen(1);
+					hlp2.sellOpen(1);
 				} else {
 					holding = -1;
-					hlp1.doSellOpen(1);
-					hlp2.doBuyOpen(1);
+					hlp1.sellOpen(1);
+					hlp2.buyOpen(1);
 				}
 			} else {
 				if(holding > 0) {
-					hlp1.doSellClose(1);
-					hlp2.doBuyClose(1);
+					hlp1.sellClose(1);
+					hlp2.buyClose(1);
 				} else {
-					hlp1.doBuyClose(1);
-					hlp2.doSellClose(1);
+					hlp1.buyClose(1);
+					hlp2.sellClose(1);
 				}
 				holding = 0;
 			}

@@ -24,15 +24,15 @@ import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.model.core.TradeTimeDefinition;
+import org.dromara.northstar.data.IAccountRepository;
 import org.dromara.northstar.data.jdbc.ExplorerTaskRepository;
-import org.dromara.northstar.data.jdbc.ModuleDealRecordRepository;
 import org.dromara.northstar.data.jdbc.entity.ExplorerTaskDO;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.gateway.mktdata.NorthstarDataSource;
 import org.dromara.northstar.module.BacktestModuleFactory;
 import org.dromara.northstar.module.BacktestRunner;
-import org.dromara.northstar.strategy.example.DualAccountExampleStrategy;
+import org.dromara.northstar.strategy.example.TestStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,7 +46,7 @@ class StrategyExplorerServiceTest {
     private ExplorerTaskRepository repo;
     
     @Mock
-    private ModuleDealRecordRepository dealRepo;
+    private IAccountRepository dealRepo;
     
     @Mock
     private NorthstarDataSource ds;
@@ -85,7 +85,7 @@ class StrategyExplorerServiceTest {
     		.contracts(List.of(ContractSimpleInfo.builder().id("ao0000@SHFE@FUTURES@PLAYBACK").unifiedSymbol("ao0000@SHFE@FUTURES").name("ao0000").build()))
     		.intervals(List.of("10m"))
     		.strategySetting(StrategyMetaInfo.builder()
-    				.className(DualAccountExampleStrategy.class.getName())
+    				.className(TestStrategy.class.getName())
     				.settings(Collections.emptyList())
     				.build())
     		.build();
@@ -98,7 +98,7 @@ class StrategyExplorerServiceTest {
     	factory = new BacktestModuleFactory();
     	factory.setDataSource(ds);
     	factory.setMktCenter(mktCenter);
-    	factory.setDealRecordRepo(dealRepo);
+    	factory.setAccountRepo(dealRepo);
     	service.factory = factory;
     	service.repo = repo;
     	when(ic.contract()).thenReturn(contract);

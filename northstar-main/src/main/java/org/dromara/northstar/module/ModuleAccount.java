@@ -1,255 +1,179 @@
 package org.dromara.northstar.module;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.BiConsumer;
+import java.util.Map;
+import java.util.Optional;
 
 import org.dromara.northstar.common.ModuleLoggerAware;
-import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
-import org.dromara.northstar.common.model.ModuleDealRecord;
-import org.dromara.northstar.common.model.ModuleDescription;
-import org.dromara.northstar.common.model.ModuleRuntimeDescription;
+import org.dromara.northstar.common.exception.IllegalOrderRequestException;
+import org.dromara.northstar.common.exception.TradeException;
+import org.dromara.northstar.common.model.core.CancelOrderReq;
 import org.dromara.northstar.common.model.core.Contract;
-import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.common.model.core.Order;
 import org.dromara.northstar.common.model.core.Position;
 import org.dromara.northstar.common.model.core.SubmitOrderReq;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.FieldUtils;
-import org.dromara.northstar.data.IModuleRepository;
-import org.dromara.northstar.gateway.IContract;
-import org.dromara.northstar.gateway.IContractManager;
-import org.dromara.northstar.strategy.IModuleAccount;
+import org.dromara.northstar.gateway.TradeGateway;
+import org.dromara.northstar.gateway.sim.trade.AccountPosition;
+import org.dromara.northstar.strategy.IAccount;
 import org.slf4j.Logger;
 
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreField.TradeField;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 /**
  * 模组账户
  * 一个模组账户可以对应多个真实账户信息
+ * 仅统计与模组相关的账户状态与持仓状态；
+ * 同时负责下单请求的路由分发，将订单转发到对应的交易账户
  * @author KevinHuangwl
  *
  */
-@Slf4j
-public class ModuleAccount implements IModuleAccount, ModuleLoggerAware {
-
-	@Getter
-	private double initBalance;
-	@Getter
-	private double accCommission;
-	@Getter
-	private double accCloseProfit;
-	@Getter
-	private double maxProfit;
-	@Getter
-	private double maxDrawdown;
-	
-	private double maxTotalBalance;
-	/* direction -> contract -> position */ 
-	private Table<DirectionEnum, Contract, ModulePosition> posTable = HashBasedTable.create();
-	private LocalDate tradingDay;
-	
-	private Set<Contract> bindedContracts = new HashSet<>();
+public class ModuleAccount implements IAccount, ModuleLoggerAware {
 
 	@Setter
 	private Logger logger;
-	
-	public ModuleAccount(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRtDescription, IModuleRepository moduleRepo,
-			IContractManager contractMgr) {
-		BiConsumer<Trade, Trade> onDealCallback = (openTrade, closeTrade) -> {
-			synchronized (this) {
-				int factor = FieldUtils.directionFactor(openTrade.direction());
-				Contract contract = closeTrade.contract();
-				double profit = factor * (closeTrade.price() - openTrade.price()) * closeTrade.volume() * contract.multiplier();
-				accCloseProfit += profit;
-				ContractDefinition cd = contract.contractDefinition();
-				double commission = cd.commissionFee() != null ? cd.commissionFee() : cd.commissionRate() * closeTrade.price() * contract.multiplier();
-				double dealCommission = commission * 2 * closeTrade.volume(); // 乘2代表手续费双向计算
-				accCommission += dealCommission;
-				maxProfit = Math.max(maxProfit, accCloseProfit - accCommission);
-				maxTotalBalance = Math.max(maxTotalBalance, initBalance + maxProfit);
-				double drawdown = accCloseProfit - accCommission - maxProfit;
-				maxDrawdown = Math.min(maxDrawdown, drawdown);
-				moduleRepo.saveDealRecord(ModuleDealRecord.builder()
-						.moduleName(moduleDescription.getName())
-						.moduleAccountId(closeTrade.gatewayId())
-						.dealProfit(profit)
-						.transactionFee(dealCommission)
-						.openTrade(openTrade.toTradeField().toByteArray())
-						.closeTrade(closeTrade.toTradeField().toByteArray())
-						.build());
-			}
-		};
-		
-		ModuleAccountRuntimeDescription mard = moduleRtDescription.getModuleAccountRuntime();
-		this.initBalance = moduleDescription.getInitBalance();
-		this.accCloseProfit = mard.getAccCloseProfit();
-		this.accCommission = mard.getAccCommission();
-		this.maxDrawdown = mard.getMaxDrawdown();
-		this.maxProfit = mard.getMaxProfit();
-		moduleDescription.getBindedContracts().stream()
-			.forEach(contractSimple -> {
-				IContract contract = contractMgr.getContract(Identifier.of(contractSimple.getId()));
-				Contract cf = contract.contract();
-				
-				ModulePosition buyPos = new ModulePosition(cf, DirectionEnum.D_Buy, moduleDescription.getClosingPolicy(), onDealCallback);
-				posTable.put(DirectionEnum.D_Buy, cf, buyPos);
-				
-				ModulePosition sellPos = new ModulePosition(cf, DirectionEnum.D_Sell, moduleDescription.getClosingPolicy(), onDealCallback);
-				posTable.put(DirectionEnum.D_Sell, cf, sellPos);
-				
-				bindedContracts.add(cf);
-			});
-		
-		mard.getPositionDescription().getNonclosedTrades()
-			.stream()
-			.map(this::convertFrom)
-			.map(t -> Trade.of(t, contractMgr))
-			.forEach(this::onTrade);
-	}
-	
-	private TradeField convertFrom(byte[] data) {
-		try {
-			return TradeField.parseFrom(data);
-		} catch (InvalidProtocolBufferException e) {
-			log.warn("", e);
-			return null;
-		}
-	}
-	
-	@Override
-	public synchronized void onTick(Tick tick) {
-		if(Objects.isNull(tradingDay) || !tradingDay.isEqual(tick.tradingDay())) {
-			tradingDay = tick.tradingDay();
-			tradeDayPreset();
-		}
-		posTable.values().stream().forEach(mp -> mp.onTick(tick));
-	}
 
+	private final String moduleName;
+	private final double initBalance;
+	private final double initCommission;
+	private final double initRealizedProfit;
+	
+	/* 合约 -> 真实交易账户 路由映射 */
+	@Getter
+	private final Map<Contract, IAccount> contractAccountMap;
+	private final Table<Contract, PositionDirectionEnum, AccountPosition> positionTbl;
+
+	public ModuleAccount(String moduleName, double initBalance, double initRealizedProfit, double initCommission,
+			Table<Contract, PositionDirectionEnum, AccountPosition> positionTbl, Map<Contract, IAccount> contractAccountMap) {
+		this.moduleName = moduleName;
+		this.initBalance = initBalance;
+		this.initCommission = initCommission;
+		this.initRealizedProfit = initRealizedProfit;
+		this.contractAccountMap = contractAccountMap;
+		this.positionTbl = positionTbl;
+	}
+	
 	@Override
-	public synchronized void onOrder(Order order) {
-		if(FieldUtils.isOpen(order.offsetFlag())) {
-			posTable.get(order.direction(), order.contract()).onOrder(order);
+	public void submitOrder(SubmitOrderReq orderReq) throws TradeException {
+		IAccount tradeAccount = contractAccountMap.get(orderReq.contract());
+		if(tradeAccount == null) {
+			throw new IllegalStateException("找不到对应的交易账户");
+		}
+		if(FieldUtils.isOpen(orderReq.offsetFlag())) {
+			checkIfHasSufficientAmount(orderReq);
 		} else {
-			posTable.get(FieldUtils.getOpposite(order.direction()), order.contract()).onOrder(order);
+			checkIfHasSufficientPosition(orderReq);
 		}
-	}
-
-	@Override
-	public synchronized void onTrade(Trade trade) {
-		if(!bindedContracts.contains(trade.contract())) {
-			throw new IllegalStateException("模组账户绑定的合约与成交记录不一致：" + String.format("成交记录为[%s]", trade.contract().unifiedSymbol()));
-		}
-		if(FieldUtils.isOpen(trade.offsetFlag())) {
-			posTable.get(trade.direction(), trade.contract()).onTrade(trade);
-		} else {
-			posTable.get(FieldUtils.getOpposite(trade.direction()), trade.contract()).onTrade(trade);
-		}
-	}
-
-	public synchronized List<Position> getPositions() {
-		List<Position> result = new ArrayList<>();
-		result.addAll(posTable.row(DirectionEnum.D_Buy).values().stream().map(ModulePosition::convertToPosition).toList());
-		result.addAll(posTable.row(DirectionEnum.D_Sell).values().stream().map(ModulePosition::convertToPosition).toList());
-		return result;
+		
+		tradeAccount.submitOrder(orderReq);
 	}
 
 	
-	public synchronized List<Trade> getNonclosedTrades() {
-		List<Trade> result = new ArrayList<>();
-		result.addAll(posTable.row(DirectionEnum.D_Buy).values().stream().flatMap(mp -> mp.getNonclosedTrades().stream()).toList());
-		result.addAll(posTable.row(DirectionEnum.D_Sell).values().stream().flatMap(mp -> mp.getNonclosedTrades().stream()).toList());
-		return result;
-	}
-
-	@Override
-	public synchronized int getNonclosedPosition(Contract contract, DirectionEnum direction) {
-		if(!posTable.contains(direction, contract)) {
-			return 0;
+	private void checkIfHasSufficientAmount(SubmitOrderReq submitOrder) {
+		double margin = submitOrder.contract().contractDefinition().marginRatio();
+		double cost = submitOrder.price() * submitOrder.volume() * submitOrder.contract().multiplier() * margin;
+		if(availableBalance() < cost) {
+			logger.warn("[{}] 资金不足。可用资金为：{}，开仓成本为：{}", getId(), availableBalance(), cost);
+			throw new IllegalOrderRequestException();
 		}
-		return posTable.get(direction, contract).totalVolume();
 	}
 	
-	@Override
-	public synchronized int getNonclosedPosition(Contract contract, DirectionEnum direction, boolean isPresentTradingDay) {
-		ModulePosition mp = posTable.get(direction, contract);
-		if(mp == null) {
-			return 0;
+	private void checkIfHasSufficientPosition(SubmitOrderReq submitOrder) {
+		Contract contract = submitOrder.contract();
+		PositionDirectionEnum closeDir = FieldUtils.closePositionDirOf(submitOrder.direction());
+		AccountPosition position = positionTbl.get(contract, closeDir);
+		if(position == null) {
+			throw new IllegalStateException("找不到持仓对象");
 		}
-		return isPresentTradingDay ? mp.tdVolume() : mp.ydVolume();
+		double availablePos = position.position() - position.frozen();
+		if(availablePos < submitOrder.volume()) {
+			logger.warn("[{}] 持仓不够。可用持仓为：{}，委托交易量：{}", getId(), availablePos, submitOrder.volume());
+			throw new IllegalOrderRequestException();
+		}
 	}
 	
 	@Override
-	public synchronized int getNonclosedNetPosition(Contract contract) {
-		int longPos = getNonclosedPosition(contract, DirectionEnum.D_Buy);
-		int shortPos = getNonclosedPosition(contract, DirectionEnum.D_Sell);
-		return longPos - shortPos;
-	}
-	
-	@Override
-	public synchronized double totalHoldingProfit() {
-		return posTable.values().stream()
-				.mapToDouble(mp -> mp.profit())
-				.sum();
+	public boolean cancelOrder(CancelOrderReq cancelReq) {
+		List<IAccount> accounts = contractAccountMap.values().stream().filter(acc -> acc.getId().equals(cancelReq.gatewayId())).toList();
+		if(accounts.isEmpty()) {
+			throw new IllegalStateException("没有找到对应的账户：" + cancelReq.gatewayId());
+		}
+		return accounts.getFirst().cancelOrder(cancelReq);
 	}
 
-	public synchronized void tradeDayPreset() {
-		posTable.values().stream().forEach(ModulePosition::releaseOrder);
-	}
-
-	/**
-	 * 模组账户可用金额（近似计算）
-	 * @return
-	 */
 	@Override
-	public synchronized double availableAmount() {
-		// 由于只有在开仓时才检查金额是否足够，因此可以忽略持仓浮盈的计算
-		return initBalance + accCloseProfit - accCommission - holdingMargin();
+	public double accountBalance() {
+		return initBalance + realizedProfit() - commission();
 	}
 	
 	// 持仓占用
 	private double holdingMargin() {
-		return posTable.values().stream().mapToDouble(ModulePosition::totalMargin).sum();
+		return positionTbl.values().stream().mapToDouble(AccountPosition::margin).sum();
+	}
+
+	public double realizedProfit() {
+		return initRealizedProfit + positionTbl.values().stream().mapToDouble(AccountPosition::getAccRealizedProfit).sum();
 	}
 	
-	public synchronized void onSubmitOrder(SubmitOrderReq submitOrder) {
-		if(FieldUtils.isOpen(submitOrder.offsetFlag())) {
-			checkIfHasSufficientAmount(submitOrder);
-		} else {
-			checkIfHasSufficientPosition(submitOrder);
-		}
+	public double commission() {
+		return initCommission + positionTbl.values().stream().mapToDouble(AccountPosition::getAccCommission).sum();
 	}
 
-	private void checkIfHasSufficientPosition(SubmitOrderReq submitOrder) {
-		Contract contract =  submitOrder.contract();
-		int available = posTable.get(FieldUtils.getOpposite(submitOrder.direction()), contract).totalAvailable();
-		if(available < submitOrder.volume()) {
-			logger.warn("模组账户可用持仓为：{}，委托交易量：{}", available, submitOrder.volume());
-			throw new IllegalStateException("模组账户可用持仓不足，无法平仓");
-		}
+	@Override
+	public double availableBalance() {
+		return accountBalance() - holdingMargin();
 	}
 
-	private void checkIfHasSufficientAmount(SubmitOrderReq submitOrder) {
-		double margin = submitOrder.contract().contractDefinition().marginRatio();
-		double cost = submitOrder.price() * submitOrder.volume() * submitOrder.contract().multiplier() * margin;
-		if(availableAmount() < cost) {
-			logger.warn("模组账户可用资金为：{}，开仓成本为：{}", availableAmount(), cost);
-			throw new IllegalStateException("模组账户可用资金不足，无法开仓");
-		}
+	@Override
+	public String getId() {
+		return moduleName;
 	}
 
+	@Override
+	public Optional<Position> getPosition(PositionDirectionEnum posDirection, Contract contract) {
+		AccountPosition mp = positionTbl.get(contract, posDirection);
+		if(mp == null) {
+			return Optional.empty();
+		}
+		return Optional.of(mp.convertToPosition());
+	}
+	
+	public List<Position> getPositions(){
+		return positionTbl.values().stream().map(AccountPosition::convertToPosition).toList();
+	}
+	
+	public List<AccountPosition> getModulePositions(){
+		return positionTbl.values().stream().toList();
+	}
+
+	@Override
+	public List<Order> getPendingOrders() {
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public void onOrder(Order order) {
+		// 不需要处理
+	}
+
+	@Override
+	public void onTrade(Trade trade) {
+		positionTbl.values().forEach(ap -> ap.onTrade(trade));
+	}
+	
+	public void onTick(Tick tick) {
+		positionTbl.values().forEach(ap -> ap.onTick(tick));
+	}
+
+	@Override
+	public TradeGateway getTradeGateway() {
+		throw new UnsupportedOperationException();
+	}
+	
 }

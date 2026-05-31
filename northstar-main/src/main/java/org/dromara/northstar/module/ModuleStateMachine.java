@@ -8,7 +8,9 @@ import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Position;
 import org.dromara.northstar.common.model.core.Trade;
+import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.slf4j.Logger;
 
@@ -16,6 +18,7 @@ import lombok.Setter;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 /**
  * 模组状态机
@@ -64,24 +67,28 @@ public class ModuleStateMachine implements TransactionAware, ModuleLoggerAware {
 	}
 	
 	public void updateState() {
-		List<Trade> nonclosedTrade = moduleAccount.getNonclosedTrades();
-		if(nonclosedTrade.isEmpty()) {
+		List<Position> positions = moduleAccount.getPositions().stream().filter(p -> p.position() > 0).toList();
+		List<Position> longPos = positions.stream().filter(p -> p.position() > 0 && p.positionDirection() == PositionDirectionEnum.PD_Long).toList();
+		List<Position> shortPos = positions.stream().filter(p -> p.position() > 0 && p.positionDirection() == PositionDirectionEnum.PD_Short).toList();
+		if(positions.isEmpty()) {
 			setState(ModuleState.EMPTY);
+		} else if (longPos.isEmpty() && !shortPos.isEmpty()){
+			setState(ModuleState.HOLDING_SHORT);
+		} else if (!longPos.isEmpty() && shortPos.isEmpty()){
+			setState(ModuleState.HOLDING_LONG);
 		} else {
-			int buyPos = nonclosedTrade.stream().filter(t -> t.direction() == DirectionEnum.D_Buy).mapToInt(Trade::volume).sum();
-			int sellPos = nonclosedTrade.stream().filter(t -> t.direction() == DirectionEnum.D_Sell).mapToInt(Trade::volume).sum();
-			if(buyPos * sellPos > 0) {
-				Trade longTrade = nonclosedTrade.stream().filter(t -> t.direction() == DirectionEnum.D_Buy).toList().get(0);
-				Trade shortTrade = nonclosedTrade.stream().filter(t -> t.direction() == DirectionEnum.D_Sell).toList().get(0);
-				if(longTrade.contract().equals(shortTrade.contract()) && buyPos == sellPos) {
+			double buyPos = longPos.stream().mapToDouble(Position::position).sum();
+			double sellPos = shortPos.stream().mapToDouble(Position::position).sum();
+			Position lp = longPos.getFirst();
+			Position sp = shortPos.getFirst();
+			if(CommonUtils.equals(sellPos, buyPos, Math.pow(1, -lp.contract().quantityPrecision()))) {
+				if(lp.contract().equals(sp.contract())) {
 					setState(ModuleState.EMPTY_HEDGE);
 				} else {
 					setState(ModuleState.HOLDING_HEDGE);
 				}
-			} else if(buyPos > 0) {
-				setState(ModuleState.HOLDING_LONG);
-			} else if(sellPos > 0) {
-				setState(ModuleState.HOLDING_SHORT);
+			} else {
+				setState(ModuleState.ERROR);
 			}
 		}
 	}

@@ -1,22 +1,18 @@
 package org.dromara.northstar.common.model.core;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.junit.jupiter.api.Test;
 
-import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
-import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
-import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 class OrderTest {
 
@@ -34,13 +30,7 @@ class OrderTest {
 				.price(1.0)
 				.totalVolume(1)
 				.tradedVolume(1)
-				.timeCondition(TimeConditionEnum.TC_GFA)
-				.gtdDate("gtdDate")
-				.volumeCondition(VolumeConditionEnum.VC_AV)
-				.minVolume(1)
-				.contingentCondition(ContingentConditionEnum.CC_Immediately)
 				.stopPrice(1.0)
-				.forceCloseReason(ForceCloseReasonEnum.FCR_ClientOverPositionLimit)
 				.tradingDay(LocalDate.now())
 				.orderDate(LocalDate.now())
 				.orderTime(LocalTime.now())
@@ -60,13 +50,7 @@ class OrderTest {
 		assertEquals(order.price(), orderField.getPrice());
 		assertEquals(order.totalVolume(), orderField.getTotalVolume());
 		assertEquals(order.tradedVolume(), orderField.getTradedVolume());
-		assertEquals(order.timeCondition().getNumber(), orderField.getTimeCondition().getNumber());
-		assertEquals(order.gtdDate(), orderField.getGtdDate());
-		assertEquals(order.volumeCondition().getNumber(), orderField.getVolumeCondition().getNumber());
-		assertEquals(order.minVolume(), orderField.getMinVolume());
-		assertEquals(order.contingentCondition().getNumber(), orderField.getContingentCondition().getNumber());
 		assertEquals(order.stopPrice(), orderField.getStopPrice());
-		assertEquals(order.forceCloseReason().getNumber(), orderField.getForceCloseReason().getNumber());
 		assertEquals(order.tradingDay().format(DateTimeConstant.D_FORMAT_INT_FORMATTER), orderField.getTradingDay());
 		assertEquals(order.orderDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER), orderField.getOrderDate());
 		assertEquals(order.orderTime().format(DateTimeConstant.T_FORMAT_FORMATTER), orderField.getOrderTime());

@@ -16,12 +16,13 @@ public class PositionVO {
 	private String name;
 	private String symbol;
     private PositionDirectionEnum dir;
-    private int total;
-    private int available;
+    private double total;
+    private double available;
     private String openPrice;
     private String lastPrice;
-    private int profit;
+    private double profit;
     private String contractId;
     private DirectionEnum closingDir;
     private String gatewayId;
+    private int quantityPrecision;
 }

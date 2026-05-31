@@ -20,7 +20,7 @@ public class ModuleDealRecordVO {
 	
 	private PositionDirectionEnum dir;
 	
-	private int vol;
+	private double vol;
 	
 	private String openPrice;
 	

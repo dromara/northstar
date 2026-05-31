@@ -7,32 +7,27 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.GatewayUsage;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
-import org.dromara.northstar.common.model.SimAccountDescription;
-import org.dromara.northstar.data.IModuleRepository;
-import org.dromara.northstar.data.ISimAccountRepository;
+import org.dromara.northstar.data.IAccountRepository;
 import org.dromara.northstar.gateway.Gateway;
 import org.dromara.northstar.gateway.GatewayFactory;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
-import org.dromara.northstar.gateway.sim.market.SimMarketGatewayLocal;
+import org.dromara.northstar.gateway.sim.market.SimMarketGateway;
 import org.dromara.northstar.gateway.sim.market.SimTickGenerator;
 
 public class SimGatewayFactory implements GatewayFactory{
 	
 	private FastEventEngine fastEventEngine;
 	
-	private ISimAccountRepository simAccountRepo;
-	
-	private IModuleRepository moduleRepo;
+	private IAccountRepository accountRepo;
 	
 	private MarketCenter mktCenter;
 	
 	private Map<String, SimTickGenerator> tickGenMap;
 	
-	public SimGatewayFactory(FastEventEngine fastEventEngine, ISimAccountRepository repo, IModuleRepository moduleRepo,
+	public SimGatewayFactory(FastEventEngine fastEventEngine, IAccountRepository accountRepo,
 			MarketCenter mktCenter, Map<String, SimTickGenerator> tickGenMap) {
 		this.fastEventEngine = fastEventEngine;
-		this.moduleRepo = moduleRepo;
-		this.simAccountRepo = repo;
+		this.accountRepo = accountRepo;
 		this.mktCenter = mktCenter;
 		this.tickGenMap = tickGenMap;
 	}
@@ -46,20 +41,11 @@ public class SimGatewayFactory implements GatewayFactory{
 	}
 	
 	private Gateway getMarketGateway(GatewayDescription gatewayDescription) {
-		return new SimMarketGatewayLocal(gatewayDescription, fastEventEngine, mktCenter, tickGenMap);
+		return new SimMarketGateway(gatewayDescription, fastEventEngine, mktCenter, tickGenMap);
 	}
 	
 	private Gateway getTradeGateway(GatewayDescription gatewayDescription) {
-		String accGatewayId = gatewayDescription.getGatewayId();
-		SimAccountDescription simAccountDescription = simAccountRepo.findById(accGatewayId);
-
-		final SimGatewayAccount account;
-		if(simAccountDescription == null) {
-			account = new SimGatewayAccount(accGatewayId, moduleRepo);
-		} else {
-			account = new SimGatewayAccount(simAccountDescription, mktCenter, moduleRepo);
-		}
-		return new SimTradeGatewayLocal(fastEventEngine, gatewayDescription, account, simAccountRepo, mktCenter);
+		return new SimTradeGateway(fastEventEngine, gatewayDescription, new SimAccountRemote(mktCenter, accountRepo), mktCenter);
 	}
 
 	@Override

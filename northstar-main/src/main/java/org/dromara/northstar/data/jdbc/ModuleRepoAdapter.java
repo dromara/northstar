@@ -5,27 +5,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.data.IModuleRepository;
-import org.dromara.northstar.data.jdbc.entity.ModuleDealRecordDO;
 import org.dromara.northstar.data.jdbc.entity.ModuleDescriptionDO;
 import org.dromara.northstar.data.jdbc.entity.ModuleRuntimeDescriptionDO;
 
 public class ModuleRepoAdapter implements IModuleRepository{
 	
-	private ModuleDealRecordRepository mdrDelegate;
-	
 	private ModuleDescriptionRepository mdDelegate;
 	
 	private ModuleRuntimeDescriptionRepository mrdDelegate;
 
-	public ModuleRepoAdapter(ModuleDescriptionRepository mdDelegate, ModuleRuntimeDescriptionRepository mrdDelegate,
-			ModuleDealRecordRepository mdrDelegate) {
+	public ModuleRepoAdapter(ModuleDescriptionRepository mdDelegate, ModuleRuntimeDescriptionRepository mrdDelegate) {
 		this.mdDelegate = mdDelegate;
 		this.mrdDelegate = mrdDelegate;
-		this.mdrDelegate = mdrDelegate;
 	}
 
 	@Override
@@ -70,20 +64,4 @@ public class ModuleRepoAdapter implements IModuleRepository{
 		mrdDelegate.deleteById(moduleName);
 	}
 
-	@Override
-	public void saveDealRecord(ModuleDealRecord dealRecord) {
-		mdrDelegate.save(ModuleDealRecordDO.convertFrom(dealRecord));
-	}
-
-	@Override
-	public List<ModuleDealRecord> findAllDealRecords(String moduleName) {
-		return mdrDelegate.findByModuleName(moduleName).stream()
-				.map(ModuleDealRecordDO::convertTo)
-				.toList();
-	}
-
-	@Override
-	public void removeAllDealRecords(String moduleName) {
-		mdrDelegate.deleteByModuleName(moduleName);
-	}
 }

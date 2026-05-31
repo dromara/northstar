@@ -149,6 +149,8 @@ public class ContractConfigService {
                 .exchange(c.exchange().toString())
                 .productClass(c.productClass().toString())
                 .name(c.name())
+                .pricePrecision(c.pricePrecision())
+                .quantityPrecision(c.quantityPrecision())
                 // 系统默认值
                 .defaultMarginRatio(defaultMarginRatio)
                 .defaultLeverage(defaultLeverage)

@@ -4,17 +4,6 @@ import "xyz/redtorch/pb/core_enum.proto";
 
 package xyz.redtorch.pb;
 
-// 网关
-message GatewayField {
-	string gatewayId = 1;  // 唯一标识
-	string name = 2;  // 名称
-	string description = 3;  // 描述
-	GatewayTypeEnum gatewayType = 4;  // 网关类型
-	GatewayAdapterTypeEnum gatewayAdapterType = 5;  // 网关适配器类型
-	ConnectStatusEnum status = 6;  // 网关状态
-	bool authErrorFlag = 7; // 登录失败标志
-}
-
 // 合约
 message ContractField {
 	string contractId = 1;  // ID，通常是  <合约代码@交易所代码@产品类型@网关ID>
@@ -72,70 +61,41 @@ message AccountField {
 message OrderField {
 	string originOrderId = 1;  // 原始定单ID
 	string orderId = 2;  // 定单ID,通常是<网关ID@适配器定单ID>
-	string adapterOrderId = 3;  // 适配器层定单ID
-	string accountId = 4;  // 账户ID
-	string orderLocalId = 5; // 本地报单编号
-	string brokerOrderSeq = 6; // 经纪公司报单编号
-	string orderSysId = 7; // 报单编号
-	string sequenceNo = 8; // 序号
-	DirectionEnum direction = 9;  // 方向
-	OffsetFlagEnum offsetFlag = 10;  // 开平
-	HedgeFlagEnum hedgeFlag = 11; // 投机套保标识
-	OrderPriceTypeEnum orderPriceType = 12; // 定单价格类型 
-	OrderStatusEnum orderStatus = 13;  // 状态
-	double price = 14;  // 价格
-	int32 totalVolume = 15;  // 数量
-	int32 tradedVolume = 16;  // 已成交数量
-	TimeConditionEnum timeCondition = 17;  // 时效
-	string gtdDate = 18; // GTD日期
-	VolumeConditionEnum volumeCondition = 19; // 成交量类型
-	int32 minVolume = 20; // 最小成交量
-	ContingentConditionEnum contingentCondition = 21; // 触发条件
-	double stopPrice = 22; // 止损价
-	ForceCloseReasonEnum forceCloseReason = 23; // 强平原因
-	int32 autoSuspend = 24; // 自动挂起标志
-	int32 userForceClose = 25; // 用户强平标志
-	int32 swapOrder = 26; // 互换单标志
-	string tradingDay = 27;  // 交易日
-	string orderDate = 28;  // 定单日期
-	string orderTime = 29;  // 定单时间
-	string activeTime = 30;  // 激活时间
-	string suspendTime = 31;  // 挂起时间
-	string cancelTime = 32;  // 撤销时间
-	string updateTime = 33;  // 最后修改时间
-	string statusMsg = 34;  // 状态信息
-	int32 frontId = 35;  // 前置机编号(CTP/LTS)
-	int32 sessionId = 36;  // 连接编号(CTP/LTS)
-    ContractField contract = 37;  // 合约
-	string gatewayId = 38;  // 网关ID
+	DirectionEnum direction = 3;  // 方向
+	OffsetFlagEnum offsetFlag = 4;  // 开平
+	HedgeFlagEnum hedgeFlag = 5; // 投机套保标识
+	OrderPriceTypeEnum orderPriceType = 6; // 定单价格类型 
+	OrderStatusEnum orderStatus = 7;  // 状态
+	double price = 8;  // 价格
+	double totalVolume = 9;  // 数量
+	double tradedVolume = 10;  // 已成交数量
+	TimeConditionEnum timeCondition = 11;  // 时效
+	double stopPrice = 12; // 止损价
+	string tradingDay = 13;  // 交易日
+	string orderDate = 14;  // 定单日期
+	string orderTime = 15;  // 定单时间
+	string updateDate = 16;  // 更新日期
+	string updateTime = 17;  // 更新时间
+	string statusMsg = 18;  // 状态信息
+    ContractField contract = 19;  // 合约
+	string gatewayId = 20;  // 网关ID
 }
 
 // 成交
 message TradeField {
 	string tradeId = 1;  // 成交ID,通常是<网关ID@定单编号@方向@成交编号>，加入方向是因为部分交易所发生违规自成交后,成交ID相同
-	string adapterTradeId = 2;  // 适配器层成交ID
-	string originOrderId = 3;  // 原始定单ID
-	string orderId = 4;  // 定单ID,通常是<网关ID@定单ID>
-	string adapterOrderId = 5;  // 适配器层定单ID
-	string orderLocalId = 6; // 本地报单编号
-	string brokerOrderSeq = 7; //经纪公司报单编号
-	string orderSysId = 8; // 报单编号
-	string settlementId = 9; // 结算编号
-	string sequenceNo = 10; // 序列号
-	string accountId = 11;  // 账户ID
-	DirectionEnum direction = 12;  // 方向
-	OffsetFlagEnum offsetFlag = 13;  // 开平
-	HedgeFlagEnum hedgeFlag = 14; // 投机套保标识
-	double price = 15;  // 价格
-	int32 volume = 16;  // 数量
-	TradeTypeEnum tradeType = 17; // 成交类型
-	PriceSourceEnum priceSource = 18; // 成交价来源
-	string tradingDay = 19;  // 交易日
-	string tradeDate = 20;  // 成交日期
-	string tradeTime = 21;  // 成交时间(HHmmssSSS)
-	fixed64 tradeTimestamp = 22;  // 成交时间戳
-    ContractField contract = 23;  // 合约
-	string gatewayId = 24;  // 网关ID
+	string originOrderId = 2;  // 原始定单ID
+	string orderId = 3;  // 定单ID,通常是<网关ID@定单ID>
+	DirectionEnum direction = 4;  // 方向
+	OffsetFlagEnum offsetFlag = 5;  // 开平
+	double price = 6;  // 价格
+	double volume = 7;  // 数量
+	string tradingDay = 8;  // 交易日
+	string tradeDate = 9;  // 成交日期
+	string tradeTime = 10;  // 成交时间(HHmmssSSS)
+	fixed64 tradeTimestamp = 11;  // 成交时间戳
+    ContractField contract = 12;  // 合约
+	string gatewayId = 13;  // 网关ID
 }
 
 // 持仓
@@ -143,27 +103,17 @@ message PositionField {
 	string positionId = 1;  // 持仓在系统中的唯一代码,通常是<合约代码@交易所代码@产品类型@方向@投机套保标志@账户@币种@网关>
 	string accountId = 2;  // 账户ID
 	PositionDirectionEnum positionDirection = 3;  // 持仓方向
-	int32 position = 4;  // 持仓量
-	int32 frozen = 5;  // 冻结数量
-	int32 ydPosition = 6;  // 昨持仓
-	int32 ydFrozen = 7;  // 冻结数量
-	int32 tdPosition = 8;  // 今持仓
-	int32 tdFrozen = 9;  // 冻结数量
-	double lastPrice = 10;  // 计算盈亏使用的行情最后价格
-	double price = 11;  // 持仓均价
-	double priceDiff = 12;  // 持仓价格差
-	double openPrice = 13;  // 开仓均价
-	double openPriceDiff = 14;  // 开仓价格差
-	double positionProfit = 15;  // 持仓盈亏
-	double positionProfitRatio = 16;  // 持仓盈亏率
-	double openPositionProfit = 17;  // 开仓盈亏
-	double openPositionProfitRatio = 18;  // 开仓盈亏率
-	double useMargin = 19;  // 占用的保证金
-	double exchangeMargin = 20;  // 交易所的保证金
-	double contractValue = 21;  // 最新合约价值
-	HedgeFlagEnum hedgeFlag = 22; // 投机套保标识
-    ContractField contract = 23;  // 合约
-	string gatewayId = 24;  // 网关ID
+	double position = 4;  // 持仓量
+	double frozen = 5;  // 冻结数量
+	double lastPrice = 6;  // 计算盈亏使用的行情最后价格
+	double openPrice = 7;  // 开仓均价
+	double openPriceDiff = 8;  // 开仓价格差
+	double positionProfit = 9;  // 持仓盈亏
+	double positionProfitRatio = 10;  // 持仓盈亏率
+	double useMargin = 11;  // 占用的保证金
+	HedgeFlagEnum hedgeFlag = 12; // 投机套保标识
+    ContractField contract = 13;  // 合约
+	string gatewayId = 14;  // 网关ID
 }
 
 // Tick
@@ -233,81 +183,6 @@ message BarField {
 	string channelType = 22;	// 渠道来源
 	string interval = 23;	// K线周期
 	bool unstable = 24; 	// 未确定标识
-}
-
-// 提交定单请求
-message SubmitOrderReqField {
-	string originOrderId = 1;  //  原始定单ID
-	string accountCode = 2;  // 账户代码
-	CurrencyEnum currency = 3;  // 币种
-	ContractField contract = 4;  //  合约
-	string gatewayId = 5; // 网关ID
-	double volume = 6;  // 数量
- 	double price = 7;  // 价格
-	OrderPriceTypeEnum orderPriceType = 8;  // 价格类型
-	DirectionEnum direction = 9;  // 方向
-	OffsetFlagEnum offsetFlag = 10; // 组合开平标志
-	HedgeFlagEnum hedgeFlag = 11; // 组合投机套保标志
-	TimeConditionEnum timeCondition = 12;  // 时效
-	string gtdDate = 13; // GTD日期
-	VolumeConditionEnum volumeCondition = 14; // 成交量类型
-	fixed32 minVolume = 15; // 最小成交量
-	ContingentConditionEnum contingentCondition = 16; // 触发条件
-	double stopPrice = 17; // 止损价
-	ForceCloseReasonEnum forceCloseReason = 18; // 强平原因
-	fixed32 autoSuspend = 19; // 自动挂起标志
-	fixed32 userForceClose = 20; // 用户强评标志
-	fixed32 swapOrder = 21; // 互换单标志
-	fixed64 actionTimestamp = 22;  // 时间戳
-}
-
-// 撤单请求
-message CancelOrderReqField {
-	string gatewayId = 1; // 网关ID
-	string orderId = 2;  // 定单ID
-	string originOrderId = 3;  // 原始定单ID
-}
-
-// 网关设置
-message GatewaySettingField {
-	message CtpApiSettingField {
-		string userId = 1;
-		string password = 2;
-		string brokerId = 3;
-		string tdHost = 4;
-		string tdPort = 5;
-		string mdHost = 6;
-		string mdPort = 7;
-		string authCode = 8;
-		string userProductInfo = 9; 
-		string appId = 10;
-	}
-
-	message IbApiSettingField {
-		string host = 1;
-		fixed32 port = 2;
-		fixed32 clientId = 3;
-	}
-	
-	string gatewayId = 1;  // 网关ID
-	string gatewayName = 2;  // 网关名称
-	string gatewayDescription = 4;  // 网关描述
-	string implementClassName = 5;  // 实现类
-	
-	GatewayTypeEnum gatewayType = 6;  // 网关类型
-	GatewayAdapterTypeEnum gatewayAdapterType = 7;  // 网关适配器类型
-	CtpApiSettingField ctpApiSetting = 8;
-	IbApiSettingField ibApiSetting = 9;
-	ConnectStatusEnum status = 10;
-	fixed64 version = 11;
-	string autoConnectTimeRanges = 12;
-	
-}
-
-message LogField {
-	LogLevelEnum logLevel = 1;
-	fixed64 timestamp = 2;
-	string content = 3;
 }
 
 message NoticeField {

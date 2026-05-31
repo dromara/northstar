@@ -30,7 +30,7 @@ public interface IModuleAccount extends TickDataAware, TransactionAware {
 	 * @param direction
 	 * @return
 	 */
-	int getNonclosedPosition(Contract contract, DirectionEnum direction);
+	double getNonclosedPosition(Contract contract, DirectionEnum direction);
 	/**
 	 * 获取指定合约指定方向的持仓数
 	 * @param unifiedSymbol
@@ -38,12 +38,12 @@ public interface IModuleAccount extends TickDataAware, TransactionAware {
 	 * @param isPresentTradingDay	是否为今日仓
 	 * @return
 	 */
-	int getNonclosedPosition(Contract contract, DirectionEnum direction, boolean isPresentTradingDay);
+	double getNonclosedPosition(Contract contract, DirectionEnum direction, boolean isPresentTradingDay);
 	/**
 	 * 获取指定合约的净持仓数量
 	 * @param unifiedSymbol
 	 * @return				正数代表净多头持仓，负数代表净空头持仓
 	 */
-	int getNonclosedNetPosition(Contract contract);
+	double getNonclosedNetPosition(Contract contract);
 	
 }

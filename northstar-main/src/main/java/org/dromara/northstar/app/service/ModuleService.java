@@ -5,15 +5,19 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Period;
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.dromara.northstar.account.AccountManager;
+import org.dromara.northstar.account.GatewayManager;
 import org.dromara.northstar.app.restful.SseStreamController;
 import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
@@ -25,15 +29,14 @@ import org.dromara.northstar.common.constant.ModuleUsage;
 import org.dromara.northstar.common.exception.NoSuchModuleException;
 import org.dromara.northstar.common.exception.OperationException;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
+import org.dromara.northstar.common.model.DealRecord;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
 import org.dromara.northstar.common.model.ModuleAccountRuntimeVO;
 import org.dromara.northstar.common.model.ModuleChartDescription;
 import org.dromara.northstar.common.model.ModuleDealRecordVO;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleMockTradeDTO;
-import org.dromara.northstar.common.model.ModulePositionDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeVO;
 import org.dromara.northstar.common.model.ModuleVO;
@@ -45,19 +48,23 @@ import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.common.utils.OrderUtils;
+import org.dromara.northstar.data.IAccountRepository;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.gateway.contract.OptionChainContract;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
+import org.dromara.northstar.gateway.sim.trade.AccountPosition;
 import org.dromara.northstar.kline.KlineGenerator;
 import org.dromara.northstar.module.ArbitrageModuleContext;
+import org.dromara.northstar.module.ModuleAccount;
 import org.dromara.northstar.module.ModuleContext;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.module.PlaybackModuleContext;
 import org.dromara.northstar.module.TradeModule;
 import org.dromara.northstar.strategy.DynamicParamsAware;
+import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.TradeStrategy;
@@ -69,13 +76,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.google.common.util.concurrent.AtomicDouble;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreField.PositionField;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 @Slf4j
@@ -87,13 +95,19 @@ public class ModuleService implements CommandLineRunner {
 	private ModuleManager moduleMgr;
 	
 	@Autowired
+	private GatewayManager gatewayMgr;
+	
+	@Autowired
+	private AccountManager accountMgr;
+
+	@Autowired
 	private IModuleRepository moduleRepo;
 	
 	@Autowired
 	private IMarketDataRepository mdRepo;
 	
 	@Autowired
-	private AccountManager accountMgr;
+	private IAccountRepository accountRepo;
 	
 	@Autowired
 	private MarketCenter mktCenter;
@@ -112,13 +126,8 @@ public class ModuleService implements CommandLineRunner {
 			throw new OperationException("error.illegalCharater", md.getName());
 		}
 		log.info("创建模组 [{}] ", md.getName());
-		ModuleAccountRuntimeDescription mard = ModuleAccountRuntimeDescription.builder()
-				.initBalance(md.getInitBalance())
-				.positionDescription(new ModulePositionDescription())
-				.build();
 		ModuleRuntimeDescription mrd = ModuleRuntimeDescription.builder()
 				.moduleName(md.getName())
-				.moduleAccountRuntime(mard)
 				.storeObject(new JSONObject())
 				.build();
 		
@@ -199,7 +208,35 @@ public class ModuleService implements CommandLineRunner {
 		moduleMgr.remove(Identifier.of(moduleName));
 		moduleRepo.deleteSettingsByName(moduleName);
 	}
-
+	
+	private ModuleAccount makeAccount(ModuleDescription md, ModuleRuntimeDescription mrd) throws InvalidProtocolBufferException {
+		Map<Contract, IAccount> contractAccountMap = new HashMap<>();
+		
+		Table<Contract, PositionDirectionEnum, List<Trade>> positionTradesTbl = accountRepo.findHoldingTrades(md.getName());
+		Table<Contract, PositionDirectionEnum, AccountPosition> positionTbl = HashBasedTable.create();
+		md.getBindedContracts().forEach(csi -> {
+			Contract c = mktCenter.getContract(Identifier.of(csi.getId())).contract();
+			
+			List<Trade> longTrades = Optional.ofNullable(positionTradesTbl.get(c, PositionDirectionEnum.PD_Long)).orElse(Collections.emptyList());
+			List<Trade> shortTrades = Optional.ofNullable(positionTradesTbl.get(c, PositionDirectionEnum.PD_Short)).orElse(Collections.emptyList());
+			positionTbl.put(c, PositionDirectionEnum.PD_Long, new AccountPosition(md.getName(), c, PositionDirectionEnum.PD_Long, accountRepo, longTrades));
+			positionTbl.put(c, PositionDirectionEnum.PD_Short, new AccountPosition(md.getName(), c, PositionDirectionEnum.PD_Short, accountRepo, shortTrades));
+			
+			md.getBindedAccounts().forEach(accountId -> {
+				TradeGateway tradeGateway = (TradeGateway) gatewayMgr.get(Identifier.of(accountId));
+				if(c.gatewayId().equals(tradeGateway.getDescription().getBindedMktGatewayId())) {
+					contractAccountMap.put(c, accountMgr.get(Identifier.of(accountId)));
+				}
+			});
+		});
+		
+		List<DealRecord> dealRecords = accountRepo.findDealRecords(md.getName());
+		double accRealizedProfit = dealRecords.stream().mapToDouble(DealRecord::getDealProfit).sum();
+		double accCommission = dealRecords.stream().mapToDouble(DealRecord::getTransactionFee).sum();
+		
+		return new ModuleAccount(md.getName(), md.getInitBalance(), accRealizedProfit, accCommission, positionTbl, contractAccountMap);
+	}
+	
 	private TradeModule loadModule(ModuleDescription md, ModuleRuntimeDescription mrd) throws Exception {
 		int weeksOfDataForPreparation = md.getWeeksOfDataForPreparation();
 		LocalDate date = LocalDate.now().minusWeeks(weeksOfDataForPreparation);
@@ -208,21 +245,19 @@ public class ModuleService implements CommandLineRunner {
 		TradeStrategy strategy = resolveComponent(strategyComponent);
 		Assert.isTrue(strategy.type() == md.getType(), () -> String.format("该策略只能用于类型为[%s]的模组", strategy.type()));
 		strategy.setStoreObject(mrd.getStoreObject());
+		
 		ModuleContext moduleCtx = null;
 		if(md.getUsage() == ModuleUsage.PLAYBACK) {
 			mrd = ModuleRuntimeDescription.builder()
 					.moduleName(md.getName())
 					.storeObject(new JSONObject())
-					.moduleAccountRuntime(ModuleAccountRuntimeDescription.builder()
-							.initBalance(md.getInitBalance())
-							.build())
 					.build();
-			moduleCtx = new PlaybackModuleContext(strategy, md, mrd, mktCenter, moduleRepo);
+			moduleCtx = new PlaybackModuleContext(strategy, md, makeAccount(md, mrd), mktCenter, moduleRepo);
 		} else {
 			if(md.getType() == ModuleType.ARBITRAGE) {
-				moduleCtx = new ArbitrageModuleContext(strategy, md, mrd, mktCenter, moduleRepo);
+				moduleCtx = new ArbitrageModuleContext(strategy, md, makeAccount(md, mrd), mktCenter, moduleRepo);
 			} else {
-				moduleCtx = new ModuleContext(strategy, md, mrd, mktCenter, moduleRepo);
+				moduleCtx = new ModuleContext(strategy, md, makeAccount(md, mrd), mktCenter, moduleRepo);
 			}
 		}
 		strategy.setContext(moduleCtx);
@@ -242,7 +277,7 @@ public class ModuleService implements CommandLineRunner {
 				}
 			}
 		}
-		return new TradeModule(moduleCtx, accountMgr, mktCenter);
+		return new TradeModule(moduleCtx);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -292,7 +327,8 @@ public class ModuleService implements CommandLineRunner {
 		log.info("删除模组 [{}] ", name);
 		unloadModule(name);
 		moduleRepo.deleteRuntimeByName(name);
-		moduleRepo.removeAllDealRecords(name);
+		accountRepo.removeDealRecords(name);
+		accountRepo.removeHoldingTrades(name);
 		sseController.sendModuleStatus();
 		log.info("模组 [{}] 已删除", name);
 	}
@@ -401,13 +437,13 @@ public class ModuleService implements CommandLineRunner {
 	}
 	
 	public List<ModuleDealRecordVO> getDealRecords(String moduleName) {
-		return moduleRepo.findAllDealRecords(moduleName)
+		return accountRepo.findDealRecords(moduleName)
 				.stream()
 				.map(deal -> {
 					TradeField openTrade = deal.convertOpenTrade();
 					TradeField closeTrade = deal.convertCloseTrade();
 					int factor = openTrade.getDirection() == DirectionEnum.D_Buy ? 1 : -1;
-					int vol = Math.min(closeTrade.getVolume(), openTrade.getVolume());
+					double vol = Math.min(closeTrade.getVolume(), openTrade.getVolume());
 					int profit = (int) (factor * (closeTrade.getPrice() - openTrade.getPrice()) * vol * closeTrade.getContract().getMultiplier());
 					return ModuleDealRecordVO.builder()
 							.name(openTrade.getContract().getName())
@@ -442,48 +478,68 @@ public class ModuleService implements CommandLineRunner {
 		if(m == null) {
 			throw new NoSuchModuleException(moduleName);
 		}
-		ModuleRuntimeDescription mrd = m.getModuleContext().getRuntimeDescription();
-		ModuleAccountRuntimeDescription mard = mrd.getModuleAccountRuntime();
 		
-		double initBalance = mard.getInitBalance();
-		double available = mard.getAvailableAmount();
-		double commission = mard.getAccCommission();
-		List<PositionVO> positions = new ArrayList<>();
-		AtomicDouble unrealizedPL = new AtomicDouble();
-		mard.getPositionDescription().getLogicalPositions()
-			.stream()
-			.forEach(data -> {
-				PositionField pf = null;
-				try {
-					pf = PositionField.parseFrom(data);
-					unrealizedPL.addAndGet(pf.getPositionProfit());
-					positions.add(PositionVO.builder()
-							.contractId(pf.getContract().getContractId())
-							.name(pf.getContract().getName())
-							.symbol(pf.getContract().getSymbol())
-							.dir(pf.getPositionDirection())
-							.total(pf.getPosition())
-							.available(pf.getPosition() - pf.getFrozen())
-							.lastPrice(BigDecimal.valueOf(pf.getLastPrice()).setScale(pf.getContract().getPricePrecision(), RoundingMode.HALF_UP) + "")
-							.openPrice(BigDecimal.valueOf(pf.getOpenPrice()).setScale(pf.getContract().getPricePrecision(), RoundingMode.HALF_UP) + "")
-							.profit((int) pf.getPositionProfit())
-							.gatewayId(pf.getGatewayId())
-							.closingDir(OrderUtils.getClosingDirection(pf.getPositionDirection()))
-							.build());
-				} catch (InvalidProtocolBufferException e) {
-					log.error("", e);
-				}
-			});
-		double realizedPL = mard.getAccCloseProfit();
-		double netPL = realizedPL + unrealizedPL.get() - commission;
-		double balance = initBalance + netPL;
+		ModuleAccount account = (ModuleAccount) m.getModuleAccount();
+		double initBalance = m.getModuleContext().getModuleDescription().getInitBalance();
+		double balance = account.accountBalance();
+		double available = account.availableBalance();
 		double marginUtilized = balance - available;
+		double commission = account.commission();
+		double realizedPL = account.realizedProfit();
 		
+		List<PositionVO> positions = account.getPositions()
+				.stream()
+				.filter(p -> p.position() > 0)
+				.map(p -> PositionVO.builder()
+						.contractId(p.contract().contractId())
+						.name(p.contract().name())
+						.symbol(p.contract().symbol())
+						.dir(p.positionDirection())
+						.total(p.position())
+						.available(p.position() - p.frozen())
+						.openPrice(BigDecimal.valueOf(p.openPrice()).setScale(p.contract().pricePrecision(), RoundingMode.HALF_UP).toPlainString())
+						.lastPrice(p.lastTick() != null 
+							? BigDecimal.valueOf(p.lastTick().lastPrice()).setScale(p.contract().pricePrecision(), RoundingMode.HALF_UP).toPlainString() 
+							: "0")
+						.profit(p.positionProfit())
+						.gatewayId(p.gatewayId())
+						.closingDir(OrderUtils.getClosingDirection(p.positionDirection()))
+						.build())
+				.toList();
+		double unrealizedProfit = positions.stream().mapToDouble(PositionVO::getProfit).sum();
+		double netPL = realizedPL + unrealizedProfit - commission;
 		List<ModuleDealRecordVO> dealRecords = getDealRecords(moduleName);
 		int totalWins = dealRecords.stream().filter(rec -> rec.getProfit() > 0).toList().size();
 		
 		double avgProfit = dealRecords.stream().filter(rec -> rec.getProfit() > 0).mapToDouble(rec -> rec.getProfit()).average().orElse(0.1D);
 		double avgLoss = dealRecords.stream().filter(rec -> rec.getProfit() < 0).mapToDouble(rec -> Math.abs(rec.getProfit())).average().orElse(0.1D);
+		
+		double maxDrawdown = 0;
+		double peak = initBalance;
+		if(!dealRecords.isEmpty()) {
+			List<ModuleDealRecordVO> ascRecords = dealRecords.reversed();
+			double cumulative = 0;
+			for(ModuleDealRecordVO rec : ascRecords) {
+				cumulative += rec.getProfit() - rec.getTransactionFee();
+				double equity = initBalance + cumulative;
+				if(equity > peak) {
+					peak = equity;
+				}
+				double dd = peak - equity;
+				if(dd > maxDrawdown) {
+					maxDrawdown = dd;
+				}
+			}
+		}
+		double currentEquity = initBalance + netPL;
+		if(currentEquity > peak) {
+			peak = currentEquity;
+		}
+		double currentDD = peak - currentEquity;
+		if(currentDD > maxDrawdown) {
+			maxDrawdown = currentDD;
+		}
+		double maxDrawdownRate = peak > 0 ? (maxDrawdown / peak) * 100 : 0;
 		
 		Double annualizedReturnRate = 0D;
 		if(!dealRecords.isEmpty()) {
@@ -501,11 +557,11 @@ public class ModuleService implements CommandLineRunner {
 						.marginUtilized(marginUtilized)
 						.balance(balance)
 						.realizedPL(realizedPL)
-						.unrealizedPL(unrealizedPL.get())
+						.unrealizedPL(unrealizedProfit)
 						.totalFees(commission)
 						.netPL(netPL)
-						.maxDrawdown(mard.getMaxDrawdown())
-						.maxDrawdownRate(mard.getMaxDrawdownPercentage())
+						.maxDrawdown(maxDrawdown)
+						.maxDrawdownRate(maxDrawdownRate)
 						.annualizedReturnRate(annualizedReturnRate)
 						.winRate(100.0 * totalWins / dealRecords.size())
 						.profitLossRatio(avgProfit / avgLoss)
@@ -521,7 +577,7 @@ public class ModuleService implements CommandLineRunner {
 		for(ModuleDescription md : moduleRepo.findAllSettings()) {
 			// 自动重置回测模组的交易记录
 			if(md.getUsage() == ModuleUsage.PLAYBACK) {
-				moduleRepo.removeAllDealRecords(md.getName());
+				accountRepo.removeDealRecords(md.getName());
 			}
 			try {
 				ModuleRuntimeDescription mrd = moduleRepo.findRuntimeByName(md.getName());

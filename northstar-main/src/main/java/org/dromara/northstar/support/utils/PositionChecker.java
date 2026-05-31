@@ -1,6 +1,9 @@
 package org.dromara.northstar.support.utils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.dromara.northstar.common.model.ContractSimpleInfo;
@@ -44,17 +47,25 @@ public class PositionChecker {
 											.map(ContractSimpleInfo::getUnifiedSymbol)
 											.collect(Collectors.toSet()).contains(position.contract().unifiedSymbol()))
 									.toList();
-		int totalPosition = modules.stream()
-									.mapToInt(m -> m.getModuleContext().getModuleAccount().getNonclosedPosition(position.contract(), direction))
+		double totalPosition = modules.stream()
+									.map(m -> m.getModuleContext().getModuleAccount().getPosition(FieldUtils.openPositionDirOf(direction), position.contract()))
+									.filter(Optional::isPresent)
+									.map(Optional::get)
+									.mapToDouble(p -> p.position())
 									.sum();
 		if(totalPosition != position.position()) {
 			log.warn("{} {}头 实际持仓数：{}", position.contract().name(), FieldUtils.chn(direction), position.position());
-			modules.forEach(m -> 
+			modules
+			.stream()
+			.filter(m -> m.getModuleContext().getModuleAccount().getPosition(FieldUtils.openPositionDirOf(direction), position.contract()).isPresent())
+			.forEach(m -> 
 				log.warn("模组 [{}] {}头 持仓为：{}", m.getModuleContext().getModuleDescription().getName(), FieldUtils.chn(direction), 
-						m.getModuleContext().getModuleAccount().getNonclosedPosition(position.contract(), direction))
+						m.getModuleContext().getModuleAccount().getPosition(FieldUtils.openPositionDirOf(direction), position.contract()).get().position())
 			);
-			throw new IllegalStateException(String.format("[%s %s %s头] 逻辑持仓与实际持仓不一致。逻辑持仓数：%d，实际持仓数：%d", 
-					position.gatewayId(), position.contract().name(), FieldUtils.chn(direction), totalPosition, position.position()));
+			throw new IllegalStateException(String.format("[%s %s %s头] 逻辑持仓与实际持仓不一致。逻辑持仓数：%s，实际持仓数：%s", 
+					position.gatewayId(), position.contract().name(), FieldUtils.chn(direction), 
+					BigDecimal.valueOf(totalPosition).setScale(position.contract().quantityPrecision(), RoundingMode.HALF_UP),
+					BigDecimal.valueOf(position.position()).setScale(position.contract().quantityPrecision(), RoundingMode.HALF_UP)));
 		}
 	}
 	

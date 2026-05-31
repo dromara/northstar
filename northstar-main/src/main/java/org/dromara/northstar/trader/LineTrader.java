@@ -2,7 +2,6 @@ package org.dromara.northstar.trader;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -16,24 +15,20 @@ import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Order;
 import org.dromara.northstar.common.model.core.Position;
 import org.dromara.northstar.common.model.core.SubmitOrderReq;
-import org.dromara.northstar.common.model.core.SubmitOrderReq.SubmitOrderReqBuilder;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.strategy.IAccount;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
-import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
-import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 
 @Slf4j
 @Builder
@@ -139,27 +134,19 @@ public class LineTrader implements TickDataAware, TransactionAware {
 		};
 		
 		SubmitOrderReq orderReq = SubmitOrderReq.builder()
-				.originOrderId(UUID.randomUUID().toString())
-				.contingentCondition(ContingentConditionEnum.CC_Immediately)
-				.contract(c)
 				.gatewayId(dto.getAccountGatewayId())
+				.originOrderId(String.valueOf(System.currentTimeMillis()))
+				.contract(c)
 				.direction(direction)
 				.offsetFlag(OffsetFlagEnum.OF_Open)
 				.volume(dto.getVolume())
-				.currency(c.currency())
 				.price(rounding(dto.getOrderPrice(), c))	// 自动加上超价
-				.volumeCondition(VolumeConditionEnum.VC_AV)
-				.timeCondition(dto.isAnyPrice() ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
-				.orderPriceType(dto.isAnyPrice() ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
-				.contingentCondition(ContingentConditionEnum.CC_Immediately)
-				.actionTimestamp(System.currentTimeMillis())
-				.minVolume(1)
 				.build();
-		log.info("{} {} {} 画线交易执行开仓操作：方向{}, {}, {}, {}", tick.actionDay(), tick.actionTime(), c.name(), orderReq.direction(),
-				orderReq.price(), orderReq.volume(), orderReq.orderPriceType());
+		log.info("{} {} {} 画线交易执行开仓操作：方向{}, {}, {}", tick.actionDay(), tick.actionTime(), c.name(), orderReq.direction(),
+				orderReq.price(), orderReq.volume());
 		IAccount account = accountManager.get(Identifier.of(dto.getAccountGatewayId()));
-		String id = account.submitOrder(orderReq);
-		orderId = Optional.of(id);
+		account.submitOrder(orderReq);
+		orderId = Optional.of(orderReq.originOrderId());
 		dto.setState(State.RUNNING);
 		stateChangeCallback.accept(dto);
 	}
@@ -170,7 +157,7 @@ public class LineTrader implements TickDataAware, TransactionAware {
 		IAccount account = accountManager.get(Identifier.of(dto.getAccountGatewayId()));
 		
 		DirectionEnum direction = null;
-		AtomicInteger volume = new AtomicInteger();
+		AtomicDouble volume = new AtomicDouble();
 		AtomicReference<Position> positionRef = new AtomicReference<>();
 		switch(dto.getPositionDir()) {
 		case "long" -> {
@@ -190,51 +177,17 @@ public class LineTrader implements TickDataAware, TransactionAware {
 		default -> throw new IllegalArgumentException("未知方向：" + dto.getPositionDir());
 		};
 		
-		SubmitOrderReqBuilder builder = SubmitOrderReq.builder()
-				.originOrderId(UUID.randomUUID().toString())
-				.contingentCondition(ContingentConditionEnum.CC_Immediately)
-				.contract(c)
+		SubmitOrderReq orderReq = SubmitOrderReq.builder()
 				.gatewayId(dto.getAccountGatewayId())
+				.originOrderId(UUID.randomUUID().toString())
+				.contract(c)
 				.direction(direction)
 				.offsetFlag(OffsetFlagEnum.OF_Close)
 				.volume(volume.get())
-				.currency(c.currency())
-				.price(tick.lastPrice())	// 自动加上超价
-				.volumeCondition(VolumeConditionEnum.VC_AV)
-				.timeCondition(dto.isAnyPrice() ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
-				.orderPriceType(dto.isAnyPrice() ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
-				.contingentCondition(ContingentConditionEnum.CC_Immediately)
-				.actionTimestamp(System.currentTimeMillis())
-				.minVolume(1);
-		if(volume.get() > 0) {			
-			if(c.exchange() != ExchangeEnum.SHFE) {
-				SubmitOrderReq orderReq = builder.build();
-				log.info("{} {} {} 画线交易执行平仓操作：{}, {}, {}, {}", tick.actionDay(), tick.actionTime(), c.name(), orderReq.direction(), orderReq.price(), 
-						orderReq.volume(), orderReq.orderPriceType());
-				account.submitOrder(orderReq);
-			} else {
-				int ydAvailable = positionRef.get().ydPosition() - positionRef.get().ydFrozen();
-				if(ydAvailable > volume.get()) {
-					SubmitOrderReq orderReq = builder.offsetFlag(OffsetFlagEnum.OF_Close).volume(volume.get()).build();
-					log.info("{} {} {} 画线交易执行平仓操作：{}, {}, {}, {}", tick.actionDay(), tick.actionTime(), c.name(), 
-							orderReq.direction(), orderReq.price(), orderReq.volume(), orderReq.orderPriceType());
-					account.submitOrder(orderReq);
-				} else {
-					if(ydAvailable > 0) {	
-						SubmitOrderReq orderReq = builder.offsetFlag(OffsetFlagEnum.OF_Close).volume(ydAvailable).build();
-						log.info("{} {} {} 画线交易执行平昨仓操作：{}, {}, {}, {}", tick.actionDay(), tick.actionTime(), c.name(), 
-								orderReq.direction(), orderReq.price(), orderReq.volume(), orderReq.orderPriceType());
-						account.submitOrder(orderReq);
-					}
-					if(volume.get() - ydAvailable > 0) {	
-						SubmitOrderReq orderReq = builder.offsetFlag(OffsetFlagEnum.OF_CloseToday).volume(volume.get() - ydAvailable).build();
-						log.info("{} {} {} 画线交易执行平今仓操作：{}, {}, {}, {}", tick.actionDay(), tick.actionTime(), c.name(), 
-								orderReq.direction(), orderReq.price(), orderReq.volume(), orderReq.orderPriceType());
-						account.submitOrder(orderReq);
-					}
-				}
-			}
-		}
+				.build();
+		log.info("{} {} {} 画线交易执行平仓操作：{}, {}, {}", tick.actionDay(), tick.actionTime(), c.name(), orderReq.direction(), orderReq.price(), 
+				orderReq.volume());
+		account.submitOrder(orderReq);
 		
 		dto.setState(State.COMPLETED);
 		

@@ -8,15 +8,12 @@ import org.dromara.northstar.common.constant.DateTimeConstant;
 import com.alibaba.fastjson2.annotation.JSONField;
 
 import lombok.Builder;
-import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
-import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.OrderField;
 
 @Builder(toBuilder = true)
@@ -30,15 +27,10 @@ public record Order(
 		OrderPriceTypeEnum orderPriceType, // 定单价格类型
 		OrderStatusEnum orderStatus,  // 状态
 		double price,               // 价格
-		int totalVolume,            // 数量
-		int tradedVolume,           // 已成交数量
+		double totalVolume,            // 数量
+		double tradedVolume,           // 已成交数量
 		TimeConditionEnum timeCondition,  // 时效
-		String gtdDate,            	// GTD日期
-		VolumeConditionEnum volumeCondition, // 成交量类型
-		int minVolume,              // 最小成交量
-		ContingentConditionEnum contingentCondition, // 触发条件
 		double stopPrice,           // 止损价
-		ForceCloseReasonEnum forceCloseReason, // 强平原因
 		LocalDate tradingDay,       // 交易日
 		LocalDate orderDate,		// 下单日期
 		LocalTime orderTime,		// 下单时间
@@ -78,18 +70,6 @@ public record Order(
 		if (timeCondition != null) {
 			builder.setTimeCondition(timeCondition);
 		}
-		if (gtdDate != null) {
-			builder.setGtdDate(gtdDate);
-		}
-		if (volumeCondition != null) {
-			builder.setVolumeCondition(volumeCondition);
-		}
-		if (contingentCondition != null) {
-			builder.setContingentCondition(contingentCondition);
-		}
-		if (forceCloseReason != null) {
-			builder.setForceCloseReason(forceCloseReason);
-		}
 		if (tradingDay != null) {
 			builder.setTradingDay(tradingDay.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		}
@@ -113,7 +93,6 @@ public record Order(
 				.setPrice(price)
 				.setTotalVolume(totalVolume)
 				.setTradedVolume(tradedVolume)
-				.setMinVolume(minVolume)
 				.setStopPrice(stopPrice)
 				.build();
 	}

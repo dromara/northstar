@@ -1,6 +1,5 @@
 package org.dromara.northstar.common.utils;
 
-import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.core.Order;
 
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -10,14 +9,6 @@ import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 public class OrderUtils {
 	
 	private OrderUtils() {}
-	
-	public static DirectionEnum resolveDirection(SignalOperation opr) {
-		return switch(opr) {
-		case BUY_CLOSE, BUY_OPEN, BUY_REVERSE -> DirectionEnum.D_Buy;
-		case SELL_CLOSE, SELL_OPEN, SELL_REVERSE -> DirectionEnum.D_Sell;
-		default -> DirectionEnum.D_Unknown;
-		};
-	}
 	
 	public static PositionDirectionEnum getClosingDirection(DirectionEnum dir) {
 		if(dir == DirectionEnum.D_Buy) {
@@ -43,5 +34,9 @@ public class OrderUtils {
 	
 	public static boolean isDoneOrder(Order order) {
 		return order.orderStatus() == OrderStatusEnum.OS_Canceled || order.orderStatus() == OrderStatusEnum.OS_AllTraded;
+	}
+	
+	public static boolean isPendingOrder(Order order) {
+		return isValidOrder(order) && !isDoneOrder(order);
 	}
 }

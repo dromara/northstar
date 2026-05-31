@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import org.dromara.northstar.account.GatewayManager;
 import org.dromara.northstar.common.constant.ChannelType;
-import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.exception.NoSuchGatewayException;
 import org.dromara.northstar.common.model.ComponentField;
@@ -20,7 +19,6 @@ import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.GatewayTypeDescription;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.StrategyMetaInfo;
-import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.gateway.Gateway;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.contract.IndexContract;
@@ -57,7 +55,7 @@ public class MetaDataService {
 		return marketCenter.getContracts(channel)
 				.stream()
 				.map(ic -> ic.contract())
-				.map(this::convertContract)
+				.map(ContractSimpleInfo::from)
 				.filter(c -> doFilter(c, query))
 				.toList();
 	}
@@ -77,14 +75,14 @@ public class MetaDataService {
 				resultList.addAll(idx.memberContracts()
 						.stream()
 						.map(IContract::contract)
-						.map(this::convertContract)
+						.map(ContractSimpleInfo::from)
 						.toList());
 			}
 			if(ic instanceof OptionChainContract occ) {
 				resultList.addAll(occ.memberContracts()
 						.stream()
 						.map(IContract::contract)
-						.map(this::convertContract)
+						.map(ContractSimpleInfo::from)
 						.toList());
 			}
 		}
@@ -110,18 +108,6 @@ public class MetaDataService {
 				.map(gw -> subscribedContracts(gw.getDescription().getChannelType(), query))
 				.flatMap(List::stream)
 				.toList();
-	}
-	
-	private ContractSimpleInfo convertContract(Contract c) {
-		return ContractSimpleInfo.builder()
-				.id(c.contractId())
-				.name(c.name())
-				.symbol(c.symbol())
-				.unifiedSymbol(c.unifiedSymbol())
-				.channelType(c.channelType())
-				.dueDate(c.lastTradeDate() != null ? c.lastTradeDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER) : "")
-				.precision(c.pricePrecision())
-				.build();
 	}
 	
 	public Map<ChannelType, Collection<ComponentField>> gatewaySettingsMeta() {

@@ -4,16 +4,16 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.account.GatewayManager;
 import org.dromara.northstar.common.event.AbstractEventHandler;
 import org.dromara.northstar.common.event.GenericEventHandler;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
+import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.gateway.MarketGateway;
-import org.dromara.northstar.gateway.sim.trade.SimTradeGatewayLocal;
+import org.dromara.northstar.gateway.sim.trade.SimTradeGateway;
 
 public class SimMarketHandler extends AbstractEventHandler implements GenericEventHandler{
 
@@ -21,11 +21,8 @@ public class SimMarketHandler extends AbstractEventHandler implements GenericEve
 	
 	private GatewayManager gatewayMgr;
 	
-	private AccountManager accountMgr;
-	
-	public SimMarketHandler(GatewayManager gatewayMgr, AccountManager accountMgr) {
+	public SimMarketHandler(GatewayManager gatewayMgr) {
 		this.gatewayMgr = gatewayMgr;
-		this.accountMgr = accountMgr;
 	}
 	
 	@Override
@@ -39,10 +36,11 @@ public class SimMarketHandler extends AbstractEventHandler implements GenericEve
 			Tick tick = (Tick) e.getData();
 			exec.execute(() -> 
 				gatewayMgr.tradeGateways().stream()
-					.filter(SimTradeGatewayLocal.class::isInstance)
-					.map(SimTradeGatewayLocal.class::cast)
+					.filter(SimTradeGateway.class::isInstance)
+					.map(SimTradeGateway.class::cast)
 					.forEach(gw -> {
-						MarketGateway mktGateway = accountMgr.get(Identifier.of(gw.getDescription().getGatewayId())).getMarketGateway();
+						GatewayDescription gwgd = gw.getDescription();
+						MarketGateway mktGateway = (MarketGateway) gatewayMgr.get(Identifier.of(gwgd.getBindedMktGatewayId()));
 						if(mktGateway != null && StringUtils.equals(mktGateway.getDescription().getGatewayId(), tick.gatewayId())) {
 							gw.onTick(tick);
 						}

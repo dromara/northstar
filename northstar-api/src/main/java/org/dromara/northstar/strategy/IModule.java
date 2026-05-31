@@ -1,7 +1,6 @@
 package org.dromara.northstar.strategy;
 
 import org.dromara.northstar.common.event.NorthstarEvent;
-import org.dromara.northstar.common.model.core.Contract;
 
 /**
  * 模组抽象接口
@@ -20,11 +19,10 @@ public interface IModule {
 	 */
 	void onEvent(NorthstarEvent event);
 	/**
-	 * 获取合约关联的交易账户
-	 * @param contract
+	 * 获取
 	 * @return
 	 */
-	IAccount getAccount(Contract contract);
+	IAccount getModuleAccount();
 	/**
 	 * 获取模组上下文
 	 * @return

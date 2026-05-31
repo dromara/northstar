@@ -5,8 +5,7 @@ import java.util.stream.Collectors;
 
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.event.FastEventEngine;
-import org.dromara.northstar.data.IModuleRepository;
-import org.dromara.northstar.data.ISimAccountRepository;
+import org.dromara.northstar.data.IAccountRepository;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.gateway.sim.market.SimTickGenerator;
 import org.dromara.northstar.gateway.sim.trade.SimContractGenerator;
@@ -34,9 +33,9 @@ public class SimConfig{
 	}
 
 	@Bean
-	SimGatewayFactory simGatewayFactory(FastEventEngine feEngine, ISimAccountRepository simAccountRepo, IModuleRepository moduleRepo,
+	SimGatewayFactory simGatewayFactory(FastEventEngine feEngine, IAccountRepository accountRepo,
 			MarketCenter marketCenter, Map<String, SimTickGenerator> tickGenMap) {
-		return new SimGatewayFactory(feEngine, simAccountRepo, moduleRepo, marketCenter, tickGenMap);
+		return new SimGatewayFactory(feEngine, accountRepo, marketCenter, tickGenMap);
 	}
 	
 }

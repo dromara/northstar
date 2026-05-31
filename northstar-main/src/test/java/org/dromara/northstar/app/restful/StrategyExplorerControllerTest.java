@@ -19,7 +19,7 @@ import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.ExplorerTaskDescription;
 import org.dromara.northstar.common.model.ExplorerTaskVO;
 import org.dromara.northstar.common.model.StrategyMetaInfo;
-import org.dromara.northstar.strategy.example.DualAccountExampleStrategy;
+import org.dromara.northstar.strategy.example.TestStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +53,7 @@ public class StrategyExplorerControllerTest {
     		.contracts(List.of(ContractSimpleInfo.builder().id("ao0000@SHFE@FUTURES@PLAYBACK").unifiedSymbol("ao0000@SHFE@FUTURES").name("ao0000").build()))
     		.intervals(List.of("10m"))
     		.strategySetting(StrategyMetaInfo.builder()
-    				.className(DualAccountExampleStrategy.class.getName())
+    				.className(TestStrategy.class.getName())
     				.settings(Collections.emptyList())
     				.build())
     		.build();

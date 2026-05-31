@@ -53,21 +53,21 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 			case EMPTY -> {
 				// 快线在慢线之上开多，快线在慢线之下开空
 				if(shouldBuy()) {					
-					helper.doBuyOpen(1);
+					helper.buyOpen(1);
 				}
 				if(shouldSell()) {
-					helper.doSellOpen(1);
+					helper.sellOpen(1);
 				}
 					
 			}
 			case HOLDING_LONG -> {
 				if(fastLine1.value(0) < slowLine1.value(0)) {
-					helper.doSellClose(1);
+					helper.sellClose(1);
 				}
 			}
 			case HOLDING_SHORT -> {
 				if(fastLine1.value(0) > slowLine1.value(0)) {
-					helper.doBuyClose(1);
+					helper.buyClose(1);
 				}
 			}
 			default -> { /* 其他情况不处理 */}
@@ -116,7 +116,7 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 		ctx.registerIndicator(slowLine1);
 		ctx.registerIndicator(slowLine2);
 		
-		helper = TradeHelper.builder().context(ctx).tradeContract(c).build();
+		helper = new TradeHelper(ctx, c);
 		
 		// 注册不同周期的监听器
 		ctx.addMergedBarListener(c, Interval.M1, bar -> {

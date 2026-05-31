@@ -22,10 +22,6 @@ public class ModuleRuntimeDescription {
 	 */
 	private String moduleName;
 	/**
-	 * 模组账户描述
-	 */
-	private ModuleAccountRuntimeDescription moduleAccountRuntime;
-	/**
 	 * 模组计算状态（持久化数据）
 	 */
 	private JSONObject storeObject;

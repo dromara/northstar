@@ -1,9 +1,6 @@
 package org.dromara.northstar.module;
 
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,9 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -25,25 +20,21 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.ModuleState;
-import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.exception.NoSuchContractException;
 import org.dromara.northstar.common.model.ContractChartDescription;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.IndicatorVO;
-import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
 import org.dromara.northstar.common.model.ModuleChartDescription;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleIndicatorDescription;
-import org.dromara.northstar.common.model.ModulePositionDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.model.TimeSeriesValue;
 import org.dromara.northstar.common.model.TimeValues;
-import org.dromara.northstar.common.model.Tuple;
 import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.CancelOrderReq;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Order;
-import org.dromara.northstar.common.model.core.Position;
 import org.dromara.northstar.common.model.core.SubmitOrderReq;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
@@ -56,19 +47,16 @@ import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.contract.OptionChainContract;
+import org.dromara.northstar.gateway.sim.trade.AccountPosition;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.IndicatorValueUpdateHelper;
 import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.kline.BarTimePadding;
 import org.dromara.northstar.strategy.IAccount;
-import org.dromara.northstar.strategy.IModule;
-import org.dromara.northstar.strategy.IModuleAccount;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.MergedBarListener;
 import org.dromara.northstar.strategy.OrderRequestFilter;
 import org.dromara.northstar.strategy.TradeStrategy;
-import org.dromara.northstar.strategy.constant.PriceType;
-import org.dromara.northstar.strategy.model.TradeIntent;
 import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
 import org.slf4j.Logger;
 import org.springframework.util.Assert;
@@ -76,20 +64,11 @@ import org.springframework.util.Assert;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
-import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
-import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
-import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
-import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
-
 public class ModuleContext implements IModuleContext{
 	
 	private final ModuleDescription moduleDescription;
 	
 	private final Logger logger;
-	
-	private IModule module;
 	
 	protected TradeStrategy tradeStrategy;
 	
@@ -110,8 +89,6 @@ public class ModuleContext implements IModuleContext{
 	
 	protected Set<IndicatorValueUpdateHelper> indicatorHelperSet = new HashSet<>();
 	
-	protected ConcurrentMap<Contract, TradeIntent> tradeIntentMap = new ConcurrentHashMap<>();	// 交易意图
-	
 	protected final BarMergerRegistry registry;
 
 	protected final ChartBuffer chartBuffer;
@@ -128,8 +105,8 @@ public class ModuleContext implements IModuleContext{
 	
 	private Map<Contract, BarTimePadding> barTimePaddingMap = new HashMap<>();
 	
-	public ModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRtDescription,
-			IContractManager contractMgr, IModuleRepository moduleRepo) {
+	public ModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription, ModuleAccount moduleAcc, IContractManager contractMgr, 
+			IModuleRepository moduleRepo) {
 		this.moduleDescription = moduleDescription;
 		this.tradeStrategy = tradeStrategy;
 		this.moduleRepo = moduleRepo;
@@ -138,24 +115,27 @@ public class ModuleContext implements IModuleContext{
 		this.logger = getLogger(getClass());
 		this.chartBuffer = new ChartBuffer(moduleDescription.getModuleCacheDataSize());
 		this.moduleStateMachine = new ModuleStateMachine();
-		this.moduleAccount = new ModuleAccount(moduleDescription, moduleRtDescription, moduleRepo, contractMgr);
 		this.orderReqFilter = new DefaultOrderFilter(moduleDescription.getBindedContracts(), this);
+		
 		moduleDescription.getBindedContracts()
 			.forEach(csi -> {
 				IContract contract = contractMgr.getContract(Identifier.of(csi.getId()));
-				Contract cf = contract.contract();
+				Contract c = contract.contract();
 				Interval barInterval = Interval.fromAlias(moduleDescription.getKlineInterval());
-				barTimePaddingMap.put(cf, new BarTimePadding(barInterval, cf));
+				barTimePaddingMap.put(c, new BarTimePadding(barInterval, c));
 				if(contract instanceof OptionChainContract) {
-					contractMap.put(cf.unifiedSymbol(), cf);
-					contract.memberContracts().forEach(c -> initForContract(c.contract(), barInterval));
+					contractMap.put(c.unifiedSymbol(), c);
+					contract.memberContracts().forEach(mc -> initForContract(mc.contract(), barInterval));
 				} else {
 					initForContract(contract.contract(), barInterval);
 				}
 			});
+		
+		this.moduleAccount = moduleAcc;
+		
 		String name = moduleDescription.getName();
 		ModuleLoggingFactory.register(name, moduleStateMachine);
-		ModuleLoggingFactory.register(name, moduleAccount);
+		ModuleLoggingFactory.register(name, moduleAcc);
 		
 		moduleStateMachine.setModuleAccount(moduleAccount);
 	}
@@ -176,17 +156,42 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public void submitOrderReq(TradeIntent tradeIntent) {
+	public void submitOrderReq(SubmitOrderReq orderReq) {
 		if(!isEnabled()) {
 			logger.info("策略处于停用状态，忽略委托单");
 			return;
 		}
-		mktCenter.lastTick(tradeIntent.getContract()).ifPresentOrElse(tick -> {
-			logger.info("收到下单意图：{}", tradeIntent);
-			tradeIntent.setContext(this);
-			tradeIntent.onTick(tick);	
-			tradeIntentMap.put(tradeIntent.getContract(), tradeIntent);
-		}, () -> logger.warn("没有TICK行情数据时，忽略下单请求"));
+
+		logger.info("准备发单：{}，{} {} {}", orderReq.contract().name(), orderReq.originOrderId(), orderReq.direction(), orderReq.offsetFlag());
+		try {
+			if(Objects.nonNull(orderReqFilter)) {
+				orderReqFilter.doFilter(orderReq);
+			}
+			moduleAccount.submitOrder(orderReq);
+			moduleStateMachine.onSubmitReq();
+			orderReqMap.put(orderReq.originOrderId(), orderReq);
+		} catch (Exception e) {
+			logger.error("发单失败。原因：{}", e.getMessage());
+			moduleStateMachine.onFailSubmitReq();
+			logger.warn("发单异常，主动停用模组");
+			setEnabled(false);
+		}
+	}
+	
+	@Override
+	public void cancelOrder(CancelOrderReq cancelReq) {
+		if(!orderReqMap.containsKey(cancelReq.originOrderId())) {
+			logger.warn("找不到订单：{}", cancelReq.originOrderId());
+			return;
+		}
+		if(!getState().isOrdering()) {
+			logger.info("非下单状态，忽略撤单请求：{}", cancelReq.originOrderId());
+			return;
+		}
+		logger.info("撤单：{}", cancelReq.originOrderId());
+		if(moduleAccount.cancelOrder(cancelReq)) {
+			orderReqMap.remove(cancelReq.originOrderId());
+		}
 	}
 
 	@Override
@@ -196,11 +201,11 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public IAccount getAccount(Contract contract) {
-		return module.getAccount(contract);
+		return moduleAccount.getContractAccountMap().get(contract);
 	}
 
 	@Override
-	public IModuleAccount getModuleAccount() {
+	public IAccount getModuleAccount() {
 		return moduleAccount;
 	}
 
@@ -250,18 +255,10 @@ public class ModuleContext implements IModuleContext{
 		logger.trace("TICK数据: {} {} {} {}，最新价：{}，累计成交：{}，成交量：{}，累计持仓：{}，持仓量：{}", 
 				tick.contract().unifiedSymbol(), tick.actionDay(), tick.actionTime(), tick.actionTimestamp(),
 				tick.lastPrice(), tick.volume(), tick.volumeDelta(), tick.openInterest(), tick.openInterestDelta());
-		if(tradeIntentMap.containsKey(tick.contract())) {
-			TradeIntent tradeIntent = tradeIntentMap.get(tick.contract());
-			tradeIntent.onTick(tick);
-			if(tradeIntent.hasTerminated()) {
-				tradeIntentMap.remove(tick.contract());
-				logger.debug("移除交易意图：{}", tick.contract().unifiedSymbol());
-			}
-		}
 		if(!Objects.equals(tick.tradingDay(), tradingDay)) {
 			tradingDay = tick.tradingDay();
 		}
-		moduleAccount.onTick(tick);
+		
 		tradeStrategy.onTick(tick);
 	}
 
@@ -301,10 +298,6 @@ public class ModuleContext implements IModuleContext{
 		}
 		moduleAccount.onOrder(order);
 		moduleStateMachine.onOrder(order);
-		if(tradeIntentMap.containsKey(order.contract())) {
-			TradeIntent tradeIntent = tradeIntentMap.get(order.contract());
-			tradeIntent.onOrder(order);
-		}
 		tradeStrategy.onOrder(order);
 	}
 
@@ -319,38 +312,15 @@ public class ModuleContext implements IModuleContext{
 		}
 		moduleAccount.onTrade(trade);
 		moduleStateMachine.onTrade(trade);
-		moduleRepo.saveRuntime(getRuntimeDescription());
-		if(tradeIntentMap.containsKey(trade.contract())) {
-			TradeIntent tradeIntent = tradeIntentMap.get(trade.contract());
-			tradeIntent.onTrade(trade);
-			if(tradeIntent.hasTerminated()) {
-				tradeIntentMap.remove(trade.contract());
-			}
-		}
 		tradeStrategy.onTrade(trade);
+		moduleRepo.saveRuntime(getRuntimeDescription());
 	}
 
 	@Override
 	public ModuleRuntimeDescription getRuntimeDescription() {
-		ModulePositionDescription posDescription = ModulePositionDescription.builder()
-				.logicalPositions(moduleAccount.getPositions().stream().map(p -> p.toPositionField().toByteArray()).toList())
-				.nonclosedTrades(moduleAccount.getNonclosedTrades().stream().map(t -> t.toTradeField().toByteArray()).toList())
-				.build();
-		ModuleAccountRuntimeDescription accRtDescription = ModuleAccountRuntimeDescription.builder()
-				.initBalance(moduleAccount.getInitBalance())
-				.accCloseProfit(moduleAccount.getAccCloseProfit())
-				.accCommission(moduleAccount.getAccCommission())
-				.maxDrawdown(moduleAccount.getMaxDrawdown())
-				.maxDrawdownPercentage(100 * Math.abs(moduleAccount.getMaxDrawdown()) / (moduleAccount.getMaxProfit() + moduleAccount.getInitBalance()))
-				.maxProfit(moduleAccount.getMaxProfit())
-				.positionDescription(posDescription)
-				.availableAmount(moduleAccount.availableAmount())
-				.build();
-		
 		return ModuleRuntimeDescription.builder()
 				.moduleName(moduleDescription.getName())
 				.storeObject(tradeStrategy.getStoreObject())
-				.moduleAccountRuntime(accRtDescription)
 				.build();
 	}
 
@@ -454,112 +424,6 @@ public class ModuleContext implements IModuleContext{
 	}
 	
 	@Override
-	public Optional<String> submitOrderReq(Contract contract, SignalOperation operation, PriceType priceType, int volume, double price) {
-		if(!isEnabled()) {
-			logger.info("策略处于停用状态，忽略委托单");
-			return Optional.empty();
-		}
-		Assert.isTrue(volume > 0, "下单交易量应该为正数。当前为" + volume);
-		Tick tick = mktCenter.lastTick(contract).orElseThrow(() -> new IllegalStateException("没有行情时不应该发送订单"));
-		
-		double orderPrice = priceType.resolvePrice(tick, operation, price);
-		if(logger.isInfoEnabled()) {
-			logger.info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，交易量【{}】，类型【{}】", 
-					tick.actionDay(), tick.actionTime(),
-					contract.unifiedSymbol(), operation.text(), orderPrice, volume, priceType);
-			logger.info("行情价格计算依据：{} {} {} 最新价：{}", tick.contract().name(), tick.actionDay(), tick.actionTime(), tick.lastPrice());
-		}
-		Assert.isTrue(CommonUtils.isNTimesOf(orderPrice, contract.priceTick()),
-				() -> String.format("委托价 %s 不符合最小价格变动价位 %s 的整数倍", orderPrice, contract.priceTick()));
-		String id = UUID.randomUUID().toString();
-		String gatewayId = getAccount(contract).accountId();
-		DirectionEnum direction = OrderUtils.resolveDirection(operation);
-		int factor = priceType == PriceType.ANY_PRICE ? 0 : FieldUtils.directionFactor(direction);	// 市价时没有超价处理
-		double plusPrice = moduleDescription.getOrderPlusTick() * contract.priceTick(); // 超价设置
-		Position pos = getAccount(contract).getPosition(OrderUtils.getClosingDirection(direction), contract)
-				.orElse(Position.builder().contract(contract).build());
-		Tuple<OffsetFlagEnum, Integer> tuple = moduleDescription.getClosingPolicy().resolve(operation, pos, volume);
-		if(tuple.t1() == OffsetFlagEnum.OF_CloseToday) {
-			Position updatePos = pos.toBuilder().tdFrozen(tuple.t2()).build();
-			getAccount(contract).onPosition(updatePos);
-		} else if(tuple.t1() == OffsetFlagEnum.OF_CloseYesterday) {
-			Position updatePos = pos.toBuilder().ydFrozen(tuple.t2()).build();
-			getAccount(contract).onPosition(updatePos);
-		}
-		return Optional.ofNullable(submitOrderReq(SubmitOrderReq.builder()
-				.originOrderId(id)
-				.contract(contract)
-				.gatewayId(gatewayId)
-				.direction(direction)
-				.offsetFlag(tuple.t1())
-				.volume(tuple.t2())
-				.currency(contract.currency())
-				.price(orderPrice + factor * plusPrice)	// 自动加上超价
-				.volumeCondition(VolumeConditionEnum.VC_AV)
-				.timeCondition(priceType == PriceType.ANY_PRICE ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
-				.orderPriceType(priceType == PriceType.ANY_PRICE ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
-				.contingentCondition(ContingentConditionEnum.CC_Immediately)
-				.actionTimestamp(System.currentTimeMillis())
-				.minVolume(1)
-				.build()));
-	}
-	
-	private String submitOrderReq(SubmitOrderReq orderReq) {
-		if(logger.isInfoEnabled()) {			
-			logger.info("发单：{}，{}", orderReq.originOrderId(), LocalDateTime.ofInstant(Instant.ofEpochMilli(orderReq.actionTimestamp()), ZoneId.systemDefault()));
-		}
-		try {
-			moduleAccount.onSubmitOrder(orderReq);
-		} catch (Exception e) {
-			logger.error("发单失败。原因：{}", e.getMessage());
-			tradeIntentMap.remove(orderReq.contract());
-			logger.warn("模组余额不足，主动停用模组");
-			setEnabled(false);
-			return null;
-		}
-		moduleStateMachine.onSubmitReq();
-		try {
-			if(Objects.nonNull(orderReqFilter)) {
-				orderReqFilter.doFilter(orderReq);
-			}
-			Contract contract = orderReq.contract();
-			String originOrderId = module.getAccount(contract).submitOrder(orderReq);
-			orderReqMap.put(originOrderId, orderReq);
-			return originOrderId;
-		} catch (Exception e) {
-			logger.error("发单失败。原因：{}", e.getMessage());
-			tradeIntentMap.remove(orderReq.contract());
-			moduleStateMachine.onFailSubmitReq();
-			return null;
-		}
-	}
-
-	@Override
-	public boolean isOrderWaitTimeout(String originOrderId, long timeout) {
-		if(!orderReqMap.containsKey(originOrderId)) {
-			return false;
-		}
-		
-		SubmitOrderReq orderReq = orderReqMap.get(originOrderId);
-		return System.currentTimeMillis() - orderReq.actionTimestamp() > timeout;
-	}
-
-	@Override
-	public void cancelOrder(String originOrderId) {
-		if(!orderReqMap.containsKey(originOrderId)) {
-			logger.warn("找不到订单：{}", originOrderId);
-			return;
-		}
-		if(!getState().isOrdering()) {
-			logger.info("非下单状态，忽略撤单请求：{}", originOrderId);
-			return;
-		}
-		logger.info("撤单：{}", originOrderId);
-		Contract contract = orderReqMap.get(originOrderId).contract();
-		module.getAccount(contract).cancelOrder(originOrderId);
-	}
-
-	@Override
 	public void setEnabled(boolean enabled) {
 		logger.info("【{}】 模组", enabled ? "启用" : "停用");
 		this.enabled = enabled;
@@ -602,10 +466,6 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public ModuleDescription getModuleDescription() {
 		return moduleDescription;
-	}
-
-	public void setModule(IModule module) {
-		this.module = module;
 	}
 
 }

@@ -58,6 +58,14 @@ public class ContractConfigVO {
 	 * 合约名称
 	 */
 	private String name;
+	/**
+	 * 价格精度
+	 */
+	private int pricePrecision;
+	/**
+	 * 交易量精度
+	 */
+	private int quantityPrecision;
 	
 	// ========== 系统默认杠杆配置 ==========
 	

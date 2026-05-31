@@ -11,21 +11,19 @@ class AccountTest {
 	@Test
 	void testToAccountField() {
 		Account account = Account.builder()
-				.accountId("accountId")
 				.available(1.0)
 				.balance(2.0)
-				.closeProfit(3.0)
+				.realizedProfit(3.0)
 				.commission(4.0)
 				.currency(CoreEnum.CurrencyEnum.CNY)
 				.deposit(5.0)
 				.gatewayId("gatewayId")
 				.margin(6.0)
-				.positionProfit(7.0)
+				.unrealizedProfit(7.0)
 				.preBalance(8.0)
 				.withdraw(9.0)
 				.build();
 		CoreField.AccountField accountField = account.toAccountField();
-		assertEquals("accountId", accountField.getAccountId());
 		assertEquals(1.0, accountField.getAvailable());
 		assertEquals(2.0, accountField.getBalance());
 		assertEquals(3.0, accountField.getCloseProfit());

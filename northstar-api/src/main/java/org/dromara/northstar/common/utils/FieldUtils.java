@@ -84,6 +84,30 @@ public class FieldUtils {
 		};
 	}
 	
+	public static int directionFactor(PositionDirectionEnum dir) {
+		return switch(dir) {
+		case PD_Long -> 1;
+		case PD_Short -> -1;
+		default -> 0;
+		};
+	}
+	
+	public static PositionDirectionEnum openPositionDirOf(DirectionEnum dir) {
+		return switch(dir) {
+		case D_Buy -> PositionDirectionEnum.PD_Long;
+		case D_Sell -> PositionDirectionEnum.PD_Short;
+		default -> PositionDirectionEnum.PD_Unknown;
+		};
+	}
+	
+	public static PositionDirectionEnum closePositionDirOf(DirectionEnum dir) {
+		return switch(dir) {
+		case D_Buy -> PositionDirectionEnum.PD_Short;
+		case D_Sell -> PositionDirectionEnum.PD_Long;
+		default -> PositionDirectionEnum.PD_Unknown;
+		};
+	}
+	
 	public static double marginRatio(ContractField contract, DirectionEnum dir) {
 		return switch(dir) {
 		case D_Buy -> contract.getLongMarginRatio();

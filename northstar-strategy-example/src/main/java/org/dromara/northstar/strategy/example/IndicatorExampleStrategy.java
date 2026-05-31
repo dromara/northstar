@@ -57,24 +57,24 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 			case EMPTY -> {
 				// 快线在慢线之上开多，快线在慢线之下开空
 				if(shouldBuy()) {
-					helper.doBuyOpen(1);
+					helper.buyOpen(1);
 					logger.info("多开");
 				}
 				if(shouldSell()) {
-					helper.doSellOpen(1);
+					helper.sellOpen(1);
 					logger.info("空开");
 				}
 
 			}
 			case HOLDING_LONG -> {
 				if(fastLine.value(0) < slowLine.value(0)) {
-					helper.doSellClose(1);
+					helper.sellClose(1);
 					logger.info("平多");
 				}
 			}
 			case HOLDING_SHORT -> {
 				if(fastLine.value(0) > slowLine.value(0)) {
-					helper.doBuyClose(1);
+					helper.buyClose(1);
 					logger.info("平空");
 				}
 			}
@@ -131,7 +131,7 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 		ctx.registerIndicator(slowLine);
 		ctx.registerIndicator(macd);
 		
-		helper = TradeHelper.builder().context(ctx).tradeContract(c).build();
+		helper = new TradeHelper(ctx, c);
 	}
 
 	public static class InitParams extends DynamicParams {			

@@ -26,8 +26,8 @@ class AccountManagerTest {
         account1 = mock(TradeAccount.class);
         account2 = mock(TradeAccount.class);
         
-        when(account1.accountId()).thenReturn("account1");
-        when(account2.accountId()).thenReturn("account2");
+        when(account1.getId()).thenReturn("account1");
+        when(account2.getId()).thenReturn("account2");
     }
 
     @Test

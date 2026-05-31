@@ -24,6 +24,7 @@ class TradeTimeDefinitionTest {
 						))
 				.build();
 		assertThat(tt1).isEqualTo(tt2);
+		assertThat(tt1.weekendClosure()).isNotNull();
 	}
 
 }

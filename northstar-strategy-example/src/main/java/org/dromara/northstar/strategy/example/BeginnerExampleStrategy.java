@@ -4,12 +4,12 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.dromara.northstar.common.constant.FieldType;
 import org.dromara.northstar.common.constant.ModuleState;
-import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.SubmitOrderReq;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.indicator.Indicator;
@@ -18,9 +18,10 @@ import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
-import org.dromara.northstar.strategy.constant.PriceType;
-import org.dromara.northstar.strategy.model.TradeIntent;
 import org.slf4j.Logger;
+
+import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 
 /**
  * 本示例用于展示写一个策略的必要元素，以及最基本的开平仓操作、超时撤单操作
@@ -52,12 +53,6 @@ public class BeginnerExampleStrategy extends AbstractStrategy	// 抽象类预实
 		
 		@Setting(label="锁仓演示", type = FieldType.SELECT, options = {"true","false"}, order = 20)
 		private boolean showHedge;
-		
-		@Setting(label="反手演示", type = FieldType.SELECT, options = {"true","false"}, order = 21)
-		private boolean showReverse;
-		
-		@Setting(label="价格类型", type = FieldType.SELECT, options = {"市价","对手价","排队价"}, optionsVal = {"ANY_PRICE", "OPP_PRICE", "WAITING_PRICE"}, order = 30)
-		private String priceType = "OPP_PRICE";
 		
 	}
 	
@@ -102,43 +97,35 @@ public class BeginnerExampleStrategy extends AbstractStrategy	// 抽象类预实
 			nextActionTime = now + params.actionInterval * 1000;
 			logger.info("开始交易");
 			if(ctx.getState().isEmpty()) {
-				SignalOperation op = flag ? SignalOperation.BUY_OPEN : SignalOperation.SELL_OPEN;	// 随机开多或者开空
+				DirectionEnum dir = flag ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;	// 随机开多或者开空
+				OffsetFlagEnum offset = OffsetFlagEnum.OF_Open;
 				if(ctx.getState() == ModuleState.EMPTY_HEDGE) {
-					op = flag ? SignalOperation.BUY_CLOSE : SignalOperation.SELL_CLOSE;
+					offset = OffsetFlagEnum.OF_Close;
 				}
-				ctx.submitOrderReq(TradeIntent.builder()
+				ctx.submitOrderReq(SubmitOrderReq.builder()
 						.contract(tick.contract())
-						.operation(op)
+						.direction(dir)
+						.offsetFlag(offset)
 						.volume(ctx.getDefaultVolume())
-						.priceType(PriceType.valueOf(params.priceType))
-						.timeout(10000)
 						.build());
 				return;
 			}
 			if(ctx.getState() == ModuleState.HOLDING_LONG) {
-				SignalOperation op = params.showHedge ? SignalOperation.SELL_OPEN : SignalOperation.SELL_CLOSE;
-				if(params.showReverse) {
-					op = SignalOperation.SELL_REVERSE;
-				}
-				ctx.submitOrderReq(TradeIntent.builder()
+				OffsetFlagEnum offset = params.showHedge ? OffsetFlagEnum.OF_Open : OffsetFlagEnum.OF_Close;
+				ctx.submitOrderReq(SubmitOrderReq.builder()
 						.contract(tick.contract())
-						.operation(op)
-						.priceType(PriceType.valueOf(params.priceType))
+						.direction(DirectionEnum.D_Sell)
+						.offsetFlag(offset)
 						.volume(ctx.getDefaultVolume())
-						.timeout(3000)
 						.build());
 			}
 			if(ctx.getState() == ModuleState.HOLDING_SHORT) {		
-				SignalOperation op = params.showHedge ? SignalOperation.BUY_OPEN : SignalOperation.BUY_CLOSE;
-				if(params.showReverse) {
-					op = SignalOperation.BUY_REVERSE;
-				}
-				ctx.submitOrderReq(TradeIntent.builder()
+				OffsetFlagEnum offset = params.showHedge ? OffsetFlagEnum.OF_Open : OffsetFlagEnum.OF_Close;
+				ctx.submitOrderReq(SubmitOrderReq.builder()
 						.contract(tick.contract())
-						.operation(op)
-						.priceType(PriceType.valueOf(params.priceType))
+						.direction(DirectionEnum.D_Buy)
+						.offsetFlag(offset)
 						.volume(ctx.getDefaultVolume())
-						.timeout(3000)
 						.build());
 			}
 		}

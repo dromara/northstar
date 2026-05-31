@@ -9,8 +9,6 @@ import java.util.NoSuchElementException;
 
 import org.dromara.northstar.common.constant.ModuleType;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
-import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
-import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.model.core.Contract;
@@ -28,7 +26,7 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 class ModuleRepoAdapterTest {
 
 	@Autowired
-	ModuleDealRecordRepository mdrDelegate;
+	DealRecordRepository mdrDelegate;
 	@Autowired
 	ModuleDescriptionRepository mdDelegate;
 	@Autowired
@@ -61,24 +59,13 @@ class ModuleRepoAdapterTest {
 			.bindedContracts(List.of(ContractSimpleInfo.builder().unifiedSymbol("rb2210@SHFE@FUTURES").build()))
 			.build();
 	
-	ModuleAccountRuntimeDescription mard = ModuleAccountRuntimeDescription.builder()
-			.initBalance(100000)
-			.build();
-
 	ModuleRuntimeDescription mrd = ModuleRuntimeDescription.builder()
 			.moduleName(moduleName)
-			.moduleAccountRuntime(mard)
-			.build();
-
-	ModuleDealRecord mdr = ModuleDealRecord.builder()
-			.moduleName(moduleName)
-			.openTrade(openTrade.toTradeField().toByteArray())
-			.closeTrade(closeTrade.toTradeField().toByteArray())
 			.build();
 
 	@BeforeEach
 	void prepare() {
-		repo = new ModuleRepoAdapter(mdDelegate, mrdDelegate, mdrDelegate);
+		repo = new ModuleRepoAdapter(mdDelegate, mrdDelegate);
 	}
 
 	@Test
@@ -127,26 +114,6 @@ class ModuleRepoAdapterTest {
 		assertThrows(NoSuchElementException.class, () -> {
 			repo.findRuntimeByName(moduleName);
 		});
-	}
-
-	@Test
-	void testSaveDealRecord() {
-		assertDoesNotThrow(() -> {
-			repo.saveDealRecord(mdr);
-		});
-	}
-
-	@Test
-	void testFindAllDealRecords() {
-		testSaveDealRecord();
-		assertThat(repo.findAllDealRecords(moduleName)).isNotEmpty();
-	}
-
-	@Test
-	void testRemoveAllDealRecords() {
-		testSaveDealRecord();
-		repo.removeAllDealRecords(moduleName);
-		assertThat(repo.findAllDealRecords(moduleName)).isEmpty();
 	}
 
 }

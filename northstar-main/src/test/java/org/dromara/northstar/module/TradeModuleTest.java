@@ -5,9 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.common.model.ModuleDescription;
-import org.dromara.northstar.gateway.IContractManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -17,8 +15,6 @@ class TradeModuleTest {
     private TradeModule tradeModule;
     private ModuleDescription moduleDescription;
     private ModuleContext moduleContext;
-    private AccountManager accountManager;
-    private IContractManager contractManager;
 
     @BeforeEach
     void setUp() {
@@ -26,9 +22,7 @@ class TradeModuleTest {
         moduleContext = Mockito.mock(ModuleContext.class);
         when(moduleContext.getModuleDescription()).thenReturn(moduleDescription);
         when(moduleContext.getLogger(any())).thenReturn(mock(Logger.class));
-        accountManager = Mockito.mock(AccountManager.class);
-        contractManager = Mockito.mock(IContractManager.class);
-        tradeModule = new TradeModule(moduleContext, accountManager, contractManager);
+        tradeModule = new TradeModule(moduleContext);
     }
 
 

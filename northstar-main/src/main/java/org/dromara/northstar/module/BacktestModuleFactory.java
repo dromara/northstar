@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.common.constant.ClosingPolicy;
@@ -13,29 +14,42 @@ import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.ModuleType;
 import org.dromara.northstar.common.constant.ModuleUsage;
+import org.dromara.northstar.common.exception.TradeException;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.ExplorerTaskDescription;
 import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
+
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.model.StrategyMetaInfo;
 import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.CancelOrderReq;
 import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Position;
+import org.dromara.northstar.common.model.core.SubmitOrderReq;
+import org.dromara.northstar.common.model.core.Trade;
+import org.dromara.northstar.data.IAccountRepository;
 import org.dromara.northstar.data.IModuleRepository;
-import org.dromara.northstar.data.jdbc.ModuleDealRecordRepository;
+import org.dromara.northstar.data.jdbc.DealRecordRepository;
+import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.gateway.mktdata.NorthstarDataSource;
+import org.dromara.northstar.gateway.sim.trade.AccountPosition;
 import org.dromara.northstar.strategy.DynamicParamsAware;
+import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson2.JSONObject;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 
 import lombok.Setter;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 /**
  * 负责根据回测任务生成回测执行器
@@ -59,7 +73,7 @@ public class BacktestModuleFactory {
 	protected IModuleRepository moduleRepo;
 	
 	@Autowired
-	protected ModuleDealRecordRepository dealRecordRepo;
+	protected IAccountRepository accountRepo;
 	
 	public BacktestRunner createTestRunner(ExplorerTaskDescription task) {
 		Map<Contract, List<IModule>> contractModulesMap = new HashMap<>();
@@ -94,23 +108,27 @@ public class BacktestModuleFactory {
 				ModuleRuntimeDescription mrd = ModuleRuntimeDescription.builder()
 						.moduleName(md.getName())
 						.storeObject(new JSONObject())
-						.moduleAccountRuntime(ModuleAccountRuntimeDescription.builder()
-								.initBalance(md.getInitBalance())
-								.build())
 						.build();
+				
+				Table<Contract, PositionDirectionEnum, AccountPosition> positionTbl = HashBasedTable.create();
+				positionTbl.put(contract, PositionDirectionEnum.PD_Long, new AccountPosition(moduleName, contract, PositionDirectionEnum.PD_Long, accountRepo));
+				positionTbl.put(contract, PositionDirectionEnum.PD_Short, new AccountPosition(moduleName, contract, PositionDirectionEnum.PD_Short, accountRepo));
+				
+				ModuleAccount moduleAccount = new ModuleAccount(md.getName(), md.getInitBalance(), 0, 0, 
+						positionTbl, Map.of(contract, new DummyAccount()));
 				TradeStrategy strategy;
 				try {
 					strategy = resolveComponent(strategyComponent);
 				} catch (Exception e) {
 					throw new IllegalStateException(e);
 				}
-				ModuleContext moduleCtx = new PlaybackModuleContext(strategy, md, mrd, mktCenter, moduleRepo);
+				ModuleContext moduleCtx = new PlaybackModuleContext(strategy, md, moduleAccount, mktCenter, moduleRepo);
 				strategy.setContext(moduleCtx);
 				strategy.setStoreObject(mrd.getStoreObject());
 				IModule module = new BacktestModule(moduleCtx);
 				
 				if(!contractModulesMap.containsKey(contract)) {
-					contractModulesMap.put(contract, new ArrayList<IModule>());
+					contractModulesMap.put(contract, new ArrayList<>());
 				}
 				contractModulesMap.get(contract).add(module);
 				moduleList.add(module);
@@ -125,7 +143,7 @@ public class BacktestModuleFactory {
 				.toDate(endDate)
 				.moduleList(moduleList)
 				.contractModulesMap(contractModulesMap)
-				.dealRecordRepo(dealRecordRepo)
+				.accountRepo(accountRepo)
 				.build();
 	}
 	
@@ -144,5 +162,56 @@ public class BacktestModuleFactory {
 		paramObj.resolveFromSource(metaInfo.getSettings());
 		obj.initWithParams(paramObj);
 		return (T) obj;
+	}
+	
+	private static class DummyAccount implements IAccount{
+
+		@Override
+		public void onOrder(Order order) {
+		}
+
+		@Override
+		public void onTrade(Trade trade) {
+		}
+
+		@Override
+		public void submitOrder(SubmitOrderReq orderReq) throws TradeException {
+		}
+
+		@Override
+		public boolean cancelOrder(CancelOrderReq cancelReq) {
+			return false;
+		}
+
+		@Override
+		public double accountBalance() {
+			return 0;
+		}
+
+		@Override
+		public double availableBalance() {
+			return 0;
+		}
+
+		@Override
+		public String getId() {
+			return "BacktestDummyAccount";
+		}
+
+		@Override
+		public Optional<Position> getPosition(PositionDirectionEnum posDirection, Contract contract) {
+			return Optional.empty();
+		}
+
+		@Override
+		public List<Order> getPendingOrders() {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public TradeGateway getTradeGateway() {
+			throw new UnsupportedOperationException();
+		}
+		
 	}
 }

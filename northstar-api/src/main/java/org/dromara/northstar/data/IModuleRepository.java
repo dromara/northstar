@@ -2,7 +2,6 @@ package org.dromara.northstar.data;
 
 import java.util.List;
 
-import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 
@@ -50,20 +49,4 @@ public interface IModuleRepository {
 	 * @param moduleName
 	 */
 	void deleteRuntimeByName(String moduleName);
-	/**
-	 * 保存模组交易记录
-	 * @param record
-	 */
-	void saveDealRecord(ModuleDealRecord dealRecord);
-	/**
-	 * 查询模组全部交易记录
-	 * @param moduleName
-	 * @return
-	 */
-	List<ModuleDealRecord> findAllDealRecords(String moduleName);
-	/**
-	 * 删除模组全部交易记录
-	 * @param moduleName
-	 */
-	void removeAllDealRecords(String moduleName);
 }

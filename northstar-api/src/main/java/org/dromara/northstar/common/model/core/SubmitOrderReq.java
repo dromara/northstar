@@ -1,49 +1,27 @@
 package org.dromara.northstar.common.model.core;
 
-import com.alibaba.fastjson2.annotation.JSONField;
+import java.util.concurrent.atomic.AtomicLong;
 
 import lombok.Builder;
-import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
-import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
-import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
-import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 
-@Builder(toBuilder = true)
+@Builder
 public record SubmitOrderReq(
-		String originOrderId,        // 本地订单ID
-		CurrencyEnum currency,        // 币种
-		@JSONField(serialize = false)
-		Contract contract,            // 合约
-		String gatewayId,
-		int volume,                    // 下单数量
-		double price,                // 下单价格
-		OrderPriceTypeEnum orderPriceType,    // 定单价格类型
+		String gatewayId,			// 交易网关ID
+		String originOrderId,       	// 本地订单ID
+		Contract contract,          	// 合约
+		double volume,              	// 下单数量
+		double price,               	// 下单价格 （当价格为0时，采用市价；否则采用限价）
 		DirectionEnum direction,    // 买卖方向
-		OffsetFlagEnum offsetFlag,    // 开平标识
-		TimeConditionEnum timeCondition,    // 时效
-		VolumeConditionEnum volumeCondition, //成交条件
-		String gtdDate,                // GTD日期
-		int minVolume,                // 最小成交量
-		ContingentConditionEnum contingentCondition,    // 触发条件
-		double stopPrice,            // 止损价
-		long actionTimestamp        // 操作时间戳
+		OffsetFlagEnum offsetFlag,  	// 开平标识
+		double takeProfit,			// 止盈价
+		double stopLoss            	// 止损价
 		) {
 	
-	@Override
-	public String toString() {
-		String unifiedSymbol = null;
-		if(contract != null) {
-			unifiedSymbol = contract.unifiedSymbol();
-		}
-		return "SubmitOrderReq [originOrderId=" + originOrderId + ", currency=" + currency + ", contract=" + unifiedSymbol
-				+ ", gatewayId=" + gatewayId + ", volume=" + volume + ", price=" + price + ", orderPriceType="
-				+ orderPriceType + ", direction=" + direction + ", offsetFlag=" + offsetFlag + ", timeCondition="
-				+ timeCondition + ", volumeCondition=" + volumeCondition + ", gtdDate=" + gtdDate + ", minVolume="
-				+ minVolume + ", contingentCondition=" + contingentCondition + ", stopPrice=" + stopPrice
-				+ ", actionTimestamp=" + actionTimestamp + "]";
+	private static final AtomicLong atomic = new AtomicLong();
+	public SubmitOrderReq{
+		if(originOrderId == null) originOrderId = System.currentTimeMillis() + atomic.incrementAndGet() + "";
 	}
 	
 }

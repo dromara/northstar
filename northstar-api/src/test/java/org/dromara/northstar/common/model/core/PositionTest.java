@@ -16,17 +16,12 @@ class PositionTest {
 				.positionDirection(PositionDirectionEnum.PD_Long)
 				.position(1)
 				.frozen(2)
-				.ydPosition(3)
-				.ydFrozen(4)
-				.tdPosition(5)
-				.tdFrozen(6)
 				.openPrice(11)
 				.openPriceDiff(12)
 				.positionProfit(13)
 				.positionProfitRatio(14)
 				.useMargin(15)
 				.exchangeMargin(16)
-				.contractValue(17)
 				.gatewayId("gatewayId")
 				.build();
 		CoreField.PositionField positionField = position.toPositionField();
@@ -34,17 +29,11 @@ class PositionTest {
 		assertThat(positionField.getPositionDirection()).isEqualTo(position.positionDirection());
 		assertThat(positionField.getPosition()).isEqualTo(position.position());
 		assertThat(positionField.getFrozen()).isEqualTo(position.frozen());
-		assertThat(positionField.getYdPosition()).isEqualTo(position.ydPosition());
-		assertThat(positionField.getYdFrozen()).isEqualTo(position.ydFrozen());
-		assertThat(positionField.getTdPosition()).isEqualTo(position.tdPosition());
-		assertThat(positionField.getTdFrozen()).isEqualTo(position.tdFrozen());
 		assertThat(positionField.getOpenPrice()).isEqualTo(position.openPrice());
 		assertThat(positionField.getOpenPriceDiff()).isEqualTo(position.openPriceDiff());
 		assertThat(positionField.getPositionProfit()).isEqualTo(position.positionProfit());
 		assertThat(positionField.getPositionProfitRatio()).isEqualTo(position.positionProfitRatio());
 		assertThat(positionField.getUseMargin()).isEqualTo(position.useMargin());
-		assertThat(positionField.getExchangeMargin()).isEqualTo(position.exchangeMargin());
-		assertThat(positionField.getContractValue()).isEqualTo(position.contractValue());
 		assertThat(positionField.getGatewayId()).isEqualTo(position.gatewayId());
 
 	}

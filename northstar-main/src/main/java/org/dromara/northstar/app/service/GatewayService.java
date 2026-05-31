@@ -20,14 +20,16 @@ import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.GatewayVO;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleDescription;
+import org.dromara.northstar.data.IAccountRepository;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.data.IModuleRepository;
-import org.dromara.northstar.data.ISimAccountRepository;
 import org.dromara.northstar.gateway.Gateway;
 import org.dromara.northstar.gateway.GatewayFactory;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeGateway;
+import org.dromara.northstar.gateway.sim.trade.SimTradeGateway;
+import org.dromara.northstar.gateway.sim.trade.SimAccountRemote;
 import org.dromara.northstar.meta.GatewayMetaProvider;
 import org.dromara.northstar.support.utils.NamingValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,9 +54,9 @@ public class GatewayService implements CommandLineRunner {
 	@Autowired
 	private IGatewayRepository gatewayRepo;
 	@Autowired
-	private ISimAccountRepository simAccRepo;
-	@Autowired
 	private IModuleRepository moduleRepo;
+	@Autowired
+	private IAccountRepository accountRepo;
 	@Autowired
 	private AccountManager accountMgr;
 	@Autowired
@@ -87,8 +89,8 @@ public class GatewayService implements CommandLineRunner {
 		gateway = factory.newInstance(gatewayDescription);
 		gatewayMgr.add(Identifier.of(gateway.getDescription().getGatewayId()), gateway);
 		if (gatewayDescription.getGatewayUsage() == GatewayUsage.TRADE) {
-			TradeAccount account = new TradeAccount(gatewayDescription, gatewayMgr);
-			accountMgr.add(Identifier.of(account.accountId()), account);
+			TradeAccount account = new TradeAccount((TradeGateway)gateway);
+			accountMgr.add(Identifier.of(account.getId()), account);
 		}
 		if (gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA
 				&& gateway instanceof MarketGateway mktGateway) {
@@ -185,8 +187,9 @@ public class GatewayService implements CommandLineRunner {
 		gatewayMgr.remove(id);
 		gatewayRepo.deleteById(gatewayId);
 		if (gd.getChannelType() == ChannelType.SIM) {
-			simAccRepo.deleteById(gatewayId);
-			moduleRepo.removeAllDealRecords(gatewayId);
+			accountRepo.removeAccounts(gatewayId);
+			accountRepo.removeHoldingTrades(gatewayId);
+			accountRepo.removeDealRecords(gatewayId);
 		}
 		
 		sseController.sendGatewayStatus();
@@ -212,17 +215,19 @@ public class GatewayService implements CommandLineRunner {
 		sseController.sendGatewayStatus();
 	}
 
-	public int moneyIO(String gatewayId, int amount) {
-		TradeGateway gateway = (TradeGateway) gatewayMgr.get(Identifier.of(gatewayId));
+	public double moneyIO(String gatewayId, int amount) {
+		SimTradeGateway gateway = (SimTradeGateway) gatewayMgr.get(Identifier.of(gatewayId));
 		if (Objects.isNull(gateway)) {
 			throw new NoSuchGatewayException(gatewayId);
 		}
 		if (amount != 0) {
 			log.info("模拟账户[{}]，{}金：{}", gatewayId, amount > 0 ? "入" : "出", Math.abs(amount));
 		}
-		int balance = gateway.moneyIO(amount);
+		
+		SimAccountRemote account = gateway.getRemoteAccount();
+		account.moneyIO(amount);
 		sseController.sendGatewayStatus();
-		return balance;
+		return account.accountBalance();
 	}
 
 	@Override
@@ -232,7 +237,7 @@ public class GatewayService implements CommandLineRunner {
 			try {
 				doCreateGateway(gd);
 			} catch (Exception e) {
-				log.error("网关创建失败：{}", e.getMessage());
+				log.error("网关创建失败：{}", e);
 			}
 		});
 		log.info("初始化交易网关");
@@ -240,7 +245,7 @@ public class GatewayService implements CommandLineRunner {
 			try {
 				doCreateGateway(gd);
 			} catch (Exception e) {
-				log.error("网关创建失败：{}", e.getMessage());
+				log.error("网关创建失败：{}", e);
 			}
 		});
 	}

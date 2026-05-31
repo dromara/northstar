@@ -6,7 +6,6 @@ import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.common.model.ModuleChartDescription;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
-import org.dromara.northstar.common.model.core.Contract;
 
 public interface IModuleContext extends IModuleStrategyContext, MergedBarListener, TickDataAware, BarDataAware, TransactionAware {
 	/**
@@ -24,12 +23,6 @@ public interface IModuleContext extends IModuleStrategyContext, MergedBarListene
 	 * @return
 	 */
 	ModuleChartDescription getChartDescription();
-	/**
-	 * 获取合约绑定的物理账户对象
-	 * @param contract
-	 * @return
-	 */
-	IAccount getAccount(Contract contract);
 	/**
 	 * 设置运行状态
 	 * @param enabled

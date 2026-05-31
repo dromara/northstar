@@ -3,10 +3,14 @@ package org.dromara.northstar.app.restful;
 import java.util.List;
 
 import org.dromara.northstar.app.service.TradeService;
+import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.LineTraderDTO;
 import org.dromara.northstar.common.model.ModuleDealRecordVO;
-import org.dromara.northstar.common.model.OrderRequestDTO;
-import org.dromara.northstar.common.model.OrderWithdrawDTO;
+import org.dromara.northstar.common.model.SubmitOrderDTO;
+import org.dromara.northstar.common.model.core.CancelOrderReq;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.SubmitOrderReq;
+import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,14 +25,27 @@ public class TradeController {
 	
 	@Autowired
 	private TradeService service;
+	
+	@Autowired
+	private MarketCenter mktCenter;
 
 	/**
 	 * 发单
 	 * @return
 	 */
 	@PostMapping("order/submit")
-	public void submitOrder(@RequestBody OrderRequestDTO dto){
-		service.submitOrder(dto);
+	public void submitOrder(@RequestBody SubmitOrderDTO dto){
+		Contract contract = mktCenter.getContract(Identifier.of(dto.getContractId())).contract();
+		service.submitOrder(SubmitOrderReq.builder()
+				.gatewayId(dto.getGatewayId())
+				.contract(contract)
+				.volume(dto.getVolume())
+				.price(dto.getPrice())
+				.direction(dto.getAction().getDirection())
+				.offsetFlag(dto.getAction().getOffsetFlag())
+				.stopLoss(dto.getStopLoss())
+				.takeProfit(dto.getTakeProfit())
+				.build());
 	}
 	
 	/**
@@ -36,8 +53,8 @@ public class TradeController {
 	 * @return
 	 */
 	@PostMapping("order/cancel")
-	public void cancelOrder(@RequestBody OrderWithdrawDTO dto){
-		service.cancelOrder(dto);
+	public void cancelOrder(@RequestBody CancelOrderReq cancelReq){
+		service.cancelOrder(cancelReq);
 	}
 	
 	/**

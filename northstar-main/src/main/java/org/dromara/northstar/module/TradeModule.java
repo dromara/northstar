@@ -1,25 +1,16 @@
 package org.dromara.northstar.module;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
-import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.NorthstarEvent;
-import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.core.Bar;
-import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Order;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
-import org.dromara.northstar.gateway.IContract;
-import org.dromara.northstar.gateway.IContractManager;
-import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeGateway;
-import org.dromara.northstar.gateway.contract.OptionChainContract;
 import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
@@ -37,61 +28,24 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TradeModule implements IModule {
 	
-	private ModuleContext ctx;
+	private final ModuleContext ctx;
 	
-	private Set<String> mktGatewayIdSet = new HashSet<>();
+	private final Set<String> bindedContractIdSet;
 	
-	private Set<String> accountIdSet = new HashSet<>();
+	private final Logger logger;
 	
-	private Set<Contract> bindedContractSet = new HashSet<>();
-	
-	private Map<String, String> mktToAccountMap = new HashMap<>();
-	
-	private Map<Contract, IAccount> contractAccountMap = new HashMap<>();
-	
-	private Logger logger;
-	
-	public TradeModule(ModuleContext ctx, AccountManager accountMgr, IContractManager contractMgr) {
+	public TradeModule(ModuleContext ctx) {
 		this.ctx = ctx;
-		ctx.setModule(this);
 		logger = ctx.getLogger(getClass());
-		ctx.getModuleDescription().getBindedAccounts().forEach(accountId -> { 
-			MarketGateway mktGateway = accountMgr.get(Identifier.of(accountId)).getMarketGateway();
-			mktGatewayIdSet.add(mktGateway.getDescription().getGatewayId());
-			accountIdSet.add(accountId);
-			String mktId = mktGateway.getDescription().getGatewayId();
-			mktToAccountMap.put(mktId, accountId);
-		});
-		ctx.getModuleDescription().getBindedContracts().forEach(contract -> {
-			IContract ic = contractMgr.getContract(Identifier.of(contract.getId()));
-			Contract c = ic.contract();
-			if(ic instanceof OptionChainContract) {
-				ic.memberContracts()
-				.stream()
-				.map(IContract::contract)
-				.forEach(cc -> {
-					bindedContractSet.add(cc);
-					String accountId = mktToAccountMap.get(cc.gatewayId());
-					if(accountId == null) {
-						throw new IllegalStateException(String.format("合约[%s]的渠道来源与模组没有绑定关系：期望[%s]，实际绑定%s", cc.name(), cc.gatewayId(), mktToAccountMap.keySet()));
-					}
-					contractAccountMap.put(cc, accountMgr.get(Identifier.of(accountId)));
-				});
-			} 
-			bindedContractSet.add(c);
-			String accountId = mktToAccountMap.get(c.gatewayId());
-			if(accountId == null) {
-				throw new IllegalStateException(String.format("合约[%s]的渠道来源与模组没有绑定关系：期望[%s]，实际绑定%s", c.name(), c.gatewayId(), mktToAccountMap.keySet()));
-			}
-			contractAccountMap.put(c, accountMgr.get(Identifier.of(accountId)));
-		});
+		bindedContractIdSet = ctx.getModuleDescription().getBindedContracts().stream().map(csi -> csi.getId()).collect(Collectors.toSet());
 		logger.info("模组 [{}] 创建成功", ctx.getModuleDescription().getName());
 	}
 	
 	@Override
 	public void setEnabled(boolean enabled) {
-		if(enabled) {
-			contractAccountMap.values().stream().distinct().forEach(acc -> {
+		ModuleAccount account = (ModuleAccount)ctx.getModuleAccount();
+		if(enabled && account != null) {
+			account.getContractAccountMap().values().stream().distinct().forEach(acc -> {
 				TradeGateway gateway = acc.getTradeGateway();
 				if(gateway.getConnection() != ConnectionState.CONNECTED) {
 					log.warn("模组 [{}] 启动时，检测到账户 [{}] 没有连线，将自动连线", ctx.getModuleDescription().getName(), gateway.getDescription().getGatewayId());
@@ -106,13 +60,13 @@ public class TradeModule implements IModule {
 	public synchronized void onEvent(NorthstarEvent event) {
 		Object data = event.getData();
 		try {
-			if(data instanceof Tick tick && bindedContractSet.contains(tick.contract()) && mktGatewayIdSet.contains(tick.gatewayId())) {
+			if(data instanceof Tick tick && bindedContractIdSet.contains(tick.contract().contractId())) {
 				ctx.onTick(tick);
-			} else if (data instanceof Bar bar && bindedContractSet.contains(bar.contract()) && mktGatewayIdSet.contains(bar.gatewayId())) {
+			} else if (data instanceof Bar bar && bindedContractIdSet.contains(bar.contract().contractId())) {
 				ctx.onBar(bar);
-			} else if (data instanceof Order order && accountIdSet.contains(order.gatewayId())) {
+			} else if (data instanceof Order order && bindedContractIdSet.contains(order.contract().contractId())) {
 				ctx.onOrder(order);
-			} else if (data instanceof Trade trade && accountIdSet.contains(trade.gatewayId())) {
+			} else if (data instanceof Trade trade && bindedContractIdSet.contains(trade.contract().contractId())) {
 				ctx.onTrade(trade);
 			}
 		} catch (Exception e) {
@@ -121,16 +75,13 @@ public class TradeModule implements IModule {
 	}
 	
 	@Override
-	public IAccount getAccount(Contract contract) {
-		if(!contractAccountMap.containsKey(contract)) {
-			throw new IllegalStateException("[" + contract.contractId() + "] 找不到绑定的账户");
-		}
-		return contractAccountMap.get(contract);
+	public IModuleContext getModuleContext() {
+		return ctx;
 	}
 
 	@Override
-	public IModuleContext getModuleContext() {
-		return ctx;
+	public IAccount getModuleAccount() {
+		return ctx.getModuleAccount();
 	}
 
 }

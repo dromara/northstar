@@ -44,6 +44,10 @@ public class ContractSimpleInfo {
 	 */
 	private int precision;
 	/**
+	 * 下单数量精度
+	 */
+	private int quantityPrecision;
+	/**
 	 * 到期日
 	 */
 	private String dueDate;
@@ -56,6 +60,7 @@ public class ContractSimpleInfo {
 				.unifiedSymbol(c.unifiedSymbol())
 				.channelType(c.channelType())
 				.precision(c.pricePrecision())
+				.quantityPrecision(c.quantityPrecision())
 				.dueDate(Objects.isNull(c.lastTradeDate()) ? null : c.lastTradeDate().format(DateTimeConstant.D_FORMAT_FORMATTER))
 				.build();
 	}

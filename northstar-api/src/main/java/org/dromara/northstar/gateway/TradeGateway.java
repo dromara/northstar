@@ -1,6 +1,7 @@
 package org.dromara.northstar.gateway;
 
 import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.common.model.core.CancelOrderReq;
 import org.dromara.northstar.common.model.core.SubmitOrderReq;
 
 public abstract class TradeGateway extends Gateway {
@@ -15,7 +16,7 @@ public abstract class TradeGateway extends Gateway {
 	 * @param orderReq
 	 * @return
 	 */
-	public abstract String submitOrder(SubmitOrderReq submitOrderReq);
+	public abstract void submitOrder(SubmitOrderReq submitOrderReq);
 
 	/**
 	 * 撤销定单
@@ -23,14 +24,6 @@ public abstract class TradeGateway extends Gateway {
 	 * @param cancelOrderReq
 	 * @return
 	 */
-	public abstract boolean cancelOrder(String originOrderId);
-	
-	/**
-	 * 交易账户出入金
-	 * @return 返回出入金后账户余额
-	 */
-	public int moneyIO(int amount) {
-		throw new UnsupportedOperationException();
-	}
+	public abstract boolean cancelOrder(CancelOrderReq cancelOrderReq);
 	
 }

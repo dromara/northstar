@@ -27,7 +27,6 @@ public class BacktestModule implements IModule{
 	
 	public BacktestModule(ModuleContext ctx) {
 		this.ctx = ctx;
-		ctx.setModule(this);;
 		this.logger = ctx.getLogger(getClass());
 		
 		Contract c = ctx.bindedContracts().getFirst();
@@ -69,13 +68,13 @@ public class BacktestModule implements IModule{
 	}
 
 	@Override
-	public IAccount getAccount(Contract contract) {
-		throw new UnsupportedOperationException("在策略探索模式下，没有绑定任何物理账户信息，不支持相关的操作");
+	public IModuleContext getModuleContext() {
+		return ctx;
 	}
 
 	@Override
-	public IModuleContext getModuleContext() {
-		return ctx;
+	public IAccount getModuleAccount() {
+		return ctx.getModuleAccount();
 	}
 
 }

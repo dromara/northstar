@@ -102,7 +102,7 @@ public class GatewayController {
 	 * @return
 	 */
 	@PutMapping("deposit/{gatewayId}")
-	public Integer moneyIO(@PathVariable String gatewayId, int amount){
+	public Double moneyIO(@PathVariable String gatewayId, int amount){
 		return service.moneyIO(gatewayId, amount);
 	}
 }

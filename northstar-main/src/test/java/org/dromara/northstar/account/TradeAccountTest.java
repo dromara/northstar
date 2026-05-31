@@ -1,117 +1,427 @@
 package org.dromara.northstar.account;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.offset;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Optional;
-import java.util.UUID;
-
+import org.dromara.northstar.common.exception.IllegalOrderRequestException;
+import org.dromara.northstar.common.utils.MessageSourceHolder;
 import org.dromara.northstar.common.model.GatewayDescription;
-import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.core.Account;
+import org.dromara.northstar.common.model.core.CancelOrderReq;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.ContractDefinition;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Position;
 import org.dromara.northstar.common.model.core.SubmitOrderReq;
-import org.dromara.northstar.gateway.MarketGateway;
+import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.gateway.TradeGateway;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.MessageSource;
+
+import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 class TradeAccountTest {
 
-	private MarketGateway marketGateway;
-	private TradeGateway tradeGateway;
-	private GatewayDescription gatewayDescription;
-	private TradeAccount tradeAccount;
+    private TradeGateway tradeGateway;
+    private TradeAccount tradeAccount;
+    private GatewayDescription gatewayDescription;
 
-	@BeforeEach
-	void setUp() {
-		GatewayManager gatewayMgr = new GatewayManager();
-		marketGateway = mock(MarketGateway.class);
-		tradeGateway = mock(TradeGateway.class);
-		gatewayMgr.add(Identifier.of("mkt"), marketGateway);
-		gatewayMgr.add(Identifier.of("test"), tradeGateway);
-		gatewayDescription = GatewayDescription.builder().bindedMktGatewayId("mkt").gatewayId("test").build();
-		tradeAccount = new TradeAccount(gatewayDescription, gatewayMgr);
-	}
+    private Contract contract;
+    private ContractDefinition contractDefinition;
 
-	@Test
-	void testAccountBalance() {
-		Account account = Account.builder().balance(1000.0).build();
-		tradeAccount.onAccount(account);
-		assertEquals(1000.0, tradeAccount.accountBalance());
-	}
+    @BeforeAll
+    static void initMessageSource() {
+        MessageSourceHolder.setMessageSource(mock(MessageSource.class));
+    }
 
-	@Test
-	void testAvailableAmount() {
-		Account account = Account.builder().available(800).build();
-		tradeAccount.onAccount(account);
-		assertEquals(800.0, tradeAccount.availableAmount());
-	}
+    @BeforeEach
+    void setUp() {
+        gatewayDescription = GatewayDescription.builder()
+                .gatewayId("TEST_GATEWAY")
+                .build();
+        tradeGateway = mock(TradeGateway.class);
+        when(tradeGateway.getDescription()).thenReturn(gatewayDescription);
+        when(tradeGateway.cancelOrder(any())).thenReturn(true);
 
-	@Test
-	void testDegreeOfRisk() {
-		Account account = Account.builder().balance(1000.0).available(800).build();
-		tradeAccount.onAccount(account);
-		assertThat(tradeAccount.degreeOfRisk()).isCloseTo(0.2, offset(1e-6));
-	}
+        tradeAccount = new TradeAccount(tradeGateway);
 
-	@Test
-	void testTryLockAmount_success() {
-		Account account = Account.builder().balance(1000.0).available(800).build();
-		tradeAccount.onAccount(account);
+        contractDefinition = ContractDefinition.builder()
+                .marginRatio(0.1)
+                .build();
+        contract = Contract.builder()
+                .contractId("rb2505@SHFE@FUTURES")
+                .unifiedSymbol("rb2505@SHFE@FUTURES")
+                .symbol("rb2505")
+                .multiplier(10)
+                .contractDefinition(contractDefinition)
+                .build();
+    }
 
-		Optional<UUID> lockId = tradeAccount.tryLockAmount(500.0);
+    @Test
+    void shouldReturnGatewayId() {
+        assertEquals("TEST_GATEWAY", tradeAccount.getId());
+    }
 
-		assertTrue(lockId.isPresent());
-	}
+    @Test
+    void shouldReturnTradeGateway() {
+        assertSame(tradeGateway, tradeAccount.getTradeGateway());
+    }
 
-	@Test
-	void testTryLockAmount_failure() {
-		Account account = Account.builder().balance(1000.0).available(800).build();
-		tradeAccount.onAccount(account);
+    @Test
+    void shouldReturnZeroBalanceWhenNoAccount() {
+        assertEquals(0, tradeAccount.accountBalance());
+        assertEquals(0, tradeAccount.availableBalance());
+    }
 
-		Optional<UUID> lockId = tradeAccount.tryLockAmount(1000.0);
+    @Test
+    void shouldUpdateAndReturnPosition() {
+        Position position = Position.builder()
+                .positionDirection(PositionDirectionEnum.PD_Long)
+                .position(10)
+                .frozen(2)
+                .contract(contract)
+                .build();
 
-		assertFalse(lockId.isPresent());
-	}
+        tradeAccount.onPosition(position);
 
-	@Test
-	void testUnlockAmount() {
-		Account account = Account.builder().balance(1000.0).available(800).build();
-		tradeAccount.onAccount(account);
+        assertTrue(tradeAccount.getPosition(PositionDirectionEnum.PD_Long, contract).isPresent());
+        assertEquals(10, tradeAccount.getPosition(PositionDirectionEnum.PD_Long, contract).get().position());
+        assertFalse(tradeAccount.getPosition(PositionDirectionEnum.PD_Short, contract).isPresent());
+    }
 
-		UUID lockId = tradeAccount.tryLockAmount(800.0).orElseThrow();
-		assertThat(tradeAccount.tryLockAmount(1)).isEmpty();
-		tradeAccount.unlockAmount(lockId);
-		
-		assertThat(tradeAccount.tryLockAmount(1)).isPresent();
-	}
+    @Test
+    void shouldSubmitOpenOrderWhenSufficientBalance() {
+        Account account = Account.builder()
+                .balance(100000)
+                .available(100000)
+                .build();
+        tradeAccount.onAccount(account);
 
-	@Test
-	void testSubmitOrder() {
-		SubmitOrderReq orderReq = SubmitOrderReq.builder()
-				.originOrderId("123")
-				.build();
-		when(tradeGateway.submitOrder(orderReq)).thenReturn("123");
+        SubmitOrderReq orderReq = SubmitOrderReq.builder()
+                .originOrderId("ORIGIN_001")
+                .contract(contract)
+                .volume(1)
+                .price(5000)
+                .direction(DirectionEnum.D_Buy)
+                .offsetFlag(OffsetFlagEnum.OF_Open)
+                .build();
 
-		String orderId = tradeAccount.submitOrder(orderReq);
+        tradeAccount.submitOrder(orderReq);
 
-		assertEquals("123", orderId);
-		verify(tradeGateway).submitOrder(orderReq);
-	}
+        verify(tradeGateway, times(1)).submitOrder(orderReq);
+    }
 
-	@Test
-	void testCancelOrder() {
-		when(tradeGateway.cancelOrder("orderId")).thenReturn(true);
+    @Test
+    void shouldThrowExceptionWhenOpenOrderWithInsufficientBalance() {
+        Account account = Account.builder()
+                .balance(1000)
+                .available(1000)
+                .build();
+        tradeAccount.onAccount(account);
 
-		boolean result = tradeAccount.cancelOrder("orderId");
+        SubmitOrderReq orderReq = SubmitOrderReq.builder()
+                .originOrderId("ORIGIN_002")
+                .contract(contract)
+                .volume(10)
+                .price(5000)
+                .direction(DirectionEnum.D_Buy)
+                .offsetFlag(OffsetFlagEnum.OF_Open)
+                .build();
 
-		assertTrue(result);
-		verify(tradeGateway).cancelOrder("orderId");
-	}
+        assertThrows(IllegalOrderRequestException.class, () -> tradeAccount.submitOrder(orderReq));
+        verify(tradeGateway, never()).submitOrder(any());
+    }
 
-	// Add more tests for other methods in the TradeAccount class.
+    @Test
+    void shouldDeductLocalFrozenAfterOpenOrderSubmitted() {
+        Account account = Account.builder()
+                .balance(100000)
+                .available(100000)
+                .build();
+        tradeAccount.onAccount(account);
+
+        SubmitOrderReq orderReq = SubmitOrderReq.builder()
+                .originOrderId("ORIGIN_003")
+                .contract(contract)
+                .volume(1)
+                .price(5000)
+                .direction(DirectionEnum.D_Buy)
+                .offsetFlag(OffsetFlagEnum.OF_Open)
+                .build();
+
+        tradeAccount.submitOrder(orderReq);
+
+        // 成本 = 5000 * 1 * 10 * 0.1 = 5000
+        assertEquals(95000, tradeAccount.availableBalance());
+    }
+
+    @Test
+    void shouldSubmitCloseOrderWhenSufficientPosition() {
+        Position position = Position.builder()
+                .positionDirection(PositionDirectionEnum.PD_Long)
+                .position(5)
+                .frozen(0)
+                .contract(contract)
+                .build();
+        tradeAccount.onPosition(position);
+
+        SubmitOrderReq orderReq = SubmitOrderReq.builder()
+                .originOrderId("ORIGIN_004")
+                .contract(contract)
+                .volume(3)
+                .price(5100)
+                .direction(DirectionEnum.D_Sell)
+                .offsetFlag(OffsetFlagEnum.OF_Close)
+                .build();
+
+        tradeAccount.submitOrder(orderReq);
+
+        verify(tradeGateway, times(1)).submitOrder(orderReq);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenCloseOrderWithInsufficientPosition() {
+        Position position = Position.builder()
+                .positionDirection(PositionDirectionEnum.PD_Long)
+                .position(2)
+                .frozen(0)
+                .contract(contract)
+                .build();
+        tradeAccount.onPosition(position);
+
+        SubmitOrderReq orderReq = SubmitOrderReq.builder()
+                .originOrderId("ORIGIN_005")
+                .contract(contract)
+                .volume(3)
+                .price(5100)
+                .direction(DirectionEnum.D_Sell)
+                .offsetFlag(OffsetFlagEnum.OF_Close)
+                .build();
+
+        assertThrows(IllegalOrderRequestException.class, () -> tradeAccount.submitOrder(orderReq));
+        verify(tradeGateway, never()).submitOrder(any());
+    }
+
+    @Test
+    void shouldConsiderFrozenPositionWhenClosing() {
+        Position position = Position.builder()
+                .positionDirection(PositionDirectionEnum.PD_Long)
+                .position(5)
+                .frozen(3)
+                .contract(contract)
+                .build();
+        tradeAccount.onPosition(position);
+
+        SubmitOrderReq orderReq = SubmitOrderReq.builder()
+                .originOrderId("ORIGIN_006")
+                .contract(contract)
+                .volume(3)
+                .price(5100)
+                .direction(DirectionEnum.D_Sell)
+                .offsetFlag(OffsetFlagEnum.OF_Close)
+                .build();
+
+        assertThrows(IllegalOrderRequestException.class, () -> tradeAccount.submitOrder(orderReq));
+        verify(tradeGateway, never()).submitOrder(any());
+    }
+
+    @Test
+    void shouldAddPendingOrderOnUnfinishedOrder() {
+        Order order = Order.builder()
+                .orderId("ORDER_001")
+                .originOrderId("ORIGIN_007")
+                .orderStatus(OrderStatusEnum.OS_NoTradeQueueing)
+                .contract(contract)
+                .build();
+
+        tradeAccount.onOrder(order);
+
+        assertEquals(1, tradeAccount.getPendingOrders().size());
+        assertEquals("ORDER_001", tradeAccount.getPendingOrders().get(0).orderId());
+    }
+
+    @Test
+    void shouldRemovePendingOrderOnDoneOrder() {
+        Order pendingOrder = Order.builder()
+                .orderId("ORDER_002")
+                .originOrderId("ORIGIN_008")
+                .orderStatus(OrderStatusEnum.OS_NoTradeQueueing)
+                .contract(contract)
+                .build();
+        tradeAccount.onOrder(pendingOrder);
+        assertEquals(1, tradeAccount.getPendingOrders().size());
+
+        Order doneOrder = Order.builder()
+                .orderId("ORDER_002")
+                .originOrderId("ORIGIN_008")
+                .orderStatus(OrderStatusEnum.OS_AllTraded)
+                .contract(contract)
+                .build();
+        tradeAccount.onOrder(doneOrder);
+
+        assertTrue(tradeAccount.getPendingOrders().isEmpty());
+    }
+
+    @Test
+    void shouldReleaseLocalFrozenWhenOrderDone() {
+        Account account = Account.builder()
+                .balance(100000)
+                .available(100000)
+                .build();
+        tradeAccount.onAccount(account);
+
+        SubmitOrderReq orderReq = SubmitOrderReq.builder()
+                .originOrderId("ORIGIN_009")
+                .contract(contract)
+                .volume(1)
+                .price(5000)
+                .direction(DirectionEnum.D_Buy)
+                .offsetFlag(OffsetFlagEnum.OF_Open)
+                .build();
+        tradeAccount.submitOrder(orderReq);
+        assertEquals(95000, tradeAccount.availableBalance());
+
+        Order doneOrder = Order.builder()
+                .orderId("ORDER_003")
+                .originOrderId("ORIGIN_009")
+                .orderStatus(OrderStatusEnum.OS_AllTraded)
+                .contract(contract)
+                .build();
+        tradeAccount.onOrder(doneOrder);
+
+        assertEquals(100000, tradeAccount.availableBalance());
+    }
+
+    @Test
+    void shouldRecordTrade() {
+        Trade trade = Trade.builder()
+                .tradeId("TRADE_001")
+                .orderId("ORDER_004")
+                .volume(1)
+                .price(5000)
+                .contract(contract)
+                .build();
+
+        tradeAccount.onTrade(trade);
+    }
+
+    @Test
+    void shouldReturnFalseWhenCancelNonExistingOrder() {
+        CancelOrderReq cancelReq = CancelOrderReq.builder()
+                .orderId("NON_EXIST_ORDER")
+                .originOrderId("NON_EXIST_ORIGIN")
+                .build();
+
+        assertFalse(tradeAccount.cancelOrder(cancelReq));
+        verify(tradeGateway, never()).cancelOrder(any());
+    }
+
+    @Test
+    void shouldCancelExistingOrder() {
+        Order pendingOrder = Order.builder()
+                .orderId("ORDER_005")
+                .originOrderId("ORIGIN_010")
+                .orderStatus(OrderStatusEnum.OS_NoTradeQueueing)
+                .contract(contract)
+                .build();
+        tradeAccount.onOrder(pendingOrder);
+
+        CancelOrderReq cancelReq = CancelOrderReq.builder()
+                .orderId("ORDER_005")
+                .originOrderId("ORIGIN_010")
+                .build();
+
+        assertTrue(tradeAccount.cancelOrder(cancelReq));
+        verify(tradeGateway, times(1)).cancelOrder(cancelReq);
+    }
+
+    @Test
+    void shouldHandleCanceledOrderStatus() {
+        Order pendingOrder = Order.builder()
+                .orderId("ORDER_006")
+                .originOrderId("ORIGIN_011")
+                .orderStatus(OrderStatusEnum.OS_NoTradeQueueing)
+                .contract(contract)
+                .build();
+        tradeAccount.onOrder(pendingOrder);
+        assertEquals(1, tradeAccount.getPendingOrders().size());
+
+        Order canceledOrder = Order.builder()
+                .orderId("ORDER_006")
+                .originOrderId("ORIGIN_011")
+                .orderStatus(OrderStatusEnum.OS_Canceled)
+                .contract(contract)
+                .build();
+        tradeAccount.onOrder(canceledOrder);
+
+        assertTrue(tradeAccount.getPendingOrders().isEmpty());
+    }
+
+    @Test
+    void shouldUpdateExistingPendingOrder() {
+        Order order = Order.builder()
+                .orderId("ORDER_007")
+                .originOrderId("ORIGIN_012")
+                .orderStatus(OrderStatusEnum.OS_NoTradeQueueing)
+                .totalVolume(10)
+                .tradedVolume(0)
+                .contract(contract)
+                .build();
+        tradeAccount.onOrder(order);
+
+        Order partialOrder = Order.builder()
+                .orderId("ORDER_007")
+                .originOrderId("ORIGIN_012")
+                .orderStatus(OrderStatusEnum.OS_PartTradedQueueing)
+                .totalVolume(10)
+                .tradedVolume(5)
+                .contract(contract)
+                .build();
+        tradeAccount.onOrder(partialOrder);
+
+        assertEquals(1, tradeAccount.getPendingOrders().size());
+        assertEquals(5, tradeAccount.getPendingOrders().get(0).tradedVolume());
+    }
+
+    @Test
+    void shouldHandleNullAccountState() {
+        // 未设置账户状态时，余额应为0
+        assertEquals(0, tradeAccount.accountBalance());
+        assertEquals(0, tradeAccount.availableBalance());
+    }
+
+    @Test
+    void shouldHandleMultiplePositions() {
+        Contract contract2 = Contract.builder()
+                .contractId("m2505@DCE@FUTURES")
+                .unifiedSymbol("m2505@DCE@FUTURES")
+                .symbol("m2505")
+                .multiplier(10)
+                .build();
+
+        Position longPos = Position.builder()
+                .positionDirection(PositionDirectionEnum.PD_Long)
+                .position(10)
+                .frozen(0)
+                .contract(contract)
+                .build();
+        Position shortPos = Position.builder()
+                .positionDirection(PositionDirectionEnum.PD_Short)
+                .position(5)
+                .frozen(0)
+                .contract(contract2)
+                .build();
+
+        tradeAccount.onPosition(longPos);
+        tradeAccount.onPosition(shortPos);
+
+        assertEquals(10, tradeAccount.getPosition(PositionDirectionEnum.PD_Long, contract).get().position());
+        assertEquals(5, tradeAccount.getPosition(PositionDirectionEnum.PD_Short, contract2).get().position());
+    }
 }

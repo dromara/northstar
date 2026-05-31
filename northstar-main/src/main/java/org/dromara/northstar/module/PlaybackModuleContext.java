@@ -3,37 +3,26 @@ package org.dromara.northstar.module;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
-import org.dromara.northstar.common.constant.SignalOperation;
-import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.CancelOrderReq;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Order;
 import org.dromara.northstar.common.model.core.SubmitOrderReq;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
-import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.TradeStrategy;
-import org.dromara.northstar.strategy.constant.PriceType;
-import org.dromara.northstar.strategy.model.TradeIntent;
 import org.slf4j.Logger;
 import org.springframework.util.Assert;
 
-import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
-import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
-import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.PriceSourceEnum;
-import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 
 public class PlaybackModuleContext extends ModuleContext implements IModuleContext{
 	
@@ -41,142 +30,48 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 	
 	private Logger logger;
 	
-	private Optional<TradeIntent> pendingTrade = Optional.empty();
-	
-	private long signalTime;
+	private Map<Contract, Tick> lastTickMap = new HashMap<>();
 	
 	public PlaybackModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription, 
-			ModuleRuntimeDescription moduleRtDescription, IContractManager contractMgr, IModuleRepository moduleRepo) {
-		super(tradeStrategy, moduleDescription, moduleRtDescription, contractMgr, new MockModuleRepository(moduleRepo));
+			ModuleAccount moduleAccount, IContractManager contractMgr, IModuleRepository moduleRepo) {
+		super(tradeStrategy, moduleDescription, moduleAccount, contractMgr, new MockModuleRepository());
 		logger = getLogger(getClass());
 	}
-
-	@Override
-	public void submitOrderReq(TradeIntent tradeIntent) {
-		pendingTrade = Optional.of(tradeIntent);
-		Tick lastTick = Optional.ofNullable(tickMap.get(tradeIntent.getContract())).orElseThrow(() -> new IllegalStateException("没有行情时不应该发送订单"));
-		signalTime = lastTick.actionTimestamp();
-	}
-	
-	private void doTrade() {
-		TradeIntent tradeIntent = pendingTrade.get();
-		// 回测时直接成交，没有撤单追单逻辑
-		SignalOperation operation = tradeIntent.getOperation();
-		if(operation == SignalOperation.BUY_REVERSE) {
-			submitOrderReq(tradeIntent.getContract(), SignalOperation.BUY_CLOSE, tradeIntent.getPriceType(), tradeIntent.getVolume(), tradeIntent.getPrice());
-			submitOrderReq(tradeIntent.getContract(), SignalOperation.BUY_OPEN, tradeIntent.getPriceType(), tradeIntent.getVolume(), tradeIntent.getPrice());
-		} else if (operation == SignalOperation.SELL_REVERSE) {
-			submitOrderReq(tradeIntent.getContract(), SignalOperation.SELL_CLOSE, tradeIntent.getPriceType(), tradeIntent.getVolume(), tradeIntent.getPrice());
-			submitOrderReq(tradeIntent.getContract(), SignalOperation.SELL_OPEN, tradeIntent.getPriceType(), tradeIntent.getVolume(), tradeIntent.getPrice());
-		} else {
-			submitOrderReq(tradeIntent.getContract(), tradeIntent.getOperation(), tradeIntent.getPriceType(), tradeIntent.getVolume(), tradeIntent.getPrice());
-		}
-	}
-	
-	@Override
-	public void cancelOrder(String originOrderId) {
-		/* 回测上下文不需要撤单 */
-	}
-	
-	@Override
-	public void onOrder(Order order) {
-		/* 回测上下文不接收外部的订单数据 */
-	}
-
-	@Override
-	public boolean isOrderWaitTimeout(String originOrderId, long timeout) {
-		if(!orderReqMap.containsKey(originOrderId)) {
-			return false;
-		}
-		
-		SubmitOrderReq orderReq = orderReqMap.get(originOrderId);
-		Tick lastTick = tickMap.get(orderReq.contract());
-		return lastTick.actionTimestamp() - orderReq.actionTimestamp() > timeout;
-	}
-	
-	private Map<Contract, Tick> tickMap = new HashMap<>();
 	
 	@Override
 	public void onTick(Tick tick) {
-		pendingTrade.ifPresent(intent -> {
-			if(tick.contract().equals(intent.getContract()) && tick.actionTimestamp() > signalTime) {
-				doTrade();
-				pendingTrade = Optional.empty();
-			}
-		});
-		synchronized (tickMap) {
-			tickMap.put(tick.contract(), tick);
-		}
-		try {			
-			super.onTick(tick);
-		} catch(Exception e) {
-			logger.error("", e);
-		}
-	}
-	
-	@Override
-	public void onBar(Bar bar) {
-		try {
-			super.onBar(bar);
-		} catch(Exception e) {
-			logger.error("", e);
-		}
+		lastTickMap.put(tick.contract(), tick);
+		super.onTick(tick);
 	}
 
-	// 所有的委托都会立马转为成交单
 	@Override
-	public Optional<String> submitOrderReq(Contract contract, SignalOperation operation, PriceType priceType, 
-			int volume, double price) {
+	public void submitOrderReq(SubmitOrderReq orderReq) {
 		if(!isEnabled()) {
 			logger.info("策略处于停用状态，忽略委托单");
-			return Optional.empty();
+			return;
 		}
 		logger.debug("回测上下文收到下单请求");
-		Assert.isTrue(volume > 0, "下单交易量应该为正数。当前为" + volume);
-		Tick lastTick = Optional.ofNullable(tickMap.get(contract)).orElseThrow(() -> new IllegalStateException("没有行情时不应该发送订单"));
+		Assert.isTrue(orderReq.volume() > 0, "下单交易量应该为正数。当前为" + orderReq.volume());
+		Tick lastTick = lastTickMap.get(orderReq.contract());
+		if(lastTick == null) {
+			throw new IllegalStateException("没有行情时不应该发送订单");
+		}
 		
-		double orderPrice = priceType.resolvePrice(lastTick, operation, price);
 		if(logger.isInfoEnabled()) {
-			logger.info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，交易量【{}】，类型【{}】", 
+			logger.info("[{} {}] 策略信号：合约【{}】，操作【{} {}】，价格【{}】，交易量【{}】", 
 					lastTick.actionDay(), lastTick.actionTime(),
-					contract.unifiedSymbol(), operation.text(), orderPrice, volume, priceType);
+					orderReq.contract().unifiedSymbol(), orderReq.direction(), orderReq.offsetFlag(), orderReq.price(), orderReq.volume());
 		}
-		String id = UUID.randomUUID().toString();
-		DirectionEnum direction = OrderUtils.resolveDirection(operation);
-		OffsetFlagEnum offsetFlag = operation.isOpen() ? OffsetFlagEnum.OF_Open : OffsetFlagEnum.OF_Close;
 		moduleStateMachine.onSubmitReq();
-		try {
-			moduleAccount.onSubmitOrder(SubmitOrderReq.builder()
-							.originOrderId(id)
-							.contract(contract)
-							.direction(direction)
-							.offsetFlag(offsetFlag)
-							.volume(volume)
-							.price(orderPrice)
-							.timeCondition(priceType == PriceType.ANY_PRICE ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
-							.orderPriceType(priceType == PriceType.ANY_PRICE ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
-							.contingentCondition(ContingentConditionEnum.CC_Immediately)
-							.actionTimestamp(lastTick.actionTimestamp())
-							.minVolume(1)
-							.build());
-		} catch (Exception e) {
-			logger.error("发单失败。原因：{}", e.getMessage());
-			tradeIntentMap.remove(contract);
-			logger.warn("模组余额不足，主动停用模组");
-			setEnabled(false);
-			moduleStateMachine.onFailSubmitReq();
-			return Optional.empty();
-		}
-		
 		Order order = Order.builder()
 				.gatewayId(PLAYBACK_GATEWAY)
-				.contract(contract)
-				.totalVolume(volume)
-				.tradedVolume(volume)
+				.contract(orderReq.contract())
+				.totalVolume(orderReq.volume())
+				.tradedVolume(orderReq.volume())
 				.price(lastTick.lastPrice())
-				.direction(OrderUtils.resolveDirection(operation))
+				.direction(orderReq.direction())
+				.offsetFlag(orderReq.offsetFlag())
 				.hedgeFlag(HedgeFlagEnum.HF_Speculation)
-				.offsetFlag(offsetFlag)
 				.tradingDay(lastTick.tradingDay())
 				.updateDate(lastTick.actionDay())
 				.updateTime(lastTick.actionTime())
@@ -188,13 +83,12 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		
 		Trade trade = Trade.builder()
 				.gatewayId(PLAYBACK_GATEWAY)
-				.contract(contract)
-				.volume(volume)
+				.contract(orderReq.contract())
+				.volume(orderReq.volume())
 				.price(lastTick.lastPrice())
 				.tradeTimestamp(lastTick.actionTimestamp())
-				.direction(OrderUtils.resolveDirection(operation))
-				.offsetFlag(offsetFlag)
-				.priceSource(PriceSourceEnum.PSRC_LastPrice)
+				.direction(orderReq.direction())
+				.offsetFlag(orderReq.offsetFlag())
 				.tradeDate(lastTick.actionDay())
 				.tradingDay(lastTick.tradingDay())
 				.tradeTime(lastTick.actionTime())
@@ -202,20 +96,32 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		moduleAccount.onTrade(trade);
 		moduleStateMachine.onTrade(trade);
 		tradeStrategy.onTrade(trade);
-		return Optional.of(id);
+	}
+	
+	
+	@Override
+	public void cancelOrder(CancelOrderReq cancelReq) {
+		/* 回测上下文不需要撤单 */
+	}
+	
+	@Override
+	public void onOrder(Order order) {
+		/* 回测上下文不接收外部的订单数据 */
 	}
 
-	
+	@Override
+	public void onBar(Bar bar) {
+		try {
+			super.onBar(bar);
+		} catch(Exception e) {
+			logger.error("", e);
+		}
+	}
+
 	private static class MockModuleRepository implements IModuleRepository{
 		
 		static UnsupportedOperationException uoe() { return new UnsupportedOperationException(); }
 		
-		private final IModuleRepository mdRepoReal;
-		
-		public MockModuleRepository(IModuleRepository mdRepoReal) {
-			this.mdRepoReal = mdRepoReal;
-		}
-
 		@Override
 		public void saveSettings(ModuleDescription moduleSettingsDescription) { throw uoe();}
 
@@ -237,17 +143,5 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		@Override
 		public void deleteRuntimeByName(String moduleName) { throw uoe();}
 
-		@Override
-		public void saveDealRecord(ModuleDealRecord dealRecord) { 
-			mdRepoReal.saveDealRecord(dealRecord);
-		}
-
-		@Override
-		public List<ModuleDealRecord> findAllDealRecords(String moduleName) {
-			return mdRepoReal.findAllDealRecords(moduleName);
-		}
-
-		@Override
-		public void removeAllDealRecords(String moduleName) { throw uoe();}
 	}
 }

@@ -15,11 +15,13 @@ import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Position;
 import org.dromara.northstar.common.utils.ModuleLoggingFactory;
 import org.dromara.northstar.event.IllegalOrderHandler;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
+import org.dromara.northstar.module.ModuleAccount;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IMessageSender;
@@ -112,16 +114,18 @@ public class ModuleCheckingTask implements InitializingBean {
 	public void checkHoldingLogicalAndPhysical() {
 		log.debug("核对模组的逻辑持仓与物理持仓是否一致");
 		moduleMgr.findAll().forEach(m -> {
+			ModuleAccount ma = (ModuleAccount) m.getModuleAccount();
+			Map<Contract, IAccount> contractAccountMap = ma.getContractAccountMap();
 			for(ContractSimpleInfo csi : m.getModuleContext().getModuleDescription().getBindedContracts()) {
 				IContract contract = contractMgr.getContract(Identifier.of(csi.getId()));
-				IAccount account = m.getAccount(contract.contract());
+				IAccount account = contractAccountMap.get(contract.contract());
 				Position longPosPlaceholder = Position.builder()
-						.gatewayId(account.accountId())
+						.gatewayId(account.getId())
 						.contract(contract.contract())
 						.positionDirection(PositionDirectionEnum.PD_Long)
 						.build();
 				Position shortPosPlaceholder = Position.builder()
-						.gatewayId(account.accountId())
+						.gatewayId(account.getId())
 						.contract(contract.contract())
 						.positionDirection(PositionDirectionEnum.PD_Short)
 						.build();
@@ -173,9 +177,9 @@ public class ModuleCheckingTask implements InitializingBean {
 	public void checkDegreeOfRisk() {
 		log.debug("检查风险度");
 		accountMgr.findAll().stream()
-			.filter(account -> account.degreeOfRisk() > 0.95)
+			.filter(account -> account.availableBalance() / account.accountBalance() > 0.95)
 			.forEach(account -> 
-				doSmartSend("[账户风险度警报]：" + account.accountId(), String.format("当前账户风险率为：%d%%", (int)(account.degreeOfRisk() * 100)))
+				doSmartSend("[账户风险度警报]：" + account.getId(), String.format("当前账户风险率为：%d%%", (int)(account.availableBalance() / account.accountBalance() * 100)))
 			);
 	}
 	/**

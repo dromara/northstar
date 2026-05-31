@@ -22,18 +22,17 @@ import org.dromara.northstar.common.model.BacktestModuleTradeDetailsVO;
 import org.dromara.northstar.common.model.BacktestModuleVO;
 import org.dromara.northstar.common.model.ContractChartDescription;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
+import org.dromara.northstar.common.model.DealRecord;
 import org.dromara.northstar.common.model.ExplorerTaskDescription;
 import org.dromara.northstar.common.model.ExplorerTaskVO;
-import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
 import org.dromara.northstar.common.model.ModuleChartDescription;
-import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.ModuleDealRecordVO;
 import org.dromara.northstar.common.model.TimeValues;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Position;
 import org.dromara.northstar.common.model.core.Tick;
-import org.dromara.northstar.data.jdbc.ModuleDealRecordRepository;
-import org.dromara.northstar.data.jdbc.entity.ModuleDealRecordDO;
+import org.dromara.northstar.data.IAccountRepository;
 import org.dromara.northstar.gateway.mktdata.NorthstarDataSource;
 import org.dromara.northstar.gateway.playback.ticker.SimplePriceSimulation;
 import org.dromara.northstar.gateway.playback.ticker.TickEntry;
@@ -65,7 +64,7 @@ public class BacktestRunner {
 	
 	private List<IModule> moduleList;
 	
-	private ModuleDealRecordRepository dealRecordRepo;
+	private IAccountRepository accountRepo;
 	
 	private LocalDate cursorDate;
 	
@@ -81,7 +80,7 @@ public class BacktestRunner {
 		
 		for(IModule m : moduleList) {
 			m.setEnabled(false);
-			dealRecordRepo.deleteByModuleName(m.getModuleContext().getModuleDescription().getName());
+			accountRepo.removeDealRecords(m.getModuleContext().getModuleDescription().getName());
 		}
 		
 		CompletableFuture.runAsync(() -> {
@@ -185,18 +184,44 @@ public class BacktestRunner {
 				.map(m -> {
 					IModuleContext ctx = m.getModuleContext();
 					String moduleName = ctx.getModuleDescription().getName();
-					List<ModuleDealRecord> dealRecords = dealRecordRepo.findByModuleName(moduleName)
-							.stream().map(ModuleDealRecordDO::convertTo).toList();
-					double profitAvg = dealRecords.stream().mapToDouble(ModuleDealRecord::getDealProfit).filter(x -> x > 0).average().orElse(0);
-					double lossAvg = dealRecords.stream().mapToDouble(ModuleDealRecord::getDealProfit).filter(x -> x <= 0).average().orElse(0);
-					double winning = dealRecords.stream().mapToDouble(ModuleDealRecord::getDealProfit).filter(x -> x > 0).count();
-					double totalProfit = dealRecords.stream().mapToDouble(ModuleDealRecord::getDealProfit).sum();
-					double totalFees = dealRecords.stream().mapToDouble(ModuleDealRecord::getTransactionFee).sum();
-					ModuleAccountRuntimeDescription mard = ctx.getRuntimeDescription().getModuleAccountRuntime();
-					double unrealizedProfit = mard.unrealizedProfit();
-					double balance = mard.getInitBalance() + totalProfit + unrealizedProfit - totalFees;
+					List<DealRecord> dealRecords = accountRepo.findDealRecords(moduleName);
+					double profitAvg = dealRecords.stream().mapToDouble(DealRecord::getDealProfit).filter(x -> x > 0).average().orElse(0);
+					double lossAvg = dealRecords.stream().mapToDouble(DealRecord::getDealProfit).filter(x -> x <= 0).average().orElse(0);
+					double winning = dealRecords.stream().mapToDouble(DealRecord::getDealProfit).filter(x -> x > 0).count();
+					double totalProfit = dealRecords.stream().mapToDouble(DealRecord::getDealProfit).sum();
+					double totalFees = dealRecords.stream().mapToDouble(DealRecord::getTransactionFee).sum();
+					double initBalance = ctx.getModuleDescription().getInitBalance();
+					double unrealizedProfit = ((ModuleAccount) ctx.getModuleAccount()).getPositions().stream()
+							.mapToDouble(Position::positionProfit).sum();
+					double balance = initBalance + totalProfit + unrealizedProfit - totalFees;
 					
-					double earningRate = (balance / ctx.getModuleDescription().getInitBalance()) - 1;
+					double maxDrawdown = 0;
+					double peak = initBalance;
+					if(!dealRecords.isEmpty()) {
+						double cumulative = 0;
+						for(DealRecord rec : dealRecords) {
+							cumulative += rec.getDealProfit() - rec.getTransactionFee();
+							double equity = initBalance + cumulative;
+							if(equity > peak) {
+								peak = equity;
+							}
+							double dd = peak - equity;
+							if(dd > maxDrawdown) {
+								maxDrawdown = dd;
+							}
+						}
+					}
+					double currentEquity = initBalance + totalProfit + unrealizedProfit - totalFees;
+					if(currentEquity > peak) {
+						peak = currentEquity;
+					}
+					double currentDD = peak - currentEquity;
+					if(currentDD > maxDrawdown) {
+						maxDrawdown = currentDD;
+					}
+					double maxDrawdownPercentage = peak > 0 ? (maxDrawdown / peak) * 100 : 0;
+					
+					double earningRate = (balance / initBalance) - 1;
 					double annualizedReturn = earningRate / ChronoUnit.DAYS.between(fromDate, toDate) * 365;
 					return BacktestModuleVO.builder()
 							.moduleName(moduleName)
@@ -206,9 +231,9 @@ public class BacktestRunner {
 							.balance(balance)
 							.transactionFees((int)totalFees)
 							.realizedProfit(totalProfit)
-							.unrealizedProfit(mard.unrealizedProfit())
-							.maxDrawdown(mard.getMaxDrawdown())
-							.maxDrawdownPercentage(mard.getMaxDrawdownPercentage())
+							.unrealizedProfit(unrealizedProfit)
+							.maxDrawdown(maxDrawdown)
+							.maxDrawdownPercentage(maxDrawdownPercentage)
 							.annualizedReturn(annualizedReturn)
 							.winRate(dealRecords.isEmpty() ? 0 : winning / dealRecords.size())
 							.profitLossRatio(lossAvg == 0 ? 0 : profitAvg / Math.abs(lossAvg))
@@ -219,9 +244,8 @@ public class BacktestRunner {
 	}
 	
 	public BacktestModuleTradeDetailsVO getBacktestModuleTradeDetails(String moduleName) {
-		List<ModuleDealRecordVO> dealRecords = dealRecordRepo.findByModuleName(moduleName)
+		List<ModuleDealRecordVO> dealRecords = accountRepo.findDealRecords(moduleName)
 				.stream()
-				.map(ModuleDealRecordDO::convertTo)
 				.map(rec -> {
 					TradeField openTrade = rec.convertOpenTrade();
 					TradeField closeTrade = rec.convertCloseTrade();

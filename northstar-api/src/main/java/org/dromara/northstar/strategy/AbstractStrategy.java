@@ -2,6 +2,7 @@ package org.dromara.northstar.strategy;
 
 import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Order;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
@@ -12,6 +13,7 @@ import com.alibaba.fastjson2.JSONObject;
 
 import lombok.Getter;
 import lombok.Setter;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 public abstract class AbstractStrategy implements TradeStrategy{
 	
@@ -35,10 +37,12 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	public void onTrade(Trade trade) {
 		// 如果策略不关心成交反馈，可以不重写
 		if(logger.isInfoEnabled()) {
-			logger.info("模组成交 [{} {} {} 操作：{}{} {}手 {}]", trade.contract().unifiedSymbol(),
+			IAccount moduleAcc = ctx.getModuleAccount();
+			Contract c = trade.contract();
+			logger.info("模组成交 [{} {} {} 操作：{}{} 数量：{} 价格：{}]", trade.contract().unifiedSymbol(),
 					trade.tradeDate(), trade.tradeTime(), FieldUtils.chn(trade.direction()), FieldUtils.chn(trade.offsetFlag()), 
 					trade.volume(), trade.price());
-			logger.info("当前模组净持仓：[{}]", ctx.getModuleAccount().getNonclosedNetPosition(trade.contract()));
+			logger.info("当前模组持仓：多头[{}] 空头[{}]", moduleAcc.getPosition(PositionDirectionEnum.PD_Long, c), moduleAcc.getPosition(PositionDirectionEnum.PD_Short, c));
 			logger.info("当前模组状态：{}", ctx.getState());
 		}
 	}
