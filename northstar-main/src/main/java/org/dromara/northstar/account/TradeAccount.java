@@ -85,7 +85,8 @@ public class TradeAccount implements IAccount {
 
 	@Override
 	public synchronized void onTrade(Trade trade) {
-		log.info("[{}] 收到网关成交反馈：[{}/{}] 数量：{}", getId(), trade.originOrderId(), trade.orderId(), trade.volume());
+		log.info("[{}] 收到网关成交反馈：[{}/{}] {} {} 数量：{}", getId(), trade.originOrderId(), trade.orderId(), 
+				trade.direction(), trade.offsetFlag(), trade.volume());
 		tradeRecords.add(trade);
 	}
 
