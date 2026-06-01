@@ -237,7 +237,7 @@ public class GatewayService implements CommandLineRunner {
 			try {
 				doCreateGateway(gd);
 			} catch (Exception e) {
-				log.error("网关创建失败：{}", e);
+				log.error("网关创建失败：{}", e.getMessage());
 			}
 		});
 		log.info("初始化交易网关");
@@ -245,7 +245,7 @@ public class GatewayService implements CommandLineRunner {
 			try {
 				doCreateGateway(gd);
 			} catch (Exception e) {
-				log.error("网关创建失败：{}", e);
+				log.error("网关创建失败：{}", e.getMessage());
 			}
 		});
 	}
