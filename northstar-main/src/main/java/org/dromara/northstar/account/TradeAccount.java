@@ -67,7 +67,7 @@ public class TradeAccount implements IAccount {
 
 	@Override
 	public synchronized void onOrder(Order order) {
-		log.info("[{}] 收到网关订单反馈：[{}] {} {}", getId(), order.originOrderId(), order.orderStatus(), order.statusMsg());
+		log.info("[{}] 收到网关订单反馈：[{}/{}] {} {}", getId(), order.originOrderId(), order.orderId(), order.orderStatus(), order.statusMsg());
 		orderRecords.add(order);
 		if(OrderUtils.isDoneOrder(order)) {
 			pendingOrderMap.remove(order.originOrderId());
@@ -85,7 +85,7 @@ public class TradeAccount implements IAccount {
 
 	@Override
 	public synchronized void onTrade(Trade trade) {
-		log.info("[{}] 收到网关成交反馈：[{}] 数量：{}", getId(), trade.originOrderId(), trade.volume());
+		log.info("[{}] 收到网关成交反馈：[{}/{}] 数量：{}", getId(), trade.originOrderId(), trade.orderId(), trade.volume());
 		tradeRecords.add(trade);
 	}
 
@@ -125,9 +125,9 @@ public class TradeAccount implements IAccount {
 
 	@Override
 	public synchronized boolean cancelOrder(CancelOrderReq cancelReq) {
-		log.info("[{}] 收到撤单请求 [{}]", getId(), cancelReq.originOrderId());
+		log.info("[{}] 收到撤单请求 [{}/{}]", getId(), cancelReq.originOrderId(), cancelReq.orderId());
 		if(!pendingOrderMap.containsKey(cancelReq.originOrderId())) {
-			log.info("[{}] 订单[{}]已经不存在", getId(), cancelReq.originOrderId());
+			log.info("[{}] 订单[{}/{}]已经不存在", getId(), cancelReq.originOrderId(), cancelReq.orderId());
 			return false;
 		}
 		return getTradeGateway().cancelOrder(cancelReq);
