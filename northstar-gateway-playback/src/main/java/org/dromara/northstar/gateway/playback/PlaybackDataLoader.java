@@ -23,10 +23,9 @@ import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.PlaybackPrecision;
 import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.model.core.Bar;
-import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.utils.CommonUtils;
-import org.dromara.northstar.gateway.mktdata.NorthstarDataSource;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.playback.model.DataFrame;
 import org.dromara.northstar.gateway.playback.model.DataFrame.TimeEntry;
 import org.dromara.northstar.gateway.playback.ticker.RandomWalkTickSimulation;
@@ -46,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PlaybackDataLoader {
 	
-	private final Collection<Contract> contracts;
+	private final Collection<IContract> contracts;
 	
 	private final TickSimulationAlgorithm tickGenAlgo;
 	
@@ -56,11 +55,8 @@ public class PlaybackDataLoader {
 	
 	private final DataLoadUtil util = new DataLoadUtil();
 	
-	private final NorthstarDataSource ds;
-	
-	public PlaybackDataLoader(String gatewayId, Collection<Contract> contracts, PlaybackPrecision precision, NorthstarDataSource ds) {
+	public PlaybackDataLoader(String gatewayId, Collection<IContract> contracts, PlaybackPrecision precision) {
 		this.gatewayId = gatewayId;
-		this.ds = ds;
 		this.contracts = contracts;
 		this.numOfTickPerBar = switch(precision) {
 			case LITE -> 1;
@@ -100,8 +96,8 @@ public class PlaybackDataLoader {
 		}
 		Map<TimeEntry, DataFrame<Bar>> timeDataMap = dataFrameList.stream().collect(Collectors.toMap(DataFrame::getTime, df -> df));
 		
-		for(Contract c : contracts) {
-			ds.getData(c, Interval.M1, realStartDate, realEndDate)
+		for(IContract ic : contracts) {
+			ic.dataSource().getData(ic.contract(), Interval.M1, realStartDate, realEndDate)
 			.stream()
 			.map(bar -> bar.toBuilder()
 					.gatewayId(gatewayId)

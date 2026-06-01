@@ -4,7 +4,6 @@ import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
-import org.dromara.northstar.gateway.mktdata.QuantitDataServiceManager;
 
 import lombok.Getter;
 
@@ -14,9 +13,9 @@ public class PlaybackGatewayAdapter extends MarketGateway {
 	private PlaybackContext context;
 	
 	public PlaybackGatewayAdapter(GatewayDescription gatewayDescription, FastEventEngine feEngine, MarketCenter mktCenter, 
-			QuantitDataServiceManager dsMgr, GlobalPlaybackDataDetector dataDetector) {
+			 GlobalPlaybackDataDetector dataDetector) {
 		super(gatewayDescription);
-		this.context = new PlaybackContext(this, feEngine, mktCenter, dsMgr, dataDetector);
+		this.context = new PlaybackContext(this, feEngine, mktCenter, dataDetector);
 	}
 
 	@Override

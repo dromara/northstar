@@ -32,8 +32,6 @@ import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
-import org.dromara.northstar.gateway.mktdata.NorthstarDataSource;
-import org.dromara.northstar.gateway.mktdata.QuantitDataServiceManager;
 import org.dromara.northstar.gateway.playback.PlaybackStatus.State;
 import org.dromara.northstar.gateway.playback.model.DataFrame;
 import org.dromara.northstar.gateway.playback.model.DataFrame.TimeEntry;
@@ -72,13 +70,9 @@ public class PlaybackContext {
 	
 	private GlobalPlaybackDataDetector dataDetector;	// 用来检测数据回放情况
 	
-	private NorthstarDataSource ds;
-	
 	private Map<Contract, KlineGenerator> klineGeneratorMap;
 	
-	public PlaybackContext(PlaybackGatewayAdapter gateway, FastEventEngine feEngine, MarketCenter mktCenter, QuantitDataServiceManager dsMgr,
-			GlobalPlaybackDataDetector dataDetector) {
-		this.ds = new NorthstarDataSource(dsMgr);
+	public PlaybackContext(PlaybackGatewayAdapter gateway, FastEventEngine feEngine, MarketCenter mktCenter, GlobalPlaybackDataDetector dataDetector) {
 		this.feEngine = feEngine;
 		this.gateway = gateway;
 		this.mktCenter = mktCenter;
@@ -88,15 +82,16 @@ public class PlaybackContext {
 	
 	public void init() {
 		playbackStatus = null;
-		Set<Contract> contracts = this.gateway.getDescription().getSubscribedContracts()
+		Set<IContract> contracts = this.gateway.getDescription().getSubscribedContracts()
 				.stream()
 				.map(csi -> mktCenter.getContract(Identifier.of(csi.getId())))
-				.map(IContract::contract)
 				.collect(Collectors.toSet());
 		Assert.isTrue(!startDate().isBefore(preloadDate()), "预热开始日不能迟于回放开始日");
-		this.dataLoader = new PlaybackDataLoader(gateway.getDescription().getGatewayId(), contracts, settings().getPrecision(), ds);
+		this.dataLoader = new PlaybackDataLoader(gateway.getDescription().getGatewayId(), contracts, settings().getPrecision());
 		
-		klineGeneratorMap = contracts.stream().collect(Collectors.toMap(c -> c, c -> new KlineGenerator(c, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar))));
+		klineGeneratorMap = contracts.stream()
+				.map(IContract::contract)
+				.collect(Collectors.toMap(c -> c, c -> new KlineGenerator(c, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar))));
 		// 初始化回放状态
 		reset();
 	}
@@ -242,7 +237,7 @@ public class PlaybackContext {
 		LocalDate startDate = LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
 		for(ContractSimpleInfo csi : gateway.getDescription().getSubscribedContracts()) {
 			Contract c = mktCenter.getContract(Identifier.of(csi.getId())).contract();
-			if(c.lastTradeDate().isBefore(startDate)) {
+			if(c.lastTradeDate() != null && c.lastTradeDate().isBefore(startDate)) {
 				String msg = String.format("合约【%s】在回放时间段内已经过期，将没有数据可以回放，请调整合约或回放时间段", c.name());
 				feEngine.emitEvent(NorthstarEventType.NOTICE, Notice.builder()
 						.status(CommonStatusEnum.COMS_WARN)

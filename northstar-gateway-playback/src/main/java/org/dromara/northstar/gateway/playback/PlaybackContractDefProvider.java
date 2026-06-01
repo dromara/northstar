@@ -10,7 +10,6 @@ import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.dromara.northstar.common.utils.DateTimeUtils;
 import org.dromara.northstar.gateway.IContractDefinitionProvider;
 import org.dromara.northstar.gateway.mktdata.NorthstarDataSource;
-import org.dromara.northstar.gateway.mktdata.QuantitDataServiceManager;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +22,8 @@ public class PlaybackContractDefProvider implements IContractDefinitionProvider{
 	
 	private NorthstarDataSource dataSource;
 	
-	public PlaybackContractDefProvider(QuantitDataServiceManager dsMgr) {
-		this.dataSource = new NorthstarDataSource(dsMgr);
+	public PlaybackContractDefProvider(NorthstarDataSource dataSource) {
+		this.dataSource = dataSource;
 	}
 	
 	private static final ExchangeEnum SSE = ExchangeEnum.SSE;

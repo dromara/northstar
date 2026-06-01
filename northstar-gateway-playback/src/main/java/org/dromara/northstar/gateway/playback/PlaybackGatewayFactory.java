@@ -11,7 +11,6 @@ import org.dromara.northstar.gateway.Gateway;
 import org.dromara.northstar.gateway.GatewayFactory;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.gateway.mktdata.NorthstarDataSource;
-import org.dromara.northstar.gateway.mktdata.QuantitDataServiceManager;
 import org.springframework.util.Assert;
 
 import com.alibaba.fastjson2.JSON;
@@ -27,16 +26,11 @@ public class PlaybackGatewayFactory implements GatewayFactory{
 	
 	private GlobalPlaybackDataDetector dataDetector;
 	
-	private QuantitDataServiceManager dsMgr;
-	
-	public PlaybackGatewayFactory(FastEventEngine feEngine, MarketCenter mktCenter, QuantitDataServiceManager dsMgr,
-			GlobalPlaybackDataDetector dataDetector) {
-		this.dsMgr = dsMgr;
+	public PlaybackGatewayFactory(FastEventEngine feEngine, MarketCenter mktCenter, GlobalPlaybackDataDetector dataDetector, NorthstarDataSource ds) {
 		this.feEngine = feEngine;
 		this.mktCenter = mktCenter;
 		this.dataDetector = dataDetector;
 		final LocalDate startDate = LocalDate.of(2020, 5, 1);	// 2020年5月1日前的数据会缺少持仓数据，故不建议使用
-		NorthstarDataSource ds = new NorthstarDataSource(dsMgr);
 		try {
 			log.info("加载回测合约");
 			ds.getAllContracts().stream()
@@ -51,7 +45,7 @@ public class PlaybackGatewayFactory implements GatewayFactory{
 	@Override
 	public Gateway newInstance(GatewayDescription gatewayDescription) {
 		GatewayDescription gd = enhance(gatewayDescription);
-		return new PlaybackGatewayAdapter(gd, feEngine, mktCenter, dsMgr, dataDetector);
+		return new PlaybackGatewayAdapter(gd, feEngine, mktCenter, dataDetector);
 	}
 
 	@Override
