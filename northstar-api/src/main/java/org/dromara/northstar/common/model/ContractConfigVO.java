@@ -40,6 +40,11 @@ public class ContractConfigVO {
 	private String gatewayId;
 	
 	/**
+	 * 渠道类型
+	 */
+	private String channelType;
+	
+	/**
 	 * 合约代码
 	 */
 	private String symbol;

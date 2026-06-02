@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.BatchResult;
 import org.dromara.northstar.common.model.ContractConfigDTO;
 import org.dromara.northstar.common.model.ContractConfigVO;
@@ -85,6 +86,11 @@ public class ContractConfigService {
 
         // 查找合约信息
         Contract contract = mktCenter.getContract(Identifier.of(contractId)).contract();
+        
+        // 只有 PLAYBACK 网关的合约支持自定义配置
+        if (contract.channelType() != ChannelType.PLAYBACK) {
+            throw new IllegalStateException("只有PLAYBACK网关的合约支持自定义配置");
+        }
 
         // 构建 DO
         ContractConfigDO entity = new ContractConfigDO();
@@ -145,6 +151,7 @@ public class ContractConfigService {
                 .contractId(c.contractId())
                 .unifiedSymbol(c.unifiedSymbol())
                 .gatewayId(c.gatewayId())
+                .channelType(c.channelType() != null ? c.channelType().toString() : null)
                 .symbol(c.symbol())
                 .exchange(c.exchange().toString())
                 .productClass(c.productClass().toString())
