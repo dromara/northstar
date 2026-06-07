@@ -86,10 +86,10 @@ class BarMergerCnFuture4HrTest {
 		LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2024, 12, 10), LocalTime.of(21, 0));
 		List<Bar> results = new LinkedList<>();
     	merger.addListener(bar -> results.add(bar));
-		for(int i=0; i<24; i++) {
+		for(int i=0; i<24*4; i++) {
     		Bar bar = utils.genBar(ldt.toLocalDate(), ldt.toLocalTime());
     		merger.onBar(bar);
-    		ldt = ldt.plusHours(1);
+    		ldt = ldt.plusMinutes(15);
     	}
 		
 		assertThat(results).hasSize(3);
@@ -108,10 +108,10 @@ class BarMergerCnFuture4HrTest {
 		LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2024, 12, 10), LocalTime.of(21, 0));
 		List<Bar> results = new LinkedList<>();
     	merger.addListener(bar -> results.add(bar));
-		for(int i=0; i<24; i++) {
+		for(int i=0; i<24*4; i++) {
     		Bar bar = utils.genBar(ldt.toLocalDate(), ldt.toLocalTime());
     		merger.onBar(bar);
-    		ldt = ldt.plusHours(1);
+    		ldt = ldt.plusMinutes(15);
     	}
 		
 		assertThat(results).hasSize(2);
@@ -151,14 +151,14 @@ class BarMergerCnFuture4HrTest {
     	while(!ldt.isAfter(LocalDateTime.of(LocalDate.of(2024, 12, 7), LocalTime.of(2, 30)))) {
     		Bar bar = utils.genBar(ldt.toLocalDate(), ldt.toLocalTime());
     		merger.onBar(bar);
-    		ldt = ldt.plusMinutes(60);
+    		ldt = ldt.plusMinutes(15);
     	}
 		
 		ldt = LocalDateTime.of(LocalDate.of(2024, 12, 9), LocalTime.of(9, 0));
 		while(!ldt.toLocalTime().isAfter(LocalTime.of(15, 0))) {
     		Bar bar = utils.genBar(ldt.toLocalDate(), ldt.toLocalTime());
     		merger.onBar(bar);
-    		ldt = ldt.plusMinutes(60);
+    		ldt = ldt.plusMinutes(15);
     	}
 		
 		assertThat(results).hasSize(3);
@@ -180,14 +180,14 @@ class BarMergerCnFuture4HrTest {
     	while(!ldt.isAfter(LocalDateTime.of(LocalDate.of(2024, 12, 7), LocalTime.of(2, 30)))) {
     		Bar bar = utils.genBar(ldt.toLocalDate(), ldt.toLocalTime());
     		merger.onBar(bar);
-    		ldt = ldt.plusMinutes(60);
+    		ldt = ldt.plusMinutes(15);
     	}
 		
 		ldt = LocalDateTime.of(LocalDate.of(2024, 12, 9), LocalTime.of(9, 0));
 		while(!ldt.toLocalTime().isAfter(LocalTime.of(15, 0))) {
     		Bar bar = utils.genBar(ldt.toLocalDate(), ldt.toLocalTime());
     		merger.onBar(bar);
-    		ldt = ldt.plusMinutes(60);
+    		ldt = ldt.plusMinutes(15);
     	}
 		
 		assertThat(results).hasSize(6);
@@ -215,14 +215,14 @@ class BarMergerCnFuture4HrTest {
     	while(!ldt.isAfter(LocalDateTime.of(LocalDate.of(2024, 12, 7), LocalTime.of(2, 30)))) {
     		Bar bar = utils.genBar(ldt.toLocalDate(), ldt.toLocalTime());
     		merger.onBar(bar);
-    		ldt = ldt.plusMinutes(60);
+    		ldt = ldt.plusMinutes(15);
     	}
 		
 		ldt = LocalDateTime.of(LocalDate.of(2024, 12, 9), LocalTime.of(9, 0));
 		while(!ldt.toLocalTime().isAfter(LocalTime.of(15, 0))) {
     		Bar bar = utils.genBar(ldt.toLocalDate(), ldt.toLocalTime());
     		merger.onBar(bar);
-    		ldt = ldt.plusMinutes(60);
+    		ldt = ldt.plusMinutes(15);
     	}
 		
 		assertThat(results).hasSize(2);
@@ -242,14 +242,14 @@ class BarMergerCnFuture4HrTest {
     	while(!ldt.isAfter(LocalDateTime.of(LocalDate.of(2024, 12, 7), LocalTime.of(2, 30)))) {
     		Bar bar = utils.genBar(ldt.toLocalDate(), ldt.toLocalTime());
     		merger.onBar(bar);
-    		ldt = ldt.plusMinutes(60);
+    		ldt = ldt.plusMinutes(15);
     	}
 		
 		ldt = LocalDateTime.of(LocalDate.of(2024, 12, 9), LocalTime.of(9, 0));
 		while(!ldt.toLocalTime().isAfter(LocalTime.of(15, 0))) {
     		Bar bar = utils.genBar(ldt.toLocalDate(), ldt.toLocalTime());
     		merger.onBar(bar);
-    		ldt = ldt.plusMinutes(60);
+    		ldt = ldt.plusMinutes(15);
     	}
 		
 		assertThat(results).hasSize(4);
@@ -332,7 +332,7 @@ class BarMergerCnFuture4HrTest {
 		while(!ldt.toLocalTime().isAfter(LocalTime.of(15, 0))) {
     		Bar bar = utils.genBar(ldt.toLocalDate(), ldt.toLocalTime());
     		merger.onBar(bar);
-    		ldt = ldt.plusMinutes(60);
+    		ldt = ldt.plusMinutes(15);
     	}
 		
 		assertThat(results).hasSize(2);

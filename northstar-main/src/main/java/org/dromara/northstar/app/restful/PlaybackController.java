@@ -1,11 +1,14 @@
 package org.dromara.northstar.app.restful;
 
 import java.util.List;
+import java.util.function.Function;
 
 import org.dromara.northstar.app.service.PlaybackService;
+import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.BarVO;
 import org.dromara.northstar.common.model.PlaybackStatusVO;
+import org.dromara.northstar.common.model.core.Bar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -63,9 +66,26 @@ public class PlaybackController {
 	@GetMapping("history/{contractId}/{interval}")
 	public List<BarVO> history(@PathVariable String contractId, @PathVariable String interval, Long from, Long to){
 		if(to == null || from == null) {
-			return service.getPreloadBars(contractId, Interval.fromAlias(interval));
+			return service.getPreloadBars(contractId, Interval.fromAlias(interval))
+					.stream()
+					.map(bar -> mapToBar.apply(interval).apply(bar))
+					.toList();
 		}
-		return service.getRangeBars(contractId, Interval.fromAlias(interval), from, to);
+		return service.getRangeBars(contractId, Interval.fromAlias(interval), from, to)
+				.stream()
+				.map(bar -> mapToBar.apply(interval).apply(bar))
+				.toList();
 	}
 
+	private Function<String, Function<Bar, BarVO>> mapToBar = interval -> bar -> BarVO.builder()
+			.timestamp(bar.actionTimestamp())
+			.open(bar.openPrice())
+			.close(bar.closePrice())
+			.high(bar.highPrice())
+			.low(bar.lowPrice())
+			.volume(bar.volumeDelta())
+			.oi(bar.openInterest())
+			.tradingDay(bar.tradingDay().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+			.interval(interval)
+			.build();
 }

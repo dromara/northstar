@@ -1,7 +1,6 @@
 package org.dromara.northstar.app.service;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
@@ -12,10 +11,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 import org.dromara.northstar.account.GatewayManager;
-import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.ModuleUsage;
-import org.dromara.northstar.common.model.BarVO;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.PlaybackStatusVO;
@@ -28,7 +25,6 @@ import org.dromara.northstar.gateway.playback.PlaybackGatewayAdapter;
 import org.dromara.northstar.gateway.playback.PlaybackStatus;
 import org.dromara.northstar.gateway.playback.PlaybackStatus.State;
 import org.dromara.northstar.kline.BarMerger;
-import org.dromara.northstar.kline.BarMergerFactory;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.strategy.MergedBarListener;
 import org.dromara.northstar.support.utils.EventEmitterHolder;
@@ -130,7 +126,7 @@ public class PlaybackService {
 		getPlaybackContext().playNext(interval);
 	}
 	
-	public List<BarVO> getRangeBars(String contractId, Interval interval, long from, long to){
+	public List<Bar> getRangeBars(String contractId, Interval interval, long from, long to){
 		long playbackTime = CommonUtils.localDateTimeToMills(getPlaybackContext().getPlaybackStatus().getRunningDateTime());
 		if(from >= playbackTime) {
 			return Collections.emptyList();
@@ -138,12 +134,13 @@ public class PlaybackService {
 		return dataService.getRangeBars(contractId, interval, from, Math.min(playbackTime, to));
 	}
 	
-	public List<BarVO> getPreloadBars(String contractId, Interval interval){
+	public List<Bar> getPreloadBars(String contractId, Interval interval){
 		log.info("预加载数据，合约{}，周期{} ", contractId, interval.getAlias());
 		
 		// 预加载数据时，需要先暂停回放进度
 		Contract contract = mktCenter.getContract(Identifier.of(contractId)).contract();
-		BarMerger merger = BarMergerFactory.newInstance(interval, contract);
+		getPlaybackContext().resetBarMerger(contract, interval);
+		BarMerger merger = getPlaybackContext().getBarMerger(contract, interval);
 		getPlaybackContext().suspend();
 		if(getPlaybackContext().getPlaybackStatus().getState() == PlaybackStatus.State.INITIAL) {
 			getPlaybackContext().getPlaybackStatus().setState(PlaybackStatus.State.PRELOADED);
@@ -167,41 +164,18 @@ public class PlaybackService {
 		List<Bar> mergedBars = new LinkedList<>();
 		MergedBarListener tempListener = mergedBars::add;
 		merger.addListener(tempListener);
-		dataService.getRangeBars(contractId, interval, CommonUtils.localDateTimeToMills(fromDateTime), CommonUtils.localDateTimeToMills(toDateTime))
+		List<Bar> preloadRaw = dataService.getRangeBars(contractId, interval, CommonUtils.localDateTimeToMills(fromDateTime), CommonUtils.localDateTimeToMills(toDateTime))
 			.stream()
-			.filter(bar -> bar.getTimestamp() <= endTime)
-			.map(vo -> Bar.builder()
-					.actionDay(LocalDateTime.ofInstant(Instant.ofEpochMilli(vo.getTimestamp()), ZoneId.systemDefault()).toLocalDate())
-					.actionTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(vo.getTimestamp()), ZoneId.systemDefault()).toLocalTime())
-					.actionTimestamp(vo.getTimestamp())
-					.tradingDay(LocalDate.parse(vo.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER))
-					.contract(contract)
-					.highPrice(vo.getHigh())
-					.lowPrice(vo.getLow())
-					.openPrice(vo.getOpen())
-					.closePrice(vo.getClose())
-					.volumeDelta(vo.getVolume())
-					.openInterest(vo.getOi())
-					.interval(interval)
-					.build())
-			.forEach(merger::onBar);
-		List<BarVO> resultList = mergedBars.stream().map(bar -> toVO(bar, interval)).toList();
+			.filter(bar -> bar.actionTimestamp() <= endTime)
+			.toList();
+		List<Bar> preloadRefine = dataService.getRangeBars(contractId, Interval.M1, preloadRaw.getLast().actionTimestamp()+1, CommonUtils.localDateTimeToMills(toDateTime))
+				.stream()
+				.filter(bar -> bar.actionTimestamp() <= endTime)
+				.toList();
+		preloadRaw.forEach(merger::onBar);
+		preloadRefine.forEach(merger::onBar);
 		getPlaybackContext().resume();
-		return resultList;
-	}
-	
-	private BarVO toVO(Bar bar, Interval interval) {
-		return BarVO.builder()
-				.timestamp(bar.actionTimestamp())
-				.open(bar.openPrice())
-				.close(bar.closePrice())
-				.high(bar.highPrice())
-				.low(bar.lowPrice())
-				.volume(bar.volumeDelta())
-				.oi(bar.openInterest())
-				.tradingDay(bar.tradingDay().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-				.interval(interval.getAlias())				
-				.build();
+		return mergedBars;
 	}
 	
 	private PlaybackContext getPlaybackContext() {

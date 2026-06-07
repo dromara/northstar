@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.dromara.northstar.app.service.MarketDataService;
+import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.BarVO;
 import org.dromara.northstar.common.model.TickVO;
@@ -30,7 +31,20 @@ public class MarketDataController {
 	 */
 	@GetMapping("range/{contractId}/{interval}")
 	public List<BarVO> getHistoricalBar(@PathVariable String contractId, @PathVariable String interval,  Long fromTime, Long toTime){
-		return service.getRangeBars(contractId, Interval.fromAlias(interval), fromTime, toTime);
+		return service.getRangeBars(contractId, Interval.fromAlias(interval), fromTime, toTime)
+				.stream()
+				.map(bar -> BarVO.builder()
+						.timestamp(bar.actionTimestamp())
+						.open(bar.openPrice())
+						.close(bar.closePrice())
+						.high(bar.highPrice())
+						.low(bar.lowPrice())
+						.volume(bar.volumeDelta())
+						.oi(bar.openInterest())
+						.tradingDay(bar.tradingDay().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+						.interval(interval)
+						.build())
+				.toList();
 	}
 	
 	/**
@@ -49,6 +63,20 @@ public class MarketDataController {
 	 */
 	@GetMapping("active")
 	public List<TickVO> activeTicks(){
-		return service.getActiveTicks();
+		return service.getActiveTicks()
+				.stream()
+				.map(tick -> TickVO.builder()
+						.name(tick.contract().name())
+						.symbol(tick.contract().symbol())
+						.lastPrice(tick.lastPrice())
+						.priceChange(tick.lastPrice() - tick.preSettlePrice())
+						.openInterest(tick.openInterest())
+						.openInterestDelta(tick.openInterestDelta())
+						.volume(tick.volume())
+						.timestamp(tick.actionTimestamp())
+						.precision(tick.contract().pricePrecision())
+						.channel(tick.channelType())
+						.build())
+				.toList();
 	}
 }

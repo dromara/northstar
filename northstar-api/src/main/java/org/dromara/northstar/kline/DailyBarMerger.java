@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Objects;
 
 import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.TickType;
@@ -14,23 +13,33 @@ import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.utils.CommonUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * 日线合成器
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class DailyBarMerger extends BarMerger{
 
 	private LocalDate tradingDay;
 	
 	private LocalTime dayEndTime;
 	
+	private LocalTime dayStartTime;
+	
 	public DailyBarMerger(Contract contract) {
 		super(Interval.D1, contract);
 		List<TimeSlot> times = contract.contractDefinition().tradeTimeDef().timeSlots();
-		this.dayEndTime = times.get(times.size() - 1).end();
+		this.dayEndTime = times.getLast().end();
+		this.dayStartTime = times.getFirst().start();
 	}
-
+	
+	private LocalTime barTime() {
+		return contract.usingStartTimeInBarTime() ? dayStartTime : dayEndTime;
+	}
+	
 	@Override
 	public synchronized void onBar(Bar bar) {
 		if(!contract.equals(bar.contract()) || bar.interval() == Interval.WK1) {
@@ -38,51 +47,34 @@ public class DailyBarMerger extends BarMerger{
 		}
 		
 		if(bar.interval() == Interval.D1) {
-			Bar b = bar.toBuilder()
-					.actionTime(dayEndTime)
-					.actionTimestamp(CommonUtils.localDateTimeToMills(LocalDateTime.of(bar.tradingDay(), dayEndTime)))
-					.build();
-			listeners.forEach(listener -> listener.onMergedBar(b));
+			listeners.forEach(listener -> listener.onMergedBar(bar));
 			return;
 		}
 		
-		if(Objects.nonNull(protoBar) && !bar.tradingDay().isAfter(tradingDay)) {
+		if(cutoffDateTime == null) {
+			cutoffDateTime = LocalDateTime.of(bar.tradingDay(), dayEndTime);
+			log.info("barDate: {} barTime: {} barDateTime: {} tradingDay: {} cutoff: {}", bar.actionDay(), bar.actionTime(), 
+					CommonUtils.millsToLocalDateTime(bar.actionTimestamp()), bar.tradingDay(), cutoffDateTime);
+		}
+		
+		if(tradingDay == null) {
+			tradingDay = bar.tradingDay();
+		}
+		
+		if(bar.tradingDay().isEqual(tradingDay)) {
 			doMerge(bar);
 		}
 		
-		if(Objects.nonNull(protoBar) && (bar.tradingDay().equals(tradingDay) && bar.actionTime().equals(dayEndTime)
-				|| bar.tradingDay().isAfter(tradingDay))) {
+		if((bar.tradingDay().equals(tradingDay) && bar.actionTime().equals(dayEndTime)
+				|| !CommonUtils.millsToLocalDateTime(bar.actionTimestamp()).isBefore(cutoffDateTime))) {
 			doGenerate();
-			if(!bar.tradingDay().isAfter(tradingDay)) {
-				return;
-			}
-		}
-
-		if(Objects.isNull(protoBar)) {
-			tradingDay = bar.tradingDay();
-			protoBar = Bar.builder()
-					.gatewayId(bar.gatewayId())
-					.contract(contract)
-					.actionDay(bar.tradingDay())
-					.actionTime(dayEndTime)
-					.actionTimestamp(CommonUtils.localDateTimeToMills(LocalDateTime.of(tradingDay, dayEndTime)))
-					.tradingDay(bar.tradingDay())
-					.channelType(bar.channelType())
-					.openPrice(bar.openPrice())
-					.highPrice(bar.highPrice())
-					.lowPrice(bar.lowPrice())
-					.closePrice(bar.closePrice())
-					.volumeDelta(bar.volumeDelta())
-					.openInterestDelta(bar.openInterestDelta())
-					.turnoverDelta(bar.turnoverDelta())
-					.preClosePrice(bar.preClosePrice())
-					.preOpenInterest(bar.preOpenInterest())
-					.preSettlePrice(bar.preSettlePrice())
-					.interval(Interval.D1)
-					.build();
-			
-			if(bar.tradingDay().equals(tradingDay) && bar.actionTime().equals(dayEndTime)) {				
-				doGenerate();
+			if(bar.tradingDay().isAfter(tradingDay)) {
+				tradingDay = bar.tradingDay();
+				cutoffDateTime = LocalDateTime.of(tradingDay, dayEndTime);
+				doMerge(bar);
+			} else {
+				tradingDay = null;
+				cutoffDateTime = null;
 			}
 		}
 	
@@ -94,27 +86,38 @@ public class DailyBarMerger extends BarMerger{
 			return;
 		}
 		if(protoBar == null) {
+			resetVal();
 			tradingDay = tick.tradingDay();
-			protoBar = Bar.builder()
-					.gatewayId(tick.gatewayId())
-					.contract(contract)
-					.actionDay(tradingDay)
-					.actionTime(dayEndTime)
-					.actionTimestamp(CommonUtils.localDateTimeToMills(LocalDateTime.of(tradingDay, dayEndTime)))
-					.tradingDay(tick.tradingDay())
-					.channelType(tick.channelType())
-					.openPrice(tick.openPrice() == 0 ? tick.lastPrice() : tick.openPrice())
-					.highPrice(tick.highPrice())
-					.lowPrice(tick.lowPrice())
-					.closePrice(tick.lastPrice())
-					.volume(tick.volume())
-					.openInterest(tick.openInterest())
-					.turnover(tick.turnover())
-					.preClosePrice(tick.preClosePrice())
-					.preOpenInterest(tick.preOpenInterest())
-					.preSettlePrice(tick.preSettlePrice())
-					.interval(Interval.D1)
-					.build();
+			if(!mergingBuffer.isEmpty()) {
+				protoBar = aggregateBar();
+			} else {
+				protoBar = Bar.builder()
+						.gatewayId(tick.gatewayId())
+						.channelType(tick.channelType())
+						.contract(contract)
+						.tradingDay(tick.tradingDay())
+						.actionDay(tradingDay)
+						.actionTime(barTime())
+						.actionTimestamp(CommonUtils.localDateTimeToMills(LocalDateTime.of(tradingDay, barTime())))
+						.openPrice(tick.openPrice() == 0 ? tick.lastPrice() : tick.openPrice())
+						.highPrice(tick.highPrice())
+						.lowPrice(tick.lowPrice())
+						.closePrice(tick.lastPrice())
+						.volume(tick.volume())
+						.openInterest(tick.openInterest())
+						.turnover(tick.turnover())
+						.preClosePrice(tick.preClosePrice())
+						.preOpenInterest(tick.preOpenInterest())
+						.preSettlePrice(tick.preSettlePrice())
+						.build();
+			}
+			
+			oiDelta = protoBar.openInterestDelta();
+			turnoverDelta = protoBar.turnoverDelta();
+			volDelta = protoBar.volumeDelta();
+			
+			high = protoBar.highPrice();
+			low = protoBar.lowPrice();
 		}
 		
 		oiDelta += tick.openInterestDelta();
@@ -134,6 +137,7 @@ public class DailyBarMerger extends BarMerger{
 				.openInterestDelta(oiDelta)
 				.turnover(tick.turnover())
 				.turnoverDelta(turnoverDelta)
+				.interval(Interval.D1)
 				.unstable(true)
 				.build();	
         

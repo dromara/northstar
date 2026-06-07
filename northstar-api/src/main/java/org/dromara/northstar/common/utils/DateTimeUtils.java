@@ -1,7 +1,9 @@
 package org.dromara.northstar.common.utils;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.WeekFields;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +21,18 @@ public class DateTimeUtils {
 		if(actionTime.isAfter(DAILY_CUTOFF) && actionDay.getDayOfWeek().getValue() < 5) {
 			return actionDay.plusDays(1);
 		}
-		return actionDay.plusDays(8 - actionDay.getDayOfWeek().getValue());
+		return actionDay.plusDays(8L - actionDay.getDayOfWeek().getValue());
+	}
+	
+	public static int weekOfYear(LocalDate date) {
+		return date.get(WeekFields.ISO.weekBasedYear()) * 100 + date.get(WeekFields.ISO.weekOfWeekBasedYear());
+	}
+	
+	public static LocalDate fromWeekOfYear(int weekOfYear, DayOfWeek weekday) {
+		int year = weekOfYear / 100;
+		int week = weekOfYear % 100;
+		return LocalDate.of(year, 1, 1).plusWeeks(week - 1L)
+				.with(WeekFields.ISO.dayOfWeek(), weekday.getValue());
 	}
 	
 	public static synchronized LocalTime fromCacheTime(LocalTime time) {

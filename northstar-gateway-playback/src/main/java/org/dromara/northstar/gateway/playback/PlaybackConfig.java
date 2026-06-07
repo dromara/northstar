@@ -15,7 +15,7 @@ public class PlaybackConfig {
 	
 	@Bean
 	PlaybackGatewayFactory playbackGatewayFactory(FastEventEngine feEngine, MarketCenter mktCenter, PlaybackContractDefProvider contractDefPvd,
-			QuantitDataServiceManager dsMgr, GlobalPlaybackDataDetector dataDetector, NorthstarDataSource ds) {
-		return new PlaybackGatewayFactory(feEngine, mktCenter, dataDetector, ds);
+			QuantitDataServiceManager dsMgr, NorthstarDataSource ds) {
+		return new PlaybackGatewayFactory(feEngine, mktCenter, ds);
 	}
 }

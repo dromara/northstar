@@ -75,12 +75,13 @@ class DailyBarMergerTest {
 		assertThat(result.get(1).openPrice()).isCloseTo(95D, offset(1e-1));
 		assertThat(result.get(1).closePrice()).isCloseTo(99D, offset(1e-1));
 		assertThat(result.get(1).highPrice()).isCloseTo(105D, offset(1e-1));
-		assertThat(result.get(1).lowPrice()).isCloseTo(99D, offset(1e-1));
+		assertThat(result.get(1).lowPrice()).isCloseTo(90D, offset(1e-1));
 	}
 
 	Tick genTick(LocalDate date, LocalTime time, double h, double l, double o, double c, long op, int opDelta, long vol, int volDelta, double tr, double trDelta) {
     	return Tick.builder()
     			.contract(contract)
+    				.tradingDay(date)
 				.actionDay(date)
 				.actionTime(time)
 				.actionTimestamp(LocalDateTime.of(date, time).toInstant(ZoneOffset.ofHours(8)).toEpochMilli())

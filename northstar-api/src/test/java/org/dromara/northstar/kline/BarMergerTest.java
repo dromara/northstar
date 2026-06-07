@@ -260,7 +260,7 @@ class BarMergerTest {
     	Bar b3 = genBar(LocalDate.of(2024, 11, 22), LocalTime.of(23, 0), 5400, 4900, 5200, 5100, 10030, 10, 20600, 200, 30002, 0);
     	Bar b4 = genBar(LocalDate.of(2024, 11, 25), LocalTime.of(9, 0), 5300, 4600, 5300, 5150, 10040, 10, 20800, 200, 30003, 1);
     	Bar b5 = genBar(LocalDate.of(2024, 11, 25), LocalTime.of(10, 0), 5300, 4600, 5300, 5150, 10040, 10, 20800, 200, 30003, 1);
-    	Bar b6 = genBar(LocalDate.of(2024, 11, 25), LocalTime.of(11, 0), 5300, 4600, 5300, 5150, 10040, 10, 20800, 200, 30003, 1);
+    	Bar b6 = genBar(LocalDate.of(2024, 11, 25), LocalTime.of(11, 15), 5300, 4600, 5300, 5150, 10040, 10, 20800, 200, 30003, 1);
     	Bar b7 = genBar(LocalDate.of(2024, 11, 25), LocalTime.of(14, 0), 5300, 4600, 5300, 5150, 10040, 10, 20800, 200, 30003, 1);
     	Bar b8 = genBar(LocalDate.of(2024, 11, 25), LocalTime.of(15, 0), 5300, 4600, 5300, 5150, 10040, 10, 20800, 200, 30003, 1);
     	

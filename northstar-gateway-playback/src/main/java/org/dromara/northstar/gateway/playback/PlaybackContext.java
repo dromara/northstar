@@ -35,6 +35,7 @@ import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.gateway.playback.PlaybackStatus.State;
 import org.dromara.northstar.gateway.playback.model.DataFrame;
 import org.dromara.northstar.gateway.playback.model.DataFrame.TimeEntry;
+import org.dromara.northstar.kline.BarMerger;
 import org.dromara.northstar.kline.KlineGenerator;
 import org.springframework.util.Assert;
 
@@ -68,15 +69,12 @@ public class PlaybackContext {
 	private AtomicInteger numOfMinutesToPlay;
 	private int roundingInt;
 	
-	private GlobalPlaybackDataDetector dataDetector;	// 用来检测数据回放情况
-	
 	private Map<Contract, KlineGenerator> klineGeneratorMap;
 	
-	public PlaybackContext(PlaybackGatewayAdapter gateway, FastEventEngine feEngine, MarketCenter mktCenter, GlobalPlaybackDataDetector dataDetector) {
+	public PlaybackContext(PlaybackGatewayAdapter gateway, FastEventEngine feEngine, MarketCenter mktCenter) {
 		this.feEngine = feEngine;
 		this.gateway = gateway;
 		this.mktCenter = mktCenter;
-		this.dataDetector = dataDetector;
 		this.init();
 	}
 	
@@ -89,9 +87,6 @@ public class PlaybackContext {
 		Assert.isTrue(!startDate().isBefore(preloadDate()), "预热开始日不能迟于回放开始日");
 		this.dataLoader = new PlaybackDataLoader(gateway.getDescription().getGatewayId(), contracts, settings().getPrecision());
 		
-		klineGeneratorMap = contracts.stream()
-				.map(IContract::contract)
-				.collect(Collectors.toMap(c -> c, c -> new KlineGenerator(c, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar))));
 		// 初始化回放状态
 		reset();
 	}
@@ -149,10 +144,7 @@ public class PlaybackContext {
 		if(timeEntry.getStart().isBefore(playbackStatus.getRunningDateTime()) || !isRunning.get()) {
 			return;
 		}
-		df.items().forEach(bar -> {
-//			feEngine.emitEvent(NorthstarEventType.BAR, bar);
-			klineGeneratorMap.get(bar.contract()).updateBar(bar);
-		});
+		df.items().forEach(bar -> klineGeneratorMap.get(bar.contract()).updateBar(bar));
 		
 		playbackStatus.setRunningDateTime(timeEntry.getEnd());
 		if(onStatusChangeCallback != null) {
@@ -330,9 +322,6 @@ public class PlaybackContext {
 		exec.execute(() -> {
 			try {
 				runningJob.get();
-				while(System.currentTimeMillis() - dataDetector.getLastEventTime() < 500) {
-					Thread.sleep(1000);
-				}
 			} catch (InterruptedException | ExecutionException e) {
 				log.warn("预热加载等待被中断", e);
 				if(e instanceof ExecutionException) {
@@ -355,6 +344,14 @@ public class PlaybackContext {
 	
 	public synchronized void reset() {
 		numOfMinutesToPlay = null;
+		Set<IContract> contracts = this.gateway.getDescription().getSubscribedContracts()
+				.stream()
+				.map(csi -> mktCenter.getContract(Identifier.of(csi.getId())))
+				.collect(Collectors.toSet());
+		klineGeneratorMap = contracts.stream()
+				.map(IContract::contract)
+				.collect(Collectors.toMap(c -> c, c -> new KlineGenerator(c, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar))));
+		
 		LocalDateTime initialDateTime = LocalDateTime.of(preloadDate(), LocalTime.of(0, 0));
 		State state =  preloadDate() == startDate() ? State.PRELOADED : State.INITIAL;
 		int interval = switch (settings().getSpeed()) {
@@ -399,4 +396,17 @@ public class PlaybackContext {
 		log.info("回放网关 [{}] 断开。当前回放时间状态：{}", gateway.getDescription().getGatewayId(), playbackStatus);
 	}
 	
+	public BarMerger getBarMerger(Contract contract, Interval interval) {
+		if(!klineGeneratorMap.containsKey(contract)) {
+			throw new OperationException("error.loose_contract_subsription", contract.name());
+		}
+		return klineGeneratorMap.get(contract).getBarMerger(interval);
+	}
+	
+	public void resetBarMerger(Contract contract, Interval interval) {
+		if(!klineGeneratorMap.containsKey(contract)) {
+			throw new OperationException("error.loose_contract_subsription", contract.name());
+		}
+		klineGeneratorMap.get(contract).reset(interval);
+	}
 }

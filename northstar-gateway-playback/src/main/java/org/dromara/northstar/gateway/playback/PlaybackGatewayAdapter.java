@@ -12,10 +12,9 @@ public class PlaybackGatewayAdapter extends MarketGateway {
 	@Getter
 	private PlaybackContext context;
 	
-	public PlaybackGatewayAdapter(GatewayDescription gatewayDescription, FastEventEngine feEngine, MarketCenter mktCenter, 
-			 GlobalPlaybackDataDetector dataDetector) {
+	public PlaybackGatewayAdapter(GatewayDescription gatewayDescription, FastEventEngine feEngine, MarketCenter mktCenter) {
 		super(gatewayDescription);
-		this.context = new PlaybackContext(this, feEngine, mktCenter, dataDetector);
+		this.context = new PlaybackContext(this, feEngine, mktCenter);
 	}
 
 	@Override

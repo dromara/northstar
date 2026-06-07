@@ -24,12 +24,9 @@ public class PlaybackGatewayFactory implements GatewayFactory{
 	
 	private MarketCenter mktCenter;
 	
-	private GlobalPlaybackDataDetector dataDetector;
-	
-	public PlaybackGatewayFactory(FastEventEngine feEngine, MarketCenter mktCenter, GlobalPlaybackDataDetector dataDetector, NorthstarDataSource ds) {
+	public PlaybackGatewayFactory(FastEventEngine feEngine, MarketCenter mktCenter, NorthstarDataSource ds) {
 		this.feEngine = feEngine;
 		this.mktCenter = mktCenter;
-		this.dataDetector = dataDetector;
 		final LocalDate startDate = LocalDate.of(2020, 5, 1);	// 2020年5月1日前的数据会缺少持仓数据，故不建议使用
 		try {
 			log.info("加载回测合约");
@@ -45,7 +42,7 @@ public class PlaybackGatewayFactory implements GatewayFactory{
 	@Override
 	public Gateway newInstance(GatewayDescription gatewayDescription) {
 		GatewayDescription gd = enhance(gatewayDescription);
-		return new PlaybackGatewayAdapter(gd, feEngine, mktCenter, dataDetector);
+		return new PlaybackGatewayAdapter(gd, feEngine, mktCenter);
 	}
 
 	@Override

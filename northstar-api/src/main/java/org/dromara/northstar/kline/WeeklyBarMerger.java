@@ -1,14 +1,10 @@
 package org.dromara.northstar.kline;
 
-import java.time.Instant;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Objects;
 
 import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.TickType;
@@ -17,19 +13,23 @@ import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.utils.CommonUtils;
+import org.dromara.northstar.common.utils.DateTimeUtils;
 
 public class WeeklyBarMerger extends BarMerger{
 	
-	private static final LocalTime MIDNIGHT = LocalTime.of(0, 0);
+	private Integer weekOfYear;	// yyyyww
 	
 	private LocalTime dayEndTime;
-	
-	private ZonedDateTime cutoffDateTime;
 	
 	public WeeklyBarMerger(Contract contract) {
 		super(Interval.WK1, contract);
 		List<TimeSlot> times = contract.contractDefinition().tradeTimeDef().timeSlots();
 		this.dayEndTime = times.getLast().end();
+	}
+	
+	private boolean endOfWeek(Bar bar) {
+		DayOfWeek endDayOfWeek = bar.contract().activeInWeekend() ? DayOfWeek.SUNDAY : DayOfWeek.FRIDAY;
+		return bar.tradingDay().getDayOfWeek() == endDayOfWeek && bar.actionTime().equals(dayEndTime);
 	}
 
 	@Override
@@ -38,45 +38,48 @@ public class WeeklyBarMerger extends BarMerger{
 			return;
 		}
 		
-		ZonedDateTime barDateTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(bar.actionTimestamp()), zone());
-		if(Objects.nonNull(protoBar) && !barDateTime.isAfter(cutoffDateTime)) {
+		int currentBarWeekOfYear = DateTimeUtils.weekOfYear(bar.tradingDay());
+		if(weekOfYear == null) {
+			weekOfYear = currentBarWeekOfYear;
+		} 
+		
+		if(bar.interval() == Interval.WK1) {
+			listeners.forEach(listener -> listener.onMergedBar(bar.toBuilder()
+					.actionDay(mergedBarActionDay())
+					.tradingDay(mergedBarActionDay())
+					.actionTime(mergedBarActionTime())
+					.actionTimestamp(CommonUtils.localDateTimeToMills(LocalDateTime.of(mergedBarActionDay(), mergedBarActionTime())))
+					.build()));
+			weekOfYear = null;
+			return;
+		}
+		
+		if(currentBarWeekOfYear == weekOfYear) {
 			doMerge(bar);
 		}
 		
-		if(Objects.nonNull(protoBar) && !barDateTime.isBefore(cutoffDateTime)) {
+		if(currentBarWeekOfYear > weekOfYear || endOfWeek(bar)) {
 			doGenerate();
-			if(!barDateTime.isAfter(cutoffDateTime)) {				
-				return;
+			if(currentBarWeekOfYear > weekOfYear) {				
+				weekOfYear = currentBarWeekOfYear;
+			} else {
+				weekOfYear = null;
 			}
 		}
 
-		if(Objects.isNull(protoBar)) {
-			cutoffDateTime = cutoffDateTime(bar.actionTimestamp());
-			LocalDate cutoffDate = cutoffDateTime.toLocalDate();
-			LocalDate monday = cutoffDate.minusDays(cutoffDate.getDayOfWeek().getValue() - 1L);
-			protoBar = Bar.builder()
-					.gatewayId(bar.gatewayId())
-					.contract(contract)
-					.actionDay(monday)
-					.actionTime(MIDNIGHT)
-					.actionTimestamp(CommonUtils.localDateTimeToMills(LocalDateTime.of(monday, MIDNIGHT)))
-					.tradingDay(monday)
-					.channelType(bar.channelType())
-					.openPrice(bar.openPrice())
-					.highPrice(bar.highPrice())
-					.lowPrice(bar.lowPrice())
-					.closePrice(bar.closePrice())
-					.volumeDelta(bar.volumeDelta())
-					.openInterestDelta(bar.openInterestDelta())
-					.turnoverDelta(bar.turnoverDelta())
-					.preClosePrice(bar.preClosePrice())
-					.preOpenInterest(bar.preOpenInterest())
-					.preSettlePrice(bar.preSettlePrice())
-					.interval(Interval.WK1)
-					.build();
-		}
+	}
 	
-		doMerge(bar);
+	@Override
+	protected LocalDate mergedBarActionDay() {
+		DayOfWeek endOfWeek = contract.activeInWeekend() ? DayOfWeek.SUNDAY : DayOfWeek.FRIDAY;
+		DayOfWeek refDay = contract.usingStartTimeInBarTime() ? DayOfWeek.MONDAY : endOfWeek;
+		return DateTimeUtils.fromWeekOfYear(weekOfYear, refDay);
+	}
+
+	@Override
+	protected LocalTime mergedBarActionTime() {
+		List<TimeSlot> times = contract.contractDefinition().tradeTimeDef().timeSlots();
+		return contract.usingStartTimeInBarTime() ? times.getFirst().start() : times.getLast().end();
 	}
 
 	@Override
@@ -84,30 +87,44 @@ public class WeeklyBarMerger extends BarMerger{
 		if(!contract.equals(tick.contract()) || tick.type() == TickType.INFO_TICK) {
 			return;
 		}
+		
+		int currentBarWeekOfYear = DateTimeUtils.weekOfYear(tick.tradingDay());
+		if(weekOfYear == null || currentBarWeekOfYear > weekOfYear) {
+			weekOfYear = currentBarWeekOfYear;
+		} 
+		
 		if(protoBar == null) {
-			cutoffDateTime = cutoffDateTime(tick.actionTimestamp());
-			LocalDate cutoffDate = cutoffDateTime.toLocalDate();
-			LocalDate monday = cutoffDate.minusDays(cutoffDate.getDayOfWeek().getValue() - 1L);
-			protoBar = Bar.builder()
-					.gatewayId(tick.gatewayId())
-					.contract(contract)
-					.actionDay(monday)
-					.actionTime(MIDNIGHT)
-					.actionTimestamp(CommonUtils.localDateTimeToMills(LocalDateTime.of(monday, MIDNIGHT)))
-					.tradingDay(monday)
-					.channelType(tick.channelType())
-					.openPrice(tick.openPrice() == 0 ? tick.lastPrice() : tick.openPrice())
-					.highPrice(tick.highPrice())
-					.lowPrice(tick.lowPrice())
-					.closePrice(tick.lastPrice())
-					.volume(tick.volume())
-					.openInterest(tick.openInterest())
-					.turnover(tick.turnover())
-					.preClosePrice(tick.preClosePrice())
-					.preOpenInterest(tick.preOpenInterest())
-					.preSettlePrice(tick.preSettlePrice())
-					.interval(Interval.WK1)
-					.build();
+			resetVal();
+			if(!mergingBuffer.isEmpty()) {
+				protoBar = aggregateBar();
+			} else {
+				protoBar = Bar.builder()
+						.gatewayId(tick.gatewayId())
+						.channelType(tick.channelType())
+						.contract(contract)
+						.tradingDay(mergedBarActionDay())
+						.actionDay(mergedBarActionDay())
+						.actionTime(mergedBarActionTime())
+						.actionTimestamp(CommonUtils.localDateTimeToMills(LocalDateTime.of(mergedBarActionDay(), mergedBarActionTime())))
+						.openPrice(tick.openPrice() == 0 ? tick.lastPrice() : tick.openPrice())
+						.highPrice(tick.highPrice())
+						.lowPrice(tick.lowPrice())
+						.closePrice(tick.lastPrice())
+						.volume(tick.volume())
+						.openInterest(tick.openInterest())
+						.turnover(tick.turnover())
+						.preClosePrice(tick.preClosePrice())
+						.preOpenInterest(tick.preOpenInterest())
+						.preSettlePrice(tick.preSettlePrice())
+						.build();
+			}
+			
+			oiDelta = protoBar.openInterestDelta();
+			turnoverDelta = protoBar.turnoverDelta();
+			volDelta = protoBar.volumeDelta();
+			
+			high = protoBar.highPrice();
+			low = protoBar.lowPrice();
 		}
 		
 		oiDelta += tick.openInterestDelta();
@@ -127,50 +144,11 @@ public class WeeklyBarMerger extends BarMerger{
 				.openInterestDelta(oiDelta)
 				.turnover(tick.turnover())
 				.turnoverDelta(turnoverDelta)
+				.interval(Interval.WK1)
 				.unstable(true)
 				.build();	
         
         listeners.forEach(listener -> listener.onMergedBar(tempBar));
 	}
 	
-	private ZoneId zone() {
-		String unifiedSymbol = contract.unifiedSymbol();
-		if(unifiedSymbol.endsWith("NSDQX@EQUITY") || unifiedSymbol.endsWith("FOREX")) {
-			return ZoneId.of("America/New_York");
-		}
-		if(unifiedSymbol.contains("BINANCE")) {
-			return ZoneOffset.UTC;
-		}
-		return ZoneOffset.systemDefault();
-	}
-	
-	private ZonedDateTime cutoffDateTime(long t) {
-		String unifiedSymbol = contract.unifiedSymbol();
-		if(unifiedSymbol.endsWith("NSDQX@EQUITY")) {
-			ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(t), ZoneId.of("America/New_York"));
-			LocalDate friday = zdt.plusDays(5L - zdt.getDayOfWeek().getValue()).toLocalDate();
-			return ZonedDateTime.of(LocalDateTime.of(friday, LocalTime.of(19, 59)), ZoneId.of("America/New_York"));
-		}
-		if(unifiedSymbol.endsWith("FOREX")) {
-			ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(t), ZoneOffset.UTC);
-			ZonedDateTime zdtFriday = zdt.plusDays(5L - zdt.getDayOfWeek().getValue()).withHour(21).withMinute(59);
-			if(zdtFriday.toInstant().toEpochMilli() < t) {
-				return zdtFriday.plusWeeks(1);
-			}
-			return zdtFriday;
-		}
-		if(unifiedSymbol.contains("BINANCE")) {
-			ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(t), ZoneOffset.UTC);
-			ZonedDateTime sunday = zdt.plusDays(7L - zdt.getDayOfWeek().getValue());
-			return sunday.plusDays(1).withMinute(0).withSecond(0).withNano(0).minusSeconds(1);
-		}
-		LocalDate today = CommonUtils.millsToLocalDateTime(t).toLocalDate();
-		LocalDate friday = today.plusDays(5L - today.getDayOfWeek().getValue());
-		ZonedDateTime zdt = ZonedDateTime.of(LocalDateTime.of(friday, dayEndTime), ZoneOffset.systemDefault()) ;
-		if(zdt.toInstant().toEpochMilli() < t) {
-			return zdt.plusWeeks(1);
-		}
-		return zdt;
-	}
-
 }

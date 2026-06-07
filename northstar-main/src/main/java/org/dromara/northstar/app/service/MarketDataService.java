@@ -9,13 +9,11 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.dromara.northstar.common.IDataSource;
-import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.Interval;
-import org.dromara.northstar.common.model.BarVO;
 import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.common.model.TickVO;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.event.KlineDispatcher;
@@ -50,7 +48,7 @@ public class MarketDataService {
 	private static final LocalDate SINCE_DATE = LocalDate.of(2021, 1, 1);
 	private static final LocalDate SINCE_DATE2 = LocalDate.of(2010, 1, 1);
 	
-	public List<BarVO> getRangeBars(String contractId, Interval interval, Long fromTime, Long toTime){
+	public List<Bar> getRangeBars(String contractId, Interval interval, Long fromTime, Long toTime){
 		IContract ic = marketCenter.getContract(Identifier.of(contractId));
 		Contract contract = ic.contract();
 		
@@ -108,22 +106,11 @@ public class MarketDataService {
 		return mergedBars.stream()
 				.filter(bar -> bar.actionTimestamp() <= CommonUtils.localDateTimeToMills(toDateTime))
 				.filter(bar -> bar.actionTimestamp() > CommonUtils.localDateTimeToMills(fromDateTime))
-				.map(bar -> BarVO.builder()
-						.timestamp(bar.actionTimestamp())
-						.open(bar.openPrice())
-						.close(bar.closePrice())
-						.high(bar.highPrice())
-						.low(bar.lowPrice())
-						.volume(bar.volumeDelta())
-						.oi(bar.openInterest())
-						.tradingDay(bar.tradingDay().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-						.interval(interval.getAlias())
-						.build())
 				.toList();
 	}
 	
 	public void subscribe(List<String> contractIds, List<Interval> intervals) {
-		log.info("订阅K线，合约 {}，周期 {}", JSON.toJSONString(contractIds), JSON.toJSONString(intervals));
+		log.info("订阅K线，合约 {}，周期 {}", JSON.toJSONString(contractIds), JSON.toJSONString(intervals.stream().map(Interval::getAlias).toList()));
 		klineDispatcher.unregisterAll();
 		contractIds.forEach(contractId -> {
 			final Contract contract = marketCenter.getContract(Identifier.of(contractId)).contract();
@@ -133,22 +120,10 @@ public class MarketDataService {
 		});
 	}
 	
-	public List<TickVO> getActiveTicks() {
+	public List<Tick> getActiveTicks() {
 		return marketCenter.latestTicks()
 				.stream()
 				.sorted((a, b) -> a.contract().unifiedSymbol().compareTo(b.contract().unifiedSymbol()))
-				.map(tick -> TickVO.builder()
-						.name(tick.contract().name())
-						.symbol(tick.contract().symbol())
-						.lastPrice(tick.lastPrice())
-						.priceChange(tick.lastPrice() - tick.preSettlePrice())
-						.openInterest(tick.openInterest())
-						.openInterestDelta(tick.openInterestDelta())
-						.volume(tick.volume())
-						.timestamp(tick.actionTimestamp())
-						.precision(tick.contract().pricePrecision())
-						.channel(tick.channelType())
-						.build())
 				.toList();
 	}
 	
