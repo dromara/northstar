@@ -75,12 +75,6 @@ public class BarMerger implements BarDataAware, TickDataAware {
 			return;
 		}
 		
-		if(bar.interval() == barInterval) {
-			listeners.forEach(listener -> listener.onMergedBar(bar));
-			resetVal();
-			return;
-		}
-		
 		LocalDateTime barEndDateTime = LocalDateTime.of(bar.actionDay(), bar.actionTime());
 		if(contract.usingStartTimeInBarTime()) {
 			LocalDateTime barStartDateTime = barEndDateTime;
@@ -142,7 +136,16 @@ public class BarMerger implements BarDataAware, TickDataAware {
 	
 	protected LocalTime mergedBarActionTime() {
 		List<TimeSlot> times = contract.contractDefinition().tradeTimeDef().timeSlots();
-		return contract.usingStartTimeInBarTime() ? times.getFirst().start() : cutoffDateTime.toLocalTime();
+		if(contract.usingStartTimeInBarTime()) {
+			if(!mergingBuffer.isEmpty()) {
+				return mergingBuffer.getFirst().actionTime();
+			}
+			if(barInterval == Interval.WK1 || barInterval == Interval.D1) {
+				return times.getFirst().start();
+			}
+			return cutoffDateTime.minusMinutes(barInterval.getMinutes()).toLocalTime();
+		}
+		return cutoffDateTime.toLocalTime();
 	}
 	
 	protected void doGenerate() {

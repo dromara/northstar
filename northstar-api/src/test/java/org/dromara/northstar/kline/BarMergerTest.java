@@ -39,6 +39,7 @@ class BarMergerTest {
 	
     Contract contract = Contract.builder()
     		.unifiedSymbol("rb2401@SHFE@FUTURES")
+    		.usingStartTimeInBarTime(false)
     		.contractDefinition(ContractDefinition.builder()
     				.tradeTimeDef(TradeTimeDefinition.builder()
     						.timeSlots(times)
@@ -105,6 +106,26 @@ class BarMergerTest {
         }
         assertThat(new HashSet(merger.barTimePadding.barTimeEntryMap.values())).hasSize(555);
         assertThat(merger.barTimePadding.barTimeEntryMap).hasSize(555);
+    }
+    
+    @Test
+    void test1Min(){
+        BarMerger merger = new BarMerger(Interval.M1, contract);
+        LocalDate date = LocalDate.of(2026, 6, 8);
+        LocalTime time = LocalTime.of(21, 1);
+        LocalTime time2 = LocalTime.of(21, 2);
+        Bar bar1 = genBar(contract, date, time, Interval.M1, 5500, 4500, 5000, 5100, 10010, 10, 20200, 200, 30001, 1);
+        Bar bar2 = genBar(contract, date, time2, Interval.M1, 5500, 4500, 5000, 5100, 10010, 10, 20200, 200, 30001, 1);
+        List<Bar> result = new ArrayList<>();
+        merger.addListener(b -> result.add(b));
+        merger.onBar(bar1);
+        merger.onBar(bar2);
+        
+        Bar b = result.get(1);
+        assertThat(b.tradingDay()).isEqualTo(bar2.tradingDay());
+		assertThat(b.actionDay()).isEqualTo(bar2.actionDay());
+		assertThat(b.actionTime()).isEqualTo(bar2.actionTime());
+		assertThat(b.actionTimestamp()).isEqualTo(bar2.actionTimestamp());
     }
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -398,6 +419,7 @@ class BarMergerTest {
     Bar genBar(Contract contract, LocalDate date, LocalTime time, Interval period, double h, double l, double o, double c, long op, int opDelta, long vol, int volDelta, double tr, double trDelta){
     	return Bar.builder()
     			.contract(contract)
+    				.tradingDay(date)
 				.actionDay(date)
 				.actionTime(time)
 				.actionTimestamp(LocalDateTime.of(date, time).toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
