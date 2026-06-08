@@ -53,8 +53,6 @@ public class DailyBarMerger extends BarMerger{
 		
 		if(cutoffDateTime == null) {
 			cutoffDateTime = LocalDateTime.of(bar.tradingDay(), dayEndTime);
-			log.info("barDate: {} barTime: {} barDateTime: {} tradingDay: {} cutoff: {}", bar.actionDay(), bar.actionTime(), 
-					CommonUtils.millsToLocalDateTime(bar.actionTimestamp()), bar.tradingDay(), cutoffDateTime);
 		}
 		
 		if(tradingDay == null) {
