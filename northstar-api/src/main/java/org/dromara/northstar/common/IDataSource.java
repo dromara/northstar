@@ -13,6 +13,17 @@ import org.springframework.retry.annotation.Retryable;
  * 历史数据源接口
  */
 public interface IDataSource {
+	
+	/**
+	 * 获取指定周期K线数据
+	 * @param contract
+	 * @param interval
+	 * @param startTimeInclusive
+	 * @param endTimeExclusive
+	 * @return
+	 */
+	@Retryable
+	List<Bar> getData(Contract contract, Interval interval, long startTimeInclusive, long endTimeExclusive);
 
 	/**
 	 * 获取指定周期K线数据

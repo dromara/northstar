@@ -309,4 +309,22 @@ public class NorthstarDataSource implements IDataSource{
 				.usingStartTimeInBarTime(dto.getUsingStartTimeInBar())
 				.build();
 	}
+
+	@Override
+	public List<Bar> getData(Contract contract, Interval interval, long startTimeInclusive, long endTimeExclusive) {
+    	try {
+			return enhanceData(dataMgr.getData(contract.unifiedSymbol(), interval, startTimeInclusive, endTimeExclusive), contract, interval);
+		} catch (HttpClientErrorException e) {
+			if(e.getStatusCode() == HttpStatus.FORBIDDEN) {
+				throw new UnauthorizedException(contract.name());
+			}
+			if(e.getStatusCode() == HttpStatus.BAD_REQUEST) {
+				log.warn("{}", e.getMessage());
+				throw new IllegalArgumentException(extractMessage(e.getMessage()));
+			}
+			throw new QuantitDataSourceException(e);
+		} catch (Exception e) {
+			throw new QuantitDataSourceException(e);
+		}
+	}
 }

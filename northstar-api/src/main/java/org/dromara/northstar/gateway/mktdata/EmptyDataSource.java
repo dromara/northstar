@@ -31,4 +31,9 @@ public class EmptyDataSource implements IDataSource{
 		return Collections.emptyList();
 	}
 
+	@Override
+	public List<Bar> getData(Contract contract, Interval interval, long startTimeInclusive, long endTimeExclusive) {
+		return Collections.emptyList();
+	}
+
 }
