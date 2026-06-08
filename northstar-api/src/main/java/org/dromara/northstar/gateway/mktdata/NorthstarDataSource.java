@@ -95,10 +95,11 @@ public class NorthstarDataSource implements IDataSource{
 	
 	private Pattern bondPtn = Pattern.compile("(TS|TF|T|TL)\\d{4}");
 	private Set<ExchangeEnum> futEx = Set.of(ExchangeEnum.CFFEX, ExchangeEnum.INE, ExchangeEnum.DCE, ExchangeEnum.SHFE, ExchangeEnum.CZCE, ExchangeEnum.GFEX);
+	private Set<Interval> enhancingIntervals = Set.of(Interval.D1, Interval.WK1);
 	
 	private long timestampEnhancement(AggBarDTO dto, Contract contract, Interval interval) {
 		// 增强修正期货日线收盘时间 
-		if(interval == Interval.D1 && futEx.contains(contract.exchange())) {
+		if(enhancingIntervals.contains(interval) && futEx.contains(contract.exchange())) {
 			LocalDateTime adjustDT = null;
 			LocalDate tradingDay = LocalDate.parse(dto.getTradingDay());
 			if(bondPtn.matcher(contract.symbol()).matches()) {

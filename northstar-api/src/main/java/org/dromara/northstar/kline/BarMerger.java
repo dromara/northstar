@@ -128,8 +128,7 @@ public class BarMerger implements BarDataAware, TickDataAware {
 	
 	protected LocalDate mergedBarActionDay() {
 		Bar firstBar = mergingBuffer.getFirst();
-		Bar lastBar = mergingBuffer.getLast();
-		return contract.usingStartTimeInBarTime() ? firstBar.actionDay() : lastBar.actionDay();
+		return contract.usingStartTimeInBarTime() ? firstBar.actionDay() : cutoffDateTime.toLocalDate();
 	}
 	
 	protected LocalTime mergedBarActionTime() {

@@ -1,7 +1,6 @@
 package org.dromara.northstar.kline;
 
 import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -17,8 +16,6 @@ import org.dromara.northstar.common.utils.DateTimeUtils;
 
 public class WeeklyBarMerger extends BarMerger{
 	
-	private Integer weekOfYear;	// yyyyww
-	
 	private LocalTime dayEndTime;
 	
 	public WeeklyBarMerger(Contract contract) {
@@ -27,71 +24,49 @@ public class WeeklyBarMerger extends BarMerger{
 		this.dayEndTime = times.getLast().end();
 	}
 	
-	private boolean endOfWeek(Bar bar) {
-		DayOfWeek endDayOfWeek = bar.contract().activeInWeekend() ? DayOfWeek.SUNDAY : DayOfWeek.FRIDAY;
-		return bar.tradingDay().getDayOfWeek() == endDayOfWeek && bar.actionTime().equals(dayEndTime);
-	}
-
 	@Override
 	public synchronized void onBar(Bar bar) {
 		if(!contract.equals(bar.contract())) {
 			return;
 		}
 		
-		int currentBarWeekOfYear = DateTimeUtils.weekOfYear(bar.tradingDay());
-		if(weekOfYear == null) {
-			weekOfYear = currentBarWeekOfYear;
-		} 
-		
 		if(bar.interval() == Interval.WK1) {
-			listeners.forEach(listener -> listener.onMergedBar(bar.toBuilder()
-					.actionDay(mergedBarActionDay())
-					.tradingDay(mergedBarActionDay())
-					.actionTime(mergedBarActionTime())
-					.actionTimestamp(CommonUtils.localDateTimeToMills(LocalDateTime.of(mergedBarActionDay(), mergedBarActionTime())))
-					.build()));
-			weekOfYear = null;
+			listeners.forEach(listener -> listener.onMergedBar(bar));
 			return;
 		}
 		
-		if(currentBarWeekOfYear == weekOfYear) {
+		if(cutoffDateTime == null) {
+			int currentBarWeekOfYear = DateTimeUtils.weekOfYear(bar.tradingDay());
+			cutoffDateTime = LocalDateTime.of(DateTimeUtils.fromWeekOfYear(currentBarWeekOfYear, DayOfWeek.FRIDAY), dayEndTime);
+		}
+		
+		if(!CommonUtils.millsToLocalDateTime(bar.actionTimestamp()).isAfter(cutoffDateTime)) {
 			doMerge(bar);
 		}
 		
-		if(currentBarWeekOfYear > weekOfYear || endOfWeek(bar)) {
+		if(!CommonUtils.millsToLocalDateTime(bar.actionTimestamp()).isBefore(cutoffDateTime)) {
 			doGenerate();
-			if(currentBarWeekOfYear > weekOfYear) {				
-				weekOfYear = currentBarWeekOfYear;
+			if(CommonUtils.millsToLocalDateTime(bar.actionTimestamp()).isAfter(cutoffDateTime)) {				
+				int currentBarWeekOfYear = DateTimeUtils.weekOfYear(bar.tradingDay());
+				cutoffDateTime = LocalDateTime.of(DateTimeUtils.fromWeekOfYear(currentBarWeekOfYear, DayOfWeek.FRIDAY), dayEndTime);
+				doMerge(bar);
 			} else {
-				weekOfYear = null;
+				cutoffDateTime = null;
 			}
 		}
 
 	}
 	
 	@Override
-	protected LocalDate mergedBarActionDay() {
-		DayOfWeek endOfWeek = contract.activeInWeekend() ? DayOfWeek.SUNDAY : DayOfWeek.FRIDAY;
-		DayOfWeek refDay = contract.usingStartTimeInBarTime() ? DayOfWeek.MONDAY : endOfWeek;
-		return DateTimeUtils.fromWeekOfYear(weekOfYear, refDay);
-	}
-
-	@Override
-	protected LocalTime mergedBarActionTime() {
-		List<TimeSlot> times = contract.contractDefinition().tradeTimeDef().timeSlots();
-		return contract.usingStartTimeInBarTime() ? times.getFirst().start() : times.getLast().end();
-	}
-
-	@Override
 	public void onTick(Tick tick) {
 		if(!contract.equals(tick.contract()) || tick.type() == TickType.INFO_TICK) {
 			return;
 		}
 		
-		int currentBarWeekOfYear = DateTimeUtils.weekOfYear(tick.tradingDay());
-		if(weekOfYear == null || currentBarWeekOfYear > weekOfYear) {
-			weekOfYear = currentBarWeekOfYear;
-		} 
+		if(cutoffDateTime == null) {
+			int currentBarWeekOfYear = DateTimeUtils.weekOfYear(tick.tradingDay());
+			cutoffDateTime = LocalDateTime.of(DateTimeUtils.fromWeekOfYear(currentBarWeekOfYear, DayOfWeek.FRIDAY), dayEndTime);
+		}
 		
 		if(protoBar == null) {
 			resetVal();
