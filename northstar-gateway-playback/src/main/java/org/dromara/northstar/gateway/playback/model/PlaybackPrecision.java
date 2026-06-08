@@ -2,6 +2,7 @@ package org.dromara.northstar.gateway.playback.model;
 
 import org.dromara.northstar.gateway.playback.ticker.RandomWalkTickSimulation;
 import org.dromara.northstar.gateway.playback.ticker.SimpleCloseSimulation;
+import org.dromara.northstar.gateway.playback.ticker.SimplePriceSimulation;
 import org.dromara.northstar.gateway.playback.ticker.TickSimulationAlgorithm;
 
 /**
@@ -17,7 +18,7 @@ public enum PlaybackPrecision {
 	/**
 	 * 每分钟4TICK
 	 */
-	LOW(4, new SimpleCloseSimulation()),
+	LOW(4, new SimplePriceSimulation()),
 	/**
 	 * 每分钟30TICK
 	 */
