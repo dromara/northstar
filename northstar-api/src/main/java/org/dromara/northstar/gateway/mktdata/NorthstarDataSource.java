@@ -1,7 +1,10 @@
 package org.dromara.northstar.gateway.mktdata;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
@@ -90,12 +93,30 @@ public class NorthstarDataSource implements IDataSource{
 		}
 	}
 	
+	private Pattern bondPtn = Pattern.compile("(TS|TF|T|TL)\\d{4}");
+	private Set<ExchangeEnum> futEx = Set.of(ExchangeEnum.CFFEX, ExchangeEnum.INE, ExchangeEnum.DCE, ExchangeEnum.SHFE, ExchangeEnum.CZCE, ExchangeEnum.GFEX);
+	
+	private long timestampEnhancement(AggBarDTO dto, Contract contract, Interval interval) {
+		// 增强修正期货日线收盘时间 
+		if(interval == Interval.D1 && futEx.contains(contract.exchange())) {
+			LocalDateTime adjustDT = null;
+			LocalDate tradingDay = LocalDate.parse(dto.getTradingDay());
+			if(bondPtn.matcher(contract.symbol()).matches()) {
+				adjustDT = LocalDateTime.of(tradingDay, LocalTime.of(15, 15));
+			} else {
+				adjustDT = LocalDateTime.of(tradingDay, LocalTime.of(15, 0));
+			}
+			return CommonUtils.localDateTimeToMills(adjustDT);
+		}
+		return dto.getTimestamp();
+	}
+	
 	private List<Bar> enhanceData(List<AggBarDTO> data, Contract contract, Interval interval){
 		return data.stream()
 				.map(dto -> Bar.builder()
-						.actionDay(CommonUtils.millsToLocalDateTime(dto.getTimestamp()).toLocalDate())
-						.actionTime(CommonUtils.millsToLocalDateTime(dto.getTimestamp()).toLocalTime())
-						.actionTimestamp(dto.getTimestamp())
+						.actionDay(CommonUtils.millsToLocalDateTime(timestampEnhancement(dto, contract, interval)).toLocalDate())
+						.actionTime(CommonUtils.millsToLocalDateTime(timestampEnhancement(dto, contract, interval)).toLocalTime())
+						.actionTimestamp(timestampEnhancement(dto, contract, interval))
 						.tradingDay(LocalDate.parse(dto.getTradingDay()))
 						.channelType(contract.channelType())
 						.gatewayId(contract.channelType() + "")
