@@ -1,21 +1,26 @@
 package org.dromara.northstar.gateway.playback;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.Interval;
@@ -35,6 +40,7 @@ import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.gateway.playback.PlaybackStatus.State;
 import org.dromara.northstar.gateway.playback.model.DataFrame;
 import org.dromara.northstar.gateway.playback.model.DataFrame.TimeEntry;
+import org.dromara.northstar.gateway.playback.model.PlaybackPrecision;
 import org.dromara.northstar.kline.BarMerger;
 import org.dromara.northstar.kline.KlineGenerator;
 import org.springframework.util.Assert;
@@ -71,6 +77,8 @@ public class PlaybackContext {
 	
 	private Map<Contract, KlineGenerator> klineGeneratorMap;
 	
+	private PlaybackPrecision precision;
+	
 	public PlaybackContext(PlaybackGatewayAdapter gateway, FastEventEngine feEngine, MarketCenter mktCenter) {
 		this.feEngine = feEngine;
 		this.gateway = gateway;
@@ -80,12 +88,14 @@ public class PlaybackContext {
 	
 	public void init() {
 		playbackStatus = null;
-		Set<IContract> contracts = this.gateway.getDescription().getSubscribedContracts()
+		Set<IContract> contracts = gateway.getDescription().getSubscribedContracts()
 				.stream()
 				.map(csi -> mktCenter.getContract(Identifier.of(csi.getId())))
 				.collect(Collectors.toSet());
 		Assert.isTrue(!startDate().isBefore(preloadDate()), "预热开始日不能迟于回放开始日");
-		this.dataLoader = new PlaybackDataLoader(gateway.getDescription().getGatewayId(), contracts, settings().getPrecision());
+		this.dataLoader = new PlaybackDataLoader(contracts);
+		PlaybackGatewaySettings settings = (PlaybackGatewaySettings) gateway.getDescription().getSettings();
+		precision = settings.getPrecision();
 		
 		// 初始化回放状态
 		reset();
@@ -247,21 +257,27 @@ public class PlaybackContext {
 		isRunning.set(true);
 		log.info("回放网关 [{}] 连线。当前回放时间状态：{}", gateway.getDescription().getGatewayId(), playbackStatus.getRunningDateTime());
 		
-		LocalDate start = playbackStatus.getRunningDateTime().toLocalDate();
 		log.info("数据回放阶段：{} -> {}", playbackStatus.getRunningDateTime(), endDate());
-		CompletableFuture<Void> runningJob = dataLoader.load(start.minusDays(1), endDate(), () -> !isRunning.get(), onTickDataCallback, onBarDataCallback);
-		
-		// 回放结束的处理
+
+		// 回放
 		exec.execute(() -> {
 			try {
-				runningJob.get();
-			} catch (InterruptedException | ExecutionException e) {
-				log.warn("回放等待被中断", e);
-				if(e instanceof ExecutionException) {
-					feEngine.emitEvent(NorthstarEventType.NOTICE, Notice.builder()
-							.status(CommonStatusEnum.COMS_ERROR)
-							.content(e.getCause().getLocalizedMessage()).build());
+				LocalDateTime datetime = playbackStatus.getRunningDateTime();
+				while(!datetime.toLocalDate().isAfter(endDate())) {
+					long startTime = CommonUtils.localDateTimeToMills(datetime);
+					long endTime = CommonUtils.localDateTimeToMills(datetime.plusDays(1));
+					List<DataFrame<Bar>> data = dataLoader.loadData(startTime, endTime);
+					if(!isRunning.get()) {
+						return;
+					}
+					for(DataFrame<Bar> df : data) {
+						generateTickFrames(df).forEach(onTickDataCallback::accept);
+						onBarDataCallback.accept(df);
+					}
+					datetime = datetime.plusDays(1);
 				}
+			} catch (InterruptedException e) {
+				log.warn("回放等待被中断", e);
 			}
 			if(isRunning.get()) {	
 				synchronized (PlaybackContext.this) {
@@ -279,6 +295,50 @@ public class PlaybackContext {
 				}
 			}
 		});
+	}
+	
+	private List<DataFrame<Tick>> generateTickFrames(DataFrame<Bar> barFrame){
+		long nanoPerStep = TimeUnit.MINUTES.toNanos(1) / precision.getNumberOfTickPerBar();
+		Map<Long, DataFrame<Tick>> tickDataMap = new HashMap<>();
+		barFrame.items().forEach(bar -> 
+			precision.getAlgorithm().generateFrom(bar).forEach(tickEntry -> {
+				LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(tickEntry.timestamp()), ZoneId.systemDefault());
+				tickDataMap.putIfAbsent(tickEntry.timestamp(), new DataFrame<>(ldt, ldt.plusNanos(nanoPerStep)));
+				
+				Tick tick = Tick.builder()
+						.preClosePrice(bar.preClosePrice())		// 采用分钟K线的模糊值
+						.preOpenInterest(bar.preOpenInterest())	// 采用分钟K线的模糊值
+						.preSettlePrice(bar.preSettlePrice())	// 采用分钟K线的模糊值
+						.highPrice(bar.highPrice())				// 采用分钟K线的模糊值
+						.lowPrice(bar.lowPrice())				// 采用分钟K线的模糊值
+						.contract(bar.contract())
+						.gatewayId(ChannelType.PLAYBACK.toString())
+						.tradingDay(bar.tradingDay())
+						.actionDay(ldt.toLocalDate())
+						.actionTime(ldt.toLocalTime())
+						.actionTimestamp(tickEntry.timestamp())
+						.type(TickType.PLAYBACK_TICK)
+						.lastPrice(tickEntry.price())
+						.askPrice(List.of(tickEntry.askPrice0())) // 仅模拟卖一价
+						.bidPrice(List.of(tickEntry.bidPrice0())) // 仅模拟买一价
+						.askVolume(List.of(ThreadLocalRandom.current().nextInt(10,500))) // 随机模拟卖一量
+						.bidVolume(List.of(ThreadLocalRandom.current().nextInt(10,500))) // 随机模拟买一量
+						.channelType(ChannelType.PLAYBACK)
+						.volume(bar.volume())								// 采用分钟K线的模糊值
+						.volumeDelta(Math.max(1, tickEntry.volume()))		// 采用模拟随机值
+						.openInterest(bar.openInterest())					// 采用分钟K线的模糊值
+						.openInterestDelta(tickEntry.openInterestDelta())	// 采用模拟随机值
+						.turnoverDelta(bar.turnoverDelta())					// 采用分钟K线的模糊值
+						.turnover(bar.turnover())							// 采用分钟K线的模糊值
+						.build();
+				tickDataMap.get(tick.actionTimestamp()).add(tick);
+			})
+		);
+		
+		return tickDataMap.entrySet().stream()
+				.sorted((a, b) -> a.getKey().compareTo(b.getKey()))
+				.map(Entry::getValue)
+				.toList();
 	}
 	
 	public synchronized void playNext(Interval interval) {
@@ -316,19 +376,22 @@ public class PlaybackContext {
 		}
 		gateway.setConnection(ConnectionState.CONNECTED);
 		log.info("回放网关 [{}] 正在加载预热数据，预热时间段：{} -> {}", gateway.getDescription().getGatewayId(), preloadDate(), startDate());
-		CompletableFuture<Void> runningJob = dataLoader.preload(preloadDate(), startDate(), onPreLoadBarDataCallback);
-		
-		// 预热完毕的处理
+
+		// 预热处理
 		exec.execute(() -> {
 			try {
-				runningJob.get();
-			} catch (InterruptedException | ExecutionException e) {
-				log.warn("预热加载等待被中断", e);
-				if(e instanceof ExecutionException) {
-					feEngine.emitEvent(NorthstarEventType.NOTICE, Notice.builder()
-							.status(CommonStatusEnum.COMS_ERROR)
-							.content(e.getCause().getLocalizedMessage()).build());
+				LocalDate date = preloadDate();
+				while(date.isBefore(startDate())) {
+					long startTime = CommonUtils.localDateTimeToMills(date.atStartOfDay());
+					long endTime = CommonUtils.localDateTimeToMills(date.plusDays(3).atStartOfDay());
+					List<DataFrame<Bar>> data = dataLoader.loadData(startTime, endTime);
+					for(DataFrame<Bar> dataFrame : data) {
+						onPreLoadBarDataCallback.accept(dataFrame);
+					}
+					date = date.plusDays(3);
 				}
+			} catch (InterruptedException e) {
+				log.warn("预热加载等待被中断", e);
 			}
 			synchronized (PlaybackContext.this) {
 				playbackStatus.setState(State.PRELOADED);
