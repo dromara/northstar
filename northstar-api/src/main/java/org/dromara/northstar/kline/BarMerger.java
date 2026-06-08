@@ -7,6 +7,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -17,6 +18,7 @@ import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.strategy.MergedBarListener;
 
@@ -127,13 +129,20 @@ public class BarMerger implements BarDataAware, TickDataAware {
 	}
 	
 	protected LocalDate mergedBarActionDay() {
-		Bar firstBar = mergingBuffer.getFirst();
-		return contract.usingStartTimeInBarTime() ? firstBar.actionDay() : cutoffDateTime.toLocalDate();
+		if(contract.usingStartTimeInBarTime()) {
+			if(!mergingBuffer.isEmpty()) {
+				return mergingBuffer.getFirst().actionDay();
+			}
+			if(barInterval == Interval.WK1) {
+				return cutoffDateTime.toLocalDate().minusDays(cutoffDateTime.toLocalDate().getDayOfWeek().getValue() - 1);
+			}
+		}
+		return cutoffDateTime.toLocalDate();
 	}
 	
 	protected LocalTime mergedBarActionTime() {
-		Bar firstBar = mergingBuffer.getFirst();
-		return contract.usingStartTimeInBarTime() ? firstBar.actionTime() : cutoffDateTime.toLocalTime();
+		List<TimeSlot> times = contract.contractDefinition().tradeTimeDef().timeSlots();
+		return contract.usingStartTimeInBarTime() ? times.getFirst().start() : cutoffDateTime.toLocalTime();
 	}
 	
 	protected void doGenerate() {
