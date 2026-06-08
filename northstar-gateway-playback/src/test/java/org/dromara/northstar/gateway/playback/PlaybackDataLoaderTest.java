@@ -16,7 +16,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-import org.dromara.northstar.common.constant.PlaybackPrecision;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.ContractDefinition;
@@ -25,6 +24,7 @@ import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.mktdata.NorthstarDataSource;
+import org.dromara.northstar.gateway.playback.model.PlaybackPrecision;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

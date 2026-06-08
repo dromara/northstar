@@ -20,13 +20,13 @@ import java.util.stream.Collectors;
 
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Interval;
-import org.dromara.northstar.common.constant.PlaybackPrecision;
 import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.playback.model.DataFrame;
+import org.dromara.northstar.gateway.playback.model.PlaybackPrecision;
 import org.dromara.northstar.gateway.playback.model.DataFrame.TimeEntry;
 import org.dromara.northstar.gateway.playback.ticker.RandomWalkTickSimulation;
 import org.dromara.northstar.gateway.playback.ticker.SimpleCloseSimulation;
