@@ -2,6 +2,7 @@ package org.dromara.northstar.gateway.playback.model;
 
 import java.time.LocalDateTime;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.dromara.northstar.common.Timed;
 import org.dromara.northstar.common.model.core.Bar;
@@ -35,14 +36,14 @@ public class DataFrame<T extends Timed> {
 				.build();
 	}
 	
-	public void add(T item) {
+	public synchronized void add(T item) {
 		if(item instanceof Tick t && timeEntry.withinSection(t.actionTimestamp())
 		|| item instanceof Bar b && timeEntry.withinSection(b.actionTimestamp())) {
 			buf.add(item);
 		}
 	}
 	
-	public LinkedList<T> items(){
+	public List<T> items(){
 		return buf;
 	}
 	
