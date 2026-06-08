@@ -2,10 +2,10 @@ package org.dromara.northstar.gateway.playback;
 
 import org.dromara.northstar.common.GatewaySettings;
 import org.dromara.northstar.common.constant.FieldType;
-import org.dromara.northstar.common.constant.PlaybackSpeed;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.gateway.playback.model.PlaybackPrecision;
+import org.dromara.northstar.gateway.playback.model.PlaybackSpeed;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

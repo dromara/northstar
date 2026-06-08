@@ -5,11 +5,11 @@ import java.util.List;
 import org.dromara.northstar.common.GatewaySettings;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.GatewayUsage;
-import org.dromara.northstar.common.constant.PlaybackSpeed;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.gateway.playback.PlaybackGatewaySettings;
 import org.dromara.northstar.gateway.playback.model.PlaybackPrecision;
+import org.dromara.northstar.gateway.playback.model.PlaybackSpeed;
 
 public class TestGatewayFactory {
 
