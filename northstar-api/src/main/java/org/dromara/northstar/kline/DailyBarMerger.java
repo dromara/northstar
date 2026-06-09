@@ -90,8 +90,8 @@ public class DailyBarMerger extends BarMerger{
 				protoBar = aggregateBar();
 			} else {
 				protoBar = Bar.builder()
-						.gatewayId(tick.gatewayId())
-						.channelType(tick.channelType())
+						.gatewayId(contract.gatewayId())
+						.channelType(contract.channelType())
 						.contract(contract)
 						.tradingDay(tick.tradingDay())
 						.actionDay(tradingDay)

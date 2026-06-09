@@ -137,9 +137,6 @@ public class BarMerger implements BarDataAware, TickDataAware {
 	protected LocalTime mergedBarActionTime() {
 		List<TimeSlot> times = contract.contractDefinition().tradeTimeDef().timeSlots();
 		if(contract.usingStartTimeInBarTime()) {
-			if(!mergingBuffer.isEmpty()) {
-				return mergingBuffer.getFirst().actionTime();
-			}
 			if(barInterval == Interval.WK1 || barInterval == Interval.D1) {
 				return times.getFirst().start();
 			}
@@ -169,13 +166,13 @@ public class BarMerger implements BarDataAware, TickDataAware {
 		Bar firstBar = mergingBuffer.getFirst();
 		return mergingBuffer.stream().reduce(Bar.builder().highPrice(Integer.MIN_VALUE).lowPrice(Integer.MAX_VALUE).build(), (accB, b) -> {
 			return accB.toBuilder()
-					.gatewayId(b.gatewayId())
+					.gatewayId(contract.gatewayId())
+					.channelType(contract.channelType())
 					.contract(contract)
 					.tradingDay(mergedBarActionDay())
 					.actionDay(mergedBarActionDay())
 					.actionTime(mergedBarActionTime())
 					.actionTimestamp(CommonUtils.localDateTimeToMills(LocalDateTime.of(mergedBarActionDay(), mergedBarActionTime())))
-					.channelType(b.channelType())
 					.openPrice(firstBar.openPrice())
 					.highPrice(Math.max(accB.highPrice(), b.highPrice()))
 					.lowPrice(Math.min(accB.lowPrice(), b.lowPrice()))
