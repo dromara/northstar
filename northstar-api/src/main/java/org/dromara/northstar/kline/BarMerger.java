@@ -213,7 +213,7 @@ public class BarMerger implements BarDataAware, TickDataAware {
 				protoBar = aggregateBar();
 			} else {
 				LocalDate actionDay = contract.usingStartTimeInBarTime() ? tick.actionDay() : cutoffDateTime.toLocalDate();
-				LocalTime actionTime = contract.usingStartTimeInBarTime() ? tick.actionTime().withSecond(0).withNano(0) : cutoffDateTime.toLocalTime();
+				LocalTime actionTime = contract.usingStartTimeInBarTime() ? cutoffDateTime.minusMinutes(barInterval.getMinutes()).toLocalTime() : cutoffDateTime.toLocalTime();
 				protoBar = Bar.builder()
 						.gatewayId(tick.gatewayId())
 						.contract(contract)
