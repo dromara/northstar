@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.dromara.northstar.common.IDataSource;
@@ -23,6 +22,7 @@ import org.dromara.northstar.kline.BarMerger;
 import org.dromara.northstar.kline.BarMergerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import com.alibaba.fastjson2.JSON;
 
@@ -48,26 +48,14 @@ public class MarketDataService {
 	private static final LocalDate SINCE_DATE = LocalDate.of(2021, 1, 1);
 	private static final LocalDate SINCE_DATE2 = LocalDate.of(2010, 1, 1);
 	
-	public List<Bar> getRangeBars(String contractId, Interval interval, Long fromTime, Long toTime){
+	public List<Bar> getRangeBars(String contractId, Interval interval, Long fromTime, Long toTime) {
+		Assert.notNull(fromTime, "开始时间不能为空");
+		Assert.notNull(toTime, "结束时间不能为空");
 		IContract ic = marketCenter.getContract(Identifier.of(contractId));
 		Contract contract = ic.contract();
 		
-		int dayDif = switch (interval) {
-			case M1 -> 1;
-			case M3 -> 3;
-			case M5 -> 5;
-			case M10 -> 10;
-			case M15 -> 15;
-			case M30 -> 30;
-			case H1 -> 60;
-			case H2 -> 120;
-			case H4 -> 240;
-			case D1,WK1 -> 300;
-			default -> throw new IllegalArgumentException("不支持的周期类型：" + interval);
-		};
-		
-		LocalDateTime toDateTime = CommonUtils.millsToLocalDateTime(Optional.ofNullable(toTime).orElse(System.currentTimeMillis()));
-		LocalDateTime fromDateTime = fromTime == null ? toDateTime.minusDays(dayDif) : CommonUtils.millsToLocalDateTime(fromTime);
+		LocalDateTime toDateTime = CommonUtils.millsToLocalDateTime(toTime);
+		LocalDateTime fromDateTime = CommonUtils.millsToLocalDateTime(fromTime);
 		
 		if(toDateTime.toLocalDate().isBefore(SINCE_DATE) && cnFutEx.contains(contract.exchange())) {
 			log.warn("国内期货行情历史回溯不能早于2021年1月1日，当前查询范围：{} -> {}", fromDateTime, toDateTime);
@@ -78,13 +66,12 @@ public class MarketDataService {
 		}
 		log.info("查询历史数据，合约{}，周期{}，{} -> {}", contractId, interval.getAlias(), fromDateTime, toDateTime);
 		
-		
 		IDataSource dataSource = contract.contractDefinition().dataSource();
 		if(dataSource == null) {
 			return Collections.emptyList();
 		}
 		
-		List<Bar> bars = new LinkedList<>(dataSource.getData(contract, interval, fromDateTime.minusDays(1).toLocalDate(), toDateTime.plusDays(3).toLocalDate()).reversed());
+		List<Bar> bars = new LinkedList<>(dataSource.getData(contract, interval, fromTime, toTime).reversed());
 		List<Bar> mergedBars = new LinkedList<>();
 		// 本地仅加载最近的数据
 		List<Bar> data = mdRepo.loadBars(ic, LocalDate.now(), LocalDate.now().plusDays(3));

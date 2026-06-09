@@ -157,7 +157,8 @@ public class PlaybackService {
 			case H1 -> 60;
 			case H2 -> 120;
 			case H4 -> 240;
-			case D1,WK1 -> 300;
+			case D1 -> 300;
+			case WK1 -> 700;
 			default -> throw new IllegalArgumentException("不支持的周期类型：" + interval);
 		};
 		LocalDateTime fromDateTime = getPlaybackContext().getPlaybackStatus().getRunningDateTime().minusDays(dayDif);
@@ -171,8 +172,17 @@ public class PlaybackService {
 		preloadRaw.forEach(merger::onBar);
 		
 		// 当查询周期大于1分钟时，可能需要额外的数据进行精确计算
-		if(interval != Interval.M1) {			
-			List<Bar> preloadRefine = dataService.getRangeBars(contractId, Interval.M1, preloadRaw.getLast().actionTimestamp()+1, CommonUtils.localDateTimeToMills(toDateTime))
+		if(interval != Interval.M1) {		
+			Interval refineLoadInterval = switch(interval) {
+			case M10, M15 -> Interval.M5;
+			case M30 -> Interval.M10;
+			case H1, H2 -> Interval.M15;
+			case H4 -> Interval.M30;
+			case D1 -> Interval.H1;
+			case WK1 -> Interval.H4;
+			default -> Interval.M1;
+			};
+			List<Bar> preloadRefine = dataService.getRangeBars(contractId, refineLoadInterval, preloadRaw.getLast().actionTimestamp()+1, CommonUtils.localDateTimeToMills(toDateTime))
 					.stream()
 					.filter(bar -> bar.actionTimestamp() <= endTime)
 					.toList();
