@@ -168,12 +168,17 @@ public class PlaybackService {
 			.stream()
 			.filter(bar -> bar.actionTimestamp() <= endTime)
 			.toList();
-		List<Bar> preloadRefine = dataService.getRangeBars(contractId, Interval.M1, preloadRaw.getLast().actionTimestamp()+1, CommonUtils.localDateTimeToMills(toDateTime))
-				.stream()
-				.filter(bar -> bar.actionTimestamp() <= endTime)
-				.toList();
 		preloadRaw.forEach(merger::onBar);
-		preloadRefine.forEach(merger::onBar);
+		
+		// 当查询周期大于1分钟时，可能需要额外的数据进行精确计算
+		if(interval != Interval.M1) {			
+			List<Bar> preloadRefine = dataService.getRangeBars(contractId, Interval.M1, preloadRaw.getLast().actionTimestamp()+1, CommonUtils.localDateTimeToMills(toDateTime))
+					.stream()
+					.filter(bar -> bar.actionTimestamp() <= endTime)
+					.toList();
+			preloadRefine.forEach(merger::onBar);
+		}
+		
 		getPlaybackContext().resume();
 		return mergedBars;
 	}
