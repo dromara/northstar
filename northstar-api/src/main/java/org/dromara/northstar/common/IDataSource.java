@@ -18,12 +18,12 @@ public interface IDataSource {
 	 * 获取指定周期K线数据
 	 * @param contract
 	 * @param interval
-	 * @param startTimeInclusive
-	 * @param endTimeExclusive
+	 * @param startTime
+	 * @param endTime
 	 * @return
 	 */
 	@Retryable
-	List<Bar> getData(Contract contract, Interval interval, long startTimeInclusive, long endTimeExclusive);
+	List<Bar> getData(Contract contract, Interval interval, long startTime, long endTime);
 
 	/**
 	 * 获取指定周期K线数据
