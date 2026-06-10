@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -133,7 +134,7 @@ public class PlaybackContext {
 		if(numOfMinutesToPlay != null) {
 			return; // 逐K回放模式下，忽略TICK回放
 		}
-		if(timeEntry.getStart().isBefore(playbackStatus.getRunningDateTime()) || !isRunning.get()) {
+		if(timeEntry.getStart().isBefore(playbackStatus.getRunningDateTime())) {
 			return;
 		}
 		dft.items().forEach(tick -> {
@@ -151,7 +152,7 @@ public class PlaybackContext {
 	// 如何处理BAR数据帧
 	private Consumer<DataFrame<Bar>> onBarDataCallback = df -> {
 		TimeEntry timeEntry = df.getTime();
-		if(timeEntry.getStart().isBefore(playbackStatus.getRunningDateTime()) || !isRunning.get()) {
+		if(timeEntry.getStart().isBefore(playbackStatus.getRunningDateTime())) {
 			return;
 		}
 		df.items().forEach(bar -> klineGeneratorMap.get(bar.contract()).updateBar(bar));
@@ -258,26 +259,21 @@ public class PlaybackContext {
 		log.info("回放网关 [{}] 连线。当前回放时间状态：{}", gateway.getDescription().getGatewayId(), playbackStatus.getRunningDateTime());
 		
 		log.info("数据回放阶段：{} -> {}", playbackStatus.getRunningDateTime(), endDate());
+		
+		final ArrayBlockingQueue<DataFrame<Bar>> dataBuffer = new ArrayBlockingQueue<>(1024*4);
 
 		// 回放
 		exec.execute(() -> {
 			try {
-				LocalDateTime datetime = playbackStatus.getRunningDateTime();
-				while(!datetime.toLocalDate().isAfter(endDate())) {
-					long startTime = CommonUtils.localDateTimeToMills(datetime);
-					long endTime = CommonUtils.localDateTimeToMills(datetime.plusDays(1));
-					List<DataFrame<Bar>> data = dataLoader.loadData(startTime, endTime);
-					if(!isRunning.get()) {
-						return;
-					}
-					for(DataFrame<Bar> df : data) {
-						generateTickFrames(df).forEach(onTickDataCallback::accept);
-						onBarDataCallback.accept(df);
-					}
-					datetime = datetime.plusDays(1);
+				while(isRunning.get()) {
+					DataFrame<Bar> df = dataBuffer.take();
+					generateTickFrames(df).forEach(onTickDataCallback::accept);
+					onBarDataCallback.accept(df);
 				}
 			} catch (InterruptedException e) {
 				log.warn("回放等待被中断", e);
+			} finally {
+				dataBuffer.clear();
 			}
 			if(isRunning.get()) {	
 				synchronized (PlaybackContext.this) {
@@ -293,6 +289,27 @@ public class PlaybackContext {
 							.content("历史行情回放已经结束，可通过【复位】重置")
 							.build());
 				}
+			}
+		});
+		
+		// 解耦数据加载
+		exec.execute(() -> {
+			try {
+				LocalDateTime datetime = playbackStatus.getRunningDateTime();
+				while(!datetime.toLocalDate().isAfter(endDate())) {
+					long startTime = CommonUtils.localDateTimeToMills(datetime);
+					long endTime = CommonUtils.localDateTimeToMills(datetime.plusDays(1));
+					List<DataFrame<Bar>> data = dataLoader.loadData(startTime, endTime);
+					for(DataFrame<Bar> df : data) {
+						if(!isRunning.get()) {
+							return;
+						}
+						dataBuffer.put(df);
+					}
+					datetime = datetime.plusDays(1);
+				}
+			} catch (InterruptedException e) {
+				log.warn("回放等待被中断", e);
 			}
 		});
 	}
