@@ -47,7 +47,6 @@ import org.dromara.northstar.kline.KlineGenerator;
 import org.springframework.util.Assert;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
 
@@ -60,7 +59,6 @@ public class PlaybackContext {
 	@Getter
 	private PlaybackStatus playbackStatus;
 	
-	@Setter
 	private Consumer<PlaybackStatus> onStatusChangeCallback;
 
 	private MarketCenter mktCenter;
@@ -158,9 +156,6 @@ public class PlaybackContext {
 		df.items().forEach(bar -> klineGeneratorMap.get(bar.contract()).updateBar(bar));
 		
 		playbackStatus.setRunningDateTime(timeEntry.getEnd());
-		if(onStatusChangeCallback != null) {
-			onStatusChangeCallback.accept(playbackStatus);
-		}
 		log.debug("当前回放状态：{}", playbackStatus);
 		if(numOfMinutesToPlay != null && numOfMinutesToPlay.decrementAndGet() <= 0 && isRoundingMatch()) {
 			pause();
@@ -187,9 +182,6 @@ public class PlaybackContext {
 			klineGeneratorMap.get(bar.contract()).updateBar(bar);
 		});
 		playbackStatus.setRunningDateTime(timeEntry.getEnd());
-		if(onStatusChangeCallback != null) {
-			onStatusChangeCallback.accept(playbackStatus);
-		}
 	};
 	
 	private List<Tick> dummyTickOfBar(Bar bar){
@@ -252,9 +244,6 @@ public class PlaybackContext {
 		
 		gateway.setConnection(ConnectionState.CONNECTED);
 		playbackStatus.setState(State.PLAYING);
-		if(onStatusChangeCallback != null) {
-			onStatusChangeCallback.accept(playbackStatus);
-		}
 		isRunning.set(true);
 		log.info("回放网关 [{}] 连线。当前回放时间状态：{}", gateway.getDescription().getGatewayId(), playbackStatus.getRunningDateTime());
 		
@@ -278,9 +267,6 @@ public class PlaybackContext {
 			if(isRunning.get()) {	
 				synchronized (PlaybackContext.this) {
 					playbackStatus.setState(State.FINISHED);
-					if(onStatusChangeCallback != null) {
-						onStatusChangeCallback.accept(playbackStatus);
-					}
 					gateway.setConnection(ConnectionState.DISCONNECTED);
 					isRunning.set(false);
 					log.info("[{}]-历史行情回放已经结束：{}，可通过【复位】重置", gateway.getDescription().getGatewayId(), playbackStatus);
@@ -388,9 +374,6 @@ public class PlaybackContext {
 			throw new OperationException("error.illegalStateForPreload");
 		}
 		playbackStatus.setState(State.PRELOADING);
-		if(onStatusChangeCallback != null) {
-			onStatusChangeCallback.accept(playbackStatus);
-		}
 		gateway.setConnection(ConnectionState.CONNECTED);
 		log.info("回放网关 [{}] 正在加载预热数据，预热时间段：{} -> {}", gateway.getDescription().getGatewayId(), preloadDate(), startDate());
 
@@ -412,9 +395,6 @@ public class PlaybackContext {
 			}
 			synchronized (PlaybackContext.this) {
 				playbackStatus.setState(State.PRELOADED);
-				if(onStatusChangeCallback != null) {
-					onStatusChangeCallback.accept(playbackStatus);
-				}
 				gateway.setConnection(ConnectionState.DISCONNECTED);
 				isRunning.set(false);
 				log.info("回放网关 [{}] 数据预热完毕：{}", gateway.getDescription().getGatewayId(), playbackStatus);
@@ -444,11 +424,9 @@ public class PlaybackContext {
 				.runningDateTime(initialDateTime)
 				.state(state)
 				.playInterval(playbackStatus == null ? interval : playbackStatus.getPlayInterval())
+				.onStatusChangeCallback(onStatusChangeCallback)
 				.build();
 		log.info("回放状态重置：{}", playbackStatus);
-		if(onStatusChangeCallback != null) {
-			onStatusChangeCallback.accept(playbackStatus);
-		}
 	}
 	
 	public synchronized void setSpeed(int interval) {
@@ -470,9 +448,6 @@ public class PlaybackContext {
 		isRunning.set(false);
 		gateway.setConnection(ConnectionState.DISCONNECTED);
 		playbackStatus.setState(State.PRELOADED);
-		if(onStatusChangeCallback != null) {
-			onStatusChangeCallback.accept(playbackStatus);
-		}
 		log.info("回放网关 [{}] 断开。当前回放时间状态：{}", gateway.getDescription().getGatewayId(), playbackStatus);
 	}
 	
@@ -488,5 +463,10 @@ public class PlaybackContext {
 			throw new OperationException("error.loose_contract_subsription", contract.name());
 		}
 		klineGeneratorMap.get(contract).reset(interval);
+	}
+
+	public void setOnStatusChangeCallback(Consumer<PlaybackStatus> onStatusChangeCallback) {
+		this.onStatusChangeCallback = onStatusChangeCallback;
+		playbackStatus.setOnStatusChangeCallback(onStatusChangeCallback);
 	}
 }
