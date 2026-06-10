@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
@@ -145,9 +146,6 @@ public class PlaybackService {
 		if(getPlaybackContext().getPlaybackStatus().getState() == PlaybackStatus.State.INITIAL) {
 			getPlaybackContext().getPlaybackStatus().setState(PlaybackStatus.State.PRELOADED);
 		}
-		long to = CommonUtils.localDateTimeToMills(getPlaybackContext().getPlaybackStatus().getRunningDateTime());
-		long endTime = to;
-		LocalDateTime toDateTime = CommonUtils.millsToLocalDateTime(to);	
 		int dayDif = switch (interval) {
 			case M1,M3 -> 3;
 			case M5 -> 5;
@@ -161,32 +159,19 @@ public class PlaybackService {
 			case WK1 -> 700;
 			default -> throw new IllegalArgumentException("不支持的周期类型：" + interval);
 		};
-		LocalDateTime fromDateTime = getPlaybackContext().getPlaybackStatus().getRunningDateTime().minusDays(dayDif);
+		long endTime = CommonUtils.localDateTimeToMills(getPlaybackContext().getPlaybackStatus().getRunningDateTime());
+		long startTime =  endTime - TimeUnit.DAYS.toMillis(dayDif);
+		
 		List<Bar> mergedBars = new LinkedList<>();
 		MergedBarListener tempListener = mergedBars::add;
 		merger.addListener(tempListener);
-		List<Bar> preloadRaw = dataService.getRangeBars(contractId, interval, CommonUtils.localDateTimeToMills(fromDateTime), CommonUtils.localDateTimeToMills(toDateTime))
-			.stream()
-			.filter(bar -> bar.actionTimestamp() <= endTime)
-			.toList();
-		preloadRaw.forEach(merger::onBar);
+		dataService.getRangeBars(contractId, interval, startTime, endTime).forEach(merger::onBar);
 		
-		// 当查询周期大于1分钟时，可能需要额外的数据进行精确计算
-		if(interval != Interval.M1) {		
-			Interval refineLoadInterval = switch(interval) {
-			case M10, M15 -> Interval.M5;
-			case M30 -> Interval.M10;
-			case H1, H2 -> Interval.M15;
-			case H4 -> Interval.M30;
-			case D1 -> Interval.H1;
-			case WK1 -> Interval.H4;
-			default -> Interval.M1;
-			};
-			List<Bar> preloadRefine = dataService.getRangeBars(contractId, refineLoadInterval, preloadRaw.getLast().actionTimestamp()+1, CommonUtils.localDateTimeToMills(toDateTime))
-					.stream()
-					.filter(bar -> bar.actionTimestamp() <= endTime)
-					.toList();
-			preloadRefine.forEach(merger::onBar);
+		// 对于以收盘时间为K线时间的合约，当查询周期大于1分钟时，可能需要额外的数据进行精确计算
+		if(interval != Interval.M1 && !contract.usingStartTimeInBarTime()) {			
+			Interval refineLoadInterval = interval.getMinutes() < Interval.D1.getMinutes() ? Interval.M1 : Interval.H1;
+			long refineLoadStart = mergedBars.getLast().actionTimestamp() + TimeUnit.MINUTES.toMillis(1);
+			dataService.getRangeBars(contractId, refineLoadInterval, refineLoadStart, endTime).forEach(merger::onBar);
 		}
 		
 		getPlaybackContext().resume();
