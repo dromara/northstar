@@ -1,1 +1,0 @@
-import{d as o,M as s,L as a,aE as n,aF as r,c,o as m}from"./index-rPUD1nse.js";const u={class:"dark:!text-white"},p=o({name:"Reset",__name:"index",setup(_){const t=s();let e;return a(()=>{e=setTimeout(()=>{t.push("/welcome")},3e3),n()}),r(()=>{clearTimeout(e)}),(i,d)=>(m(),c("h1",u,"正在重置系统..."))}});export{p as default};
