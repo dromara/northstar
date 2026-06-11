@@ -78,6 +78,12 @@ public class PlaybackContext {
 	
 	private PlaybackPrecision precision;
 	
+	private ArrayBlockingQueue<DataFrame<Bar>> dataBuffer;
+	
+	private volatile LocalDateTime dataLoadCursor;
+	
+	private final AtomicBoolean isLoadThreadActive = new AtomicBoolean();
+	
 	public PlaybackContext(PlaybackGatewayAdapter gateway, FastEventEngine feEngine, MarketCenter mktCenter) {
 		this.feEngine = feEngine;
 		this.gateway = gateway;
@@ -95,9 +101,50 @@ public class PlaybackContext {
 		this.dataLoader = new PlaybackDataLoader(contracts);
 		PlaybackGatewaySettings settings = (PlaybackGatewaySettings) gateway.getDescription().getSettings();
 		precision = settings.getPrecision();
+		this.dataBuffer = new ArrayBlockingQueue<>(1024*4);
 		
 		// 初始化回放状态
 		reset();
+		startDataLoadThreadIfNeeded();
+	}
+	
+	private void startDataLoadThreadIfNeeded() {
+		if (isLoadThreadActive.compareAndSet(false, true)) {
+			exec.execute(() -> {
+				try {
+					while (true) {
+						if (!isRunning.get()) {
+							Thread.sleep(100);
+							continue;
+						}
+						LocalDateTime cursor = dataLoadCursor;
+						if (cursor == null) {
+							cursor = playbackStatus.getRunningDateTime();
+						}
+						if (cursor.toLocalDate().isAfter(endDate())) {
+							Thread.sleep(100);
+							continue;
+						}
+						long startTime = CommonUtils.localDateTimeToMills(cursor);
+						long endTime = CommonUtils.localDateTimeToMills(cursor.plusDays(1));
+						List<DataFrame<Bar>> data = dataLoader.loadData(startTime, endTime);
+						for (DataFrame<Bar> df : data) {
+							while (isRunning.get() && !dataBuffer.offer(df, 100, TimeUnit.MILLISECONDS)) {
+								// 等待放入队列
+							}
+							if (!isRunning.get()) {
+								break;
+							}
+						}
+						if (isRunning.get()) {
+							dataLoadCursor = cursor.plusDays(1);
+						}
+					}
+				} catch (InterruptedException e) {
+					log.warn("数据加载线程被中断", e);
+				}
+			});
+		}
 	}
 	
 	private PlaybackGatewaySettings settings() {
@@ -248,8 +295,6 @@ public class PlaybackContext {
 		log.info("回放网关 [{}] 连线。当前回放时间状态：{}", gateway.getDescription().getGatewayId(), playbackStatus.getRunningDateTime());
 		
 		log.info("数据回放阶段：{} -> {}", playbackStatus.getRunningDateTime(), endDate());
-		
-		final ArrayBlockingQueue<DataFrame<Bar>> dataBuffer = new ArrayBlockingQueue<>(1024*4);
 
 		// 回放
 		exec.execute(() -> {
@@ -261,8 +306,6 @@ public class PlaybackContext {
 				}
 			} catch (InterruptedException e) {
 				log.warn("回放等待被中断", e);
-			} finally {
-				dataBuffer.clear();
 			}
 			if(isRunning.get()) {	
 				synchronized (PlaybackContext.this) {
@@ -275,27 +318,6 @@ public class PlaybackContext {
 							.content("历史行情回放已经结束，可通过【复位】重置")
 							.build());
 				}
-			}
-		});
-		
-		// 解耦数据加载
-		exec.execute(() -> {
-			try {
-				LocalDateTime datetime = playbackStatus.getRunningDateTime();
-				while(!datetime.toLocalDate().isAfter(endDate())) {
-					long startTime = CommonUtils.localDateTimeToMills(datetime);
-					long endTime = CommonUtils.localDateTimeToMills(datetime.plusDays(1));
-					List<DataFrame<Bar>> data = dataLoader.loadData(startTime, endTime);
-					for(DataFrame<Bar> df : data) {
-						if(!isRunning.get()) {
-							return;
-						}
-						dataBuffer.put(df);
-					}
-					datetime = datetime.plusDays(1);
-				}
-			} catch (InterruptedException e) {
-				log.warn("回放等待被中断", e);
 			}
 		});
 	}
@@ -397,6 +419,7 @@ public class PlaybackContext {
 				playbackStatus.setState(State.PRELOADED);
 				gateway.setConnection(ConnectionState.DISCONNECTED);
 				isRunning.set(false);
+				dataLoadCursor = playbackStatus.getRunningDateTime();
 				log.info("回放网关 [{}] 数据预热完毕：{}", gateway.getDescription().getGatewayId(), playbackStatus);
 			}
 		});
@@ -412,7 +435,9 @@ public class PlaybackContext {
 				.map(IContract::contract)
 				.collect(Collectors.toMap(c -> c, c -> new KlineGenerator(c, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar))));
 		
+		dataBuffer.clear();
 		LocalDateTime initialDateTime = LocalDateTime.of(preloadDate(), LocalTime.of(0, 0));
+		dataLoadCursor = initialDateTime;
 		State state =  preloadDate() == startDate() ? State.PRELOADED : State.INITIAL;
 		int interval = switch (settings().getSpeed()) {
 			case NORMAL -> 500;
@@ -471,6 +496,8 @@ public class PlaybackContext {
 	}
 	
 	public void setRunningTime(long timestamp) {
+		dataBuffer.clear();
 		playbackStatus.setRunningDateTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault()));
+		dataLoadCursor = playbackStatus.getRunningDateTime();
 	}
 }
