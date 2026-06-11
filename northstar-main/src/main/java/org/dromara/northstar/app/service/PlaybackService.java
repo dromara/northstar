@@ -1,8 +1,5 @@
 package org.dromara.northstar.app.service;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -120,7 +117,7 @@ public class PlaybackService {
 	}
 	
 	public void setTime(long timestamp) {
-		getPlaybackContext().getPlaybackStatus().setRunningDateTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault()));
+		getPlaybackContext().setRunningTime(timestamp);
 	}
 	
 	public void playNext(Interval interval) {

@@ -469,4 +469,8 @@ public class PlaybackContext {
 		this.onStatusChangeCallback = onStatusChangeCallback;
 		playbackStatus.setOnStatusChangeCallback(onStatusChangeCallback);
 	}
+	
+	public void setRunningTime(long timestamp) {
+		playbackStatus.setRunningDateTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault()));
+	}
 }
