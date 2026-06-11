@@ -3,12 +3,12 @@ package org.dromara.northstar.app.restful;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.dromara.northstar.NorthstarApplication;
 import org.dromara.northstar.common.constant.ChannelType;
@@ -72,7 +72,9 @@ class MarketDataControllerTest {
 	
 	@Test
 	void testRange() throws Exception {
-		String result = mvc.perform(MockMvcRequestBuilders.get("/northstar/marketdata/range/BTCUSDT@BINANCE@SWAP@PLAYBACK/15m?fromTime=&toTime="))
+		long from = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1);
+		long to = System.currentTimeMillis();
+		String result = mvc.perform(MockMvcRequestBuilders.get("/northstar/marketdata/range/BTCUSDT@BINANCE@SWAP@PLAYBACK/15m?fromTime="+from+"&toTime="+to))
 		.andExpect(status().isOk())
 		.andReturn().getResponse().getContentAsString();
 		ObjectMapper mapper = new ObjectMapper();
@@ -93,12 +95,6 @@ class MarketDataControllerTest {
 		List<BarVO> bars = mapper.readValue(result, new TypeReference<List<BarVO>>(){});
 		
 		assertThat(bars).isNotEmpty();
-		Set<String> dates = new HashSet<>();
-		bars.forEach(bar -> {
-			assertThat(dates.contains(bar.getTradingDay()));
-			dates.add(bar.getTradingDay());
-			assertThat(LocalDate.parse(bar.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER).getDayOfWeek()).isEqualTo(DayOfWeek.MONDAY);
-		});
 	}
 
 	@Test

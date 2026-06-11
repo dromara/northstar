@@ -12,9 +12,12 @@ import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.model.core.TradeTimeDefinition;
+import org.dromara.northstar.common.utils.CommonUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
+
+import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 
 class NorthstarDataSourceTest {
 	
@@ -29,6 +32,7 @@ class NorthstarDataSourceTest {
 	
 	Contract c = Contract.builder()
 			.unifiedSymbol("rb9999@SHFE@FUTURES")
+			.exchange(ExchangeEnum.SHFE)
 			.contractDefinition(ContractDefinition.builder()
 					.tradeTimeDef(TradeTimeDefinition.builder()
 							.timeSlots(List.of(TimeSlot.builder()
@@ -42,22 +46,30 @@ class NorthstarDataSourceTest {
 	
 	@Test
 	void testGetMinutelyData() {
-		assertThat(ds.getData(c, Interval.M1, LocalDate.of(2024, 3, 22), LocalDate.of(2024, 3, 22))).isNotEmpty();
+		long end = CommonUtils.localDateTimeToMills(LocalDate.of(2026, 6, 11).atStartOfDay());
+		long start = CommonUtils.localDateTimeToMills(LocalDate.of(2026, 6, 8).atStartOfDay());
+		assertThat(ds.getData(c, Interval.M1, start, end)).isNotEmpty();
 	}
 
 	@Test
 	void testGetQuarterlyData() {
-		assertThat(ds.getData(c, Interval.M15, LocalDate.of(2024, 3, 22), LocalDate.of(2024, 3, 22))).isNotEmpty();
+		long end = CommonUtils.localDateTimeToMills(LocalDate.of(2026, 6, 11).atStartOfDay());
+		long start = CommonUtils.localDateTimeToMills(LocalDate.of(2026, 6, 8).atStartOfDay());
+		assertThat(ds.getData(c, Interval.M15, start, end)).isNotEmpty();
 	}
 
 	@Test
 	void testGetHourlyData() {
-		assertThat(ds.getData(c, Interval.H1, LocalDate.of(2024, 3, 22), LocalDate.of(2024, 3, 22))).isNotEmpty();
+		long end = CommonUtils.localDateTimeToMills(LocalDate.of(2026, 6, 11).atStartOfDay());
+		long start = CommonUtils.localDateTimeToMills(LocalDate.of(2026, 6, 8).atStartOfDay());
+		assertThat(ds.getData(c, Interval.H1, start, end)).isNotEmpty();
 	}
 
 	@Test
 	void testGetDailyData() {
-		assertThat(ds.getData(c, Interval.D1, LocalDate.of(2024, 3, 22), LocalDate.of(2024, 3, 22))).isNotEmpty();
+		long end = CommonUtils.localDateTimeToMills(LocalDate.of(2026, 6, 11).atStartOfDay());
+		long start = CommonUtils.localDateTimeToMills(LocalDate.of(2026, 6, 8).atStartOfDay());
+		assertThat(ds.getData(c, Interval.D1, start, end)).isNotEmpty();
 	}
 
 	@Test

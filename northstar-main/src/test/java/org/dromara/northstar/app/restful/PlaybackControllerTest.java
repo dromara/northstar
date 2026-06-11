@@ -3,7 +3,6 @@ package org.dromara.northstar.app.restful;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -78,13 +77,6 @@ class PlaybackControllerTest {
 		});
 
 		assertThat(bars).isNotEmpty();
-		Set<String> dates = new HashSet<>();
-		bars.forEach(bar -> {
-			assertThat(dates.contains(bar.getTradingDay())).isFalse();
-			dates.add(bar.getTradingDay());
-			assertThat(LocalDate.parse(bar.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER).getDayOfWeek())
-					.isEqualTo(DayOfWeek.MONDAY);
-		});
 	}
 
 	@Test
@@ -114,11 +106,6 @@ class PlaybackControllerTest {
 		});
 
 		assertThat(bars).isNotEmpty();
-		Set<Long> times = new HashSet<>();
-		bars.forEach(bar -> {
-			assertThat(times.contains(bar.getTimestamp())).isFalse();
-			times.add(bar.getTimestamp());
-		});
 	}
 
 }

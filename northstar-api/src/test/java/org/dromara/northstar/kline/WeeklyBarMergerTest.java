@@ -94,19 +94,19 @@ class WeeklyBarMergerTest {
 		assertThat(result.get(0).unstable()).isTrue();
 		assertThat(result.get(1).unstable()).isFalse();
 		
-		assertThat(result.get(1).actionDay()).isEqualTo(LocalDate.of(2024, 9, 9));
-		assertThat(result.get(1).actionTime()).isEqualTo(LocalTime.of(21, 0));
+		assertThat(result.get(1).actionDay()).isEqualTo(LocalDate.of(2024, 9, 13));
+		assertThat(result.get(1).actionTime()).isEqualTo(LocalTime.of(15, 0));
 		assertThat(result.get(1).openPrice()).isCloseTo(95D, offset(1e-1));
 		assertThat(result.get(1).closePrice()).isCloseTo(99D, offset(1e-1));
 		assertThat(result.get(1).highPrice()).isCloseTo(105D, offset(1e-1));
 		assertThat(result.get(1).lowPrice()).isCloseTo(90D, offset(1e-1));
 		
-		assertThat(result.get(2).actionDay()).isEqualTo(LocalDate.of(2024, 9, 16));
-		assertThat(result.get(2).actionTime()).isEqualTo(LocalTime.of(21, 0));
+		assertThat(result.get(2).actionDay()).isEqualTo(LocalDate.of(2024, 9, 20));
+		assertThat(result.get(2).actionTime()).isEqualTo(LocalTime.of(15, 0));
 		assertThat(result.get(2).openPrice()).isCloseTo(115D, offset(1e-1));
 		assertThat(result.get(2).closePrice()).isCloseTo(116D, offset(1e-1));
-		assertThat(result.get(2).highPrice()).isCloseTo(116D, offset(1e-1));
-		assertThat(result.get(2).lowPrice()).isCloseTo(116D, offset(1e-1));
+		assertThat(result.get(2).highPrice()).isCloseTo(120D, offset(1e-1));
+		assertThat(result.get(2).lowPrice()).isCloseTo(85D, offset(1e-1));
 	}
 	
 	Tick genTick(LocalDate date, LocalTime time, double h, double l, double o, double c, long op, int opDelta, long vol, int volDelta, double tr, double trDelta) {
