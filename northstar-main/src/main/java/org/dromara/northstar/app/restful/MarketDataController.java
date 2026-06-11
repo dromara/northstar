@@ -2,6 +2,8 @@ package org.dromara.northstar.app.restful;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import org.dromara.northstar.app.service.MarketDataService;
 import org.dromara.northstar.common.constant.DateTimeConstant;
@@ -31,7 +33,12 @@ public class MarketDataController {
 	 */
 	@GetMapping("range/{contractId}/{interval}")
 	public List<BarVO> getHistoricalBar(@PathVariable String contractId, @PathVariable String interval,  Long fromTime, Long toTime){
-		return service.getRangeBars(contractId, Interval.fromAlias(interval), fromTime, toTime)
+		Interval barInterval = Interval.fromAlias(interval);
+		
+		long end = Optional.ofNullable(toTime).orElse(System.currentTimeMillis());
+		long start = Optional.ofNullable(fromTime).orElse(end - Math.max(TimeUnit.DAYS.toMillis(1), TimeUnit.MINUTES.toMillis(barInterval.getMinutes() * 300L)));
+		
+		return service.getRangeBars(contractId, barInterval, start, end)
 				.stream()
 				.map(bar -> BarVO.builder()
 						.timestamp(bar.actionTimestamp())

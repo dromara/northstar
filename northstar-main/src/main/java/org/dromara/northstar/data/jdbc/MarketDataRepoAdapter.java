@@ -13,6 +13,7 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.jdbc.entity.BarDO;
@@ -66,13 +67,14 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 	private List<Bar> findBarData(LocalDate date, String unifiedSymbol){
 		String tradingDay = date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 		log.debug("加载 [{}] 本地行情数据：{}", unifiedSymbol, tradingDay);
+		Contract contract = contractMgr.getContract(ChannelType.CTP, unifiedSymbol).contract();
 		try {
 			return delegate.findByUnifiedSymbolAndTradingDay(unifiedSymbol, tradingDay)
 					.stream()
 					.map(BarDO::getBarData)
 					.map(this::convertFrom)
 					.filter(Objects::nonNull)
-					.map(bar -> Bar.of(bar, contractMgr.getContract(ChannelType.valueOf(bar.getChannelType()), bar.getUnifiedSymbol()).contract()))
+					.map(bar -> Bar.of(bar, contract))
 					.toList();
 		} catch (Exception e) {
 			log.error("数据转换异常", e);
