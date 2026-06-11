@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -63,8 +62,6 @@ public class PlaybackContext {
 
 	private MarketCenter mktCenter;
 	
-	private PlaybackDataLoader dataLoader;
-	
 	private final AtomicBoolean isRunning = new AtomicBoolean();
 	
 	private final AtomicBoolean isSuspended = new AtomicBoolean();
@@ -78,11 +75,7 @@ public class PlaybackContext {
 	
 	private PlaybackPrecision precision;
 	
-	private ArrayBlockingQueue<DataFrame<Bar>> dataBuffer;
-	
-	private volatile LocalDateTime dataLoadCursor;
-	
-	private final AtomicBoolean isLoadThreadActive = new AtomicBoolean();
+	private PlaybackDataProvider dataProvider;
 	
 	public PlaybackContext(PlaybackGatewayAdapter gateway, FastEventEngine feEngine, MarketCenter mktCenter) {
 		this.feEngine = feEngine;
@@ -93,58 +86,20 @@ public class PlaybackContext {
 	
 	public void init() {
 		playbackStatus = null;
-		Set<IContract> contracts = gateway.getDescription().getSubscribedContracts()
-				.stream()
-				.map(csi -> mktCenter.getContract(Identifier.of(csi.getId())))
-				.collect(Collectors.toSet());
 		Assert.isTrue(!startDate().isBefore(preloadDate()), "预热开始日不能迟于回放开始日");
-		this.dataLoader = new PlaybackDataLoader(contracts);
+		this.dataProvider = new PlaybackDataProvider(this);
 		PlaybackGatewaySettings settings = (PlaybackGatewaySettings) gateway.getDescription().getSettings();
 		precision = settings.getPrecision();
-		this.dataBuffer = new ArrayBlockingQueue<>(1024*4);
 		
 		// 初始化回放状态
 		reset();
-		startDataLoadThreadIfNeeded();
 	}
 	
-	private void startDataLoadThreadIfNeeded() {
-		if (isLoadThreadActive.compareAndSet(false, true)) {
-			exec.execute(() -> {
-				try {
-					while (true) {
-						if (!isRunning.get()) {
-							Thread.sleep(100);
-							continue;
-						}
-						LocalDateTime cursor = dataLoadCursor;
-						if (cursor == null) {
-							cursor = playbackStatus.getRunningDateTime();
-						}
-						if (cursor.toLocalDate().isAfter(endDate())) {
-							Thread.sleep(100);
-							continue;
-						}
-						long startTime = CommonUtils.localDateTimeToMills(cursor);
-						long endTime = CommonUtils.localDateTimeToMills(cursor.plusDays(1));
-						List<DataFrame<Bar>> data = dataLoader.loadData(startTime, endTime);
-						for (DataFrame<Bar> df : data) {
-							while (isRunning.get() && !dataBuffer.offer(df, 100, TimeUnit.MILLISECONDS)) {
-								// 等待放入队列
-							}
-							if (!isRunning.get()) {
-								break;
-							}
-						}
-						if (isRunning.get()) {
-							dataLoadCursor = cursor.plusDays(1);
-						}
-					}
-				} catch (InterruptedException e) {
-					log.warn("数据加载线程被中断", e);
-				}
-			});
-		}
+	Set<IContract> playbackContracts(){
+		return gateway.getDescription().getSubscribedContracts()
+				.stream()
+				.map(csi -> mktCenter.getContract(Identifier.of(csi.getId())))
+				.collect(Collectors.toSet());
 	}
 	
 	private PlaybackGatewaySettings settings() {
@@ -157,11 +112,11 @@ public class PlaybackContext {
 				DateTimeConstant.D_FORMAT_INT_FORMATTER);
 	}
 	
-	private LocalDate startDate() {
+	LocalDate startDate() {
 		return LocalDate.parse(settings().getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
 	}
 	
-	private LocalDate endDate() {
+	LocalDate endDate() {
 		return LocalDate.parse(settings().getEndDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
 	}
 	
@@ -295,12 +250,15 @@ public class PlaybackContext {
 		log.info("回放网关 [{}] 连线。当前回放时间状态：{}", gateway.getDescription().getGatewayId(), playbackStatus.getRunningDateTime());
 		
 		log.info("数据回放阶段：{} -> {}", playbackStatus.getRunningDateTime(), endDate());
+		
+		dataProvider.startSupply();
+		var buffer = dataProvider.getBuffer();
 
 		// 回放
 		exec.execute(() -> {
 			try {
 				while(isRunning.get()) {
-					DataFrame<Bar> df = dataBuffer.take();
+					DataFrame<Bar> df = buffer.take();
 					generateTickFrames(df).forEach(onTickDataCallback::accept);
 					onBarDataCallback.accept(df);
 				}
@@ -402,15 +360,9 @@ public class PlaybackContext {
 		// 预热处理
 		exec.execute(() -> {
 			try {
-				LocalDate date = preloadDate();
-				while(date.isBefore(startDate())) {
-					long startTime = CommonUtils.localDateTimeToMills(date.atStartOfDay());
-					long endTime = CommonUtils.localDateTimeToMills(date.plusDays(3).atStartOfDay());
-					List<DataFrame<Bar>> data = dataLoader.loadData(startTime, endTime);
-					for(DataFrame<Bar> dataFrame : data) {
-						onPreLoadBarDataCallback.accept(dataFrame);
-					}
-					date = date.plusDays(3);
+				List<DataFrame<Bar>> preloadData = dataProvider.loadPreloadData();
+				for(DataFrame<Bar> dataFrame : preloadData) {
+					onPreLoadBarDataCallback.accept(dataFrame);
 				}
 			} catch (InterruptedException e) {
 				log.warn("预热加载等待被中断", e);
@@ -419,7 +371,7 @@ public class PlaybackContext {
 				playbackStatus.setState(State.PRELOADED);
 				gateway.setConnection(ConnectionState.DISCONNECTED);
 				isRunning.set(false);
-				dataLoadCursor = playbackStatus.getRunningDateTime();
+				dataProvider.setRunningTime(playbackStatus.getRunningDateTime());
 				log.info("回放网关 [{}] 数据预热完毕：{}", gateway.getDescription().getGatewayId(), playbackStatus);
 			}
 		});
@@ -427,17 +379,11 @@ public class PlaybackContext {
 	
 	public synchronized void reset() {
 		numOfMinutesToPlay = null;
-		Set<IContract> contracts = this.gateway.getDescription().getSubscribedContracts()
-				.stream()
-				.map(csi -> mktCenter.getContract(Identifier.of(csi.getId())))
-				.collect(Collectors.toSet());
-		klineGeneratorMap = contracts.stream()
-				.map(IContract::contract)
+		klineGeneratorMap = playbackContracts().stream().map(IContract::contract)
 				.collect(Collectors.toMap(c -> c, c -> new KlineGenerator(c, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar))));
 		
-		dataBuffer.clear();
+		dataProvider.reset();
 		LocalDateTime initialDateTime = LocalDateTime.of(preloadDate(), LocalTime.of(0, 0));
-		dataLoadCursor = initialDateTime;
 		State state =  preloadDate() == startDate() ? State.PRELOADED : State.INITIAL;
 		int interval = switch (settings().getSpeed()) {
 			case NORMAL -> 500;
@@ -471,6 +417,7 @@ public class PlaybackContext {
 			return;
 		}
 		isRunning.set(false);
+		dataProvider.pauseSupply();
 		gateway.setConnection(ConnectionState.DISCONNECTED);
 		playbackStatus.setState(State.PRELOADED);
 		log.info("回放网关 [{}] 断开。当前回放时间状态：{}", gateway.getDescription().getGatewayId(), playbackStatus);
@@ -496,8 +443,8 @@ public class PlaybackContext {
 	}
 	
 	public void setRunningTime(long timestamp) {
-		dataBuffer.clear();
-		playbackStatus.setRunningDateTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault()));
-		dataLoadCursor = playbackStatus.getRunningDateTime();
+		LocalDateTime runningDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
+		playbackStatus.setRunningDateTime(runningDateTime);
+		dataProvider.setRunningTime(runningDateTime);
 	}
 }
