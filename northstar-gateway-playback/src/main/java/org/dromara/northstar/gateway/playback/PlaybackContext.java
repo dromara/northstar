@@ -16,7 +16,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -67,9 +66,6 @@ public class PlaybackContext {
 	private final AtomicBoolean isSuspended = new AtomicBoolean();
 	
 	private ExecutorService exec = CommonUtils.newThreadPerTaskExecutor(getClass());
-	
-	private AtomicInteger numOfMinutesToPlay;
-	private int roundingInt;
 	
 	private Map<Contract, KlineGenerator> klineGeneratorMap;
 	
@@ -131,9 +127,6 @@ public class PlaybackContext {
 				log.error("", e);
 			}
 		}
-		if(numOfMinutesToPlay != null) {
-			return; // 逐K回放模式下，忽略TICK回放
-		}
 		if(timeEntry.getStart().isBefore(playbackStatus.getRunningDateTime())) {
 			return;
 		}
@@ -159,14 +152,7 @@ public class PlaybackContext {
 		
 		playbackStatus.setRunningDateTime(timeEntry.getEnd());
 		log.debug("当前回放状态：{}", playbackStatus);
-		if(numOfMinutesToPlay != null && numOfMinutesToPlay.decrementAndGet() <= 0 && isRoundingMatch()) {
-			pause();
-		}
 	};
-	
-	private boolean isRoundingMatch() {
-		return playbackStatus.getRunningDateTime().getMinute() % roundingInt == 0;
-	}
 	
 	// 如何处理预加载的BAR数据帧
 	private Consumer<DataFrame<Bar>> onPreLoadBarDataCallback = df -> {
@@ -216,11 +202,6 @@ public class PlaybackContext {
 	}
 	
 	public synchronized void start() {
-		numOfMinutesToPlay = null;
-		doStart();
-	}
-	
-	private void doStart() {
 		if(playbackStatus.getState() == State.PLAYING) {
 			log.warn("已经处于回放中，不要重复启动");
 			return;
@@ -252,13 +233,12 @@ public class PlaybackContext {
 		log.info("数据回放阶段：{} -> {}", playbackStatus.getRunningDateTime(), endDate());
 		
 		dataProvider.startSupply();
-		var buffer = dataProvider.getBuffer();
 
 		// 回放
 		exec.execute(() -> {
 			try {
 				while(isRunning.get()) {
-					DataFrame<Bar> df = buffer.take();
+					DataFrame<Bar> df = dataProvider.getBuffer().take();
 					generateTickFrames(df).forEach(onTickDataCallback::accept);
 					onBarDataCallback.accept(df);
 				}
@@ -324,29 +304,20 @@ public class PlaybackContext {
 				.toList();
 	}
 	
+	/**
+	 * 逐K回放
+	 * @param interval
+	 */
 	public synchronized void playNext(Interval interval) {
-		LocalDateTime runningDateTime = playbackStatus.getRunningDateTime();
-		switch (interval) {
-			case M1 -> {
-				roundingInt = 1;
-				numOfMinutesToPlay = new AtomicInteger(1);
+		dataProvider.startSupply();
+		try {			
+			for(int i=0; i < interval.getMinutes(); i++) {
+				onBarDataCallback.accept(dataProvider.getBuffer().take());
 			}
-			case M3, M5, M10, M15, M30, H1 -> {
-				roundingInt = interval.getMinutes();
-				int carry = runningDateTime.getMinute() % roundingInt;
-				numOfMinutesToPlay = new AtomicInteger(roundingInt - carry);
-			}
-			case H2, H4 -> {
-				roundingInt = 60;
-				int carry = runningDateTime.getMinute() % roundingInt;
-				numOfMinutesToPlay = new AtomicInteger(interval.getMinutes() - carry);
-			}
-			default -> {
-				log.warn("无法处理周期{}的逐K回放", interval);
-				throw new IllegalArgumentException();
-			}
+		} catch(InterruptedException e) {
+			log.warn("等待中断");
 		}
-		doStart();
+		dataProvider.pauseSupply();
 	}
 	
 	public synchronized void preload() {
@@ -378,7 +349,6 @@ public class PlaybackContext {
 	}
 	
 	public synchronized void reset() {
-		numOfMinutesToPlay = null;
 		klineGeneratorMap = playbackContracts().stream().map(IContract::contract)
 				.collect(Collectors.toMap(c -> c, c -> new KlineGenerator(c, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar))));
 		

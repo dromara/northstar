@@ -168,7 +168,9 @@ public class PlaybackService {
 		if(interval != Interval.M1 && !contract.usingStartTimeInBarTime()) {			
 			Interval refineLoadInterval = interval.getMinutes() < Interval.D1.getMinutes() ? Interval.M1 : Interval.H1;
 			long refineLoadStart = mergedBars.getLast().actionTimestamp() + TimeUnit.MINUTES.toMillis(1);
-			dataService.getRangeBars(contractId, refineLoadInterval, refineLoadStart, endTime).forEach(merger::onBar);
+			if(refineLoadStart < endTime) {				
+				dataService.getRangeBars(contractId, refineLoadInterval, refineLoadStart, endTime).forEach(merger::onBar);
+			}
 		}
 		
 		getPlaybackContext().resume();
