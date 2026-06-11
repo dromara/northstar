@@ -8,9 +8,6 @@ import org.dromara.northstar.common.exception.NoSuchGatewayException;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.data.jdbc.entity.GatewayDescriptionDO;
-import org.dromara.northstar.support.utils.CodecUtils;
-
-import com.alibaba.fastjson2.JSON;
 
 public class GatewayRepoAdapter implements IGatewayRepository{
 	
@@ -22,10 +19,7 @@ public class GatewayRepoAdapter implements IGatewayRepository{
 
 	@Override
 	public void save(GatewayDescription gatewayDescription) {
-		Object settings = gatewayDescription.getSettings();
-		gatewayDescription.setSettings(CodecUtils.encrypt(JSON.toJSONString(settings)));
 		delegate.save(GatewayDescriptionDO.convertFrom(gatewayDescription));
-		gatewayDescription.setSettings(settings);
 	}
 
 	@Override
@@ -41,22 +35,13 @@ public class GatewayRepoAdapter implements IGatewayRepository{
 			GatewayDescriptionDO obj = itResults.next();
 			list.add(obj.convertTo());
 		}
-		return list.stream()
-				.map(gd -> {
-					String encrypted = gd.getSettings().toString();
-					gd.setSettings(JSON.parse(CodecUtils.decrypt(encrypted)));
-					return gd;
-				})
-				.toList();
+		return list;
 	}
 
 	@Override
 	public GatewayDescription findById(String gatewayId) {
 		GatewayDescriptionDO gdDo = delegate.findById(gatewayId).orElseThrow(() -> new NoSuchGatewayException(gatewayId));
-		GatewayDescription gd = gdDo.convertTo();
-		String encrypted = gd.getSettings().toString();
-		gd.setSettings(JSON.parse(CodecUtils.decrypt(encrypted)));
-		return gd;
+		return gdDo.convertTo();
 	}
 
 
