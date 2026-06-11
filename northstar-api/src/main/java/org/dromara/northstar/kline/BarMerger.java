@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import org.dromara.northstar.common.BarDataAware;
@@ -60,6 +61,8 @@ public class BarMerger implements BarDataAware, TickDataAware {
 	
 	protected LinkedList<Bar> mergingBuffer = new LinkedList<>();
 	
+	private LocalDate tradingDay;
+	
 	public BarMerger(Interval interval, Contract contract) { 
 		this.contract = contract;
 		this.barInterval = interval;
@@ -73,6 +76,11 @@ public class BarMerger implements BarDataAware, TickDataAware {
 				log.trace("[{}] K线合成器忽略Bar数据 [{}]", contract.unifiedSymbol(), String.format("%s:%s:%s", bar.contract().unifiedSymbol(), bar.actionDay(), bar.actionTime()));
 			}
 			return;
+		}
+		
+		if(bar.interval() == Interval.M1) {
+			listeners.forEach(listener -> listener.onMergedBar(bar));
+			cutoffDateTime = null;
 		}
 		
 		LocalDateTime barEndDateTime = LocalDateTime.of(bar.actionDay(), bar.actionTime());
@@ -169,7 +177,7 @@ public class BarMerger implements BarDataAware, TickDataAware {
 					.gatewayId(contract.gatewayId())
 					.channelType(contract.channelType())
 					.contract(contract)
-					.tradingDay(mergedBarActionDay())
+					.tradingDay(Optional.ofNullable(tradingDay).orElse(firstBar.tradingDay()))
 					.actionDay(mergedBarActionDay())
 					.actionTime(mergedBarActionTime())
 					.actionTimestamp(CommonUtils.localDateTimeToMills(LocalDateTime.of(mergedBarActionDay(), mergedBarActionTime())))
@@ -209,6 +217,7 @@ public class BarMerger implements BarDataAware, TickDataAware {
 		}
 		if(protoBar == null) {
 			resetVal();
+			tradingDay = tick.tradingDay();
 			if(!mergingBuffer.isEmpty()) {
 				protoBar = aggregateBar();
 			} else {
