@@ -78,9 +78,10 @@ public class BarMerger implements BarDataAware, TickDataAware {
 			return;
 		}
 		
-		if(bar.interval() == Interval.M1) {
+		if(barInterval == Interval.M1 && bar.interval() == Interval.M1) {
 			listeners.forEach(listener -> listener.onMergedBar(bar));
 			cutoffDateTime = null;
+			return;
 		}
 		
 		LocalDateTime barEndDateTime = LocalDateTime.of(bar.actionDay(), bar.actionTime());

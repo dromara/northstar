@@ -23,6 +23,7 @@ import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.model.core.TradeTimeDefinition;
+import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.kline.BarTimePadding.MinuteEntry;
 import org.dromara.northstar.strategy.MergedBarListener;
 import org.junit.jupiter.api.Test;
@@ -95,6 +96,14 @@ class BarMergerTest {
     				.tradeTimeDef(TradeTimeDefinition.builder().timeSlots(times5).weekendClosure(false).build())
     				.build())
     		.usingStartTimeInBarTime(true)
+    		.build();
+    
+    Contract contractStart = Contract.builder()
+    		.unifiedSymbol("rb2401@SHFE@FUTURES")
+    		.usingStartTimeInBarTime(true)
+    		.contractDefinition(ContractDefinition.builder()
+    				.tradeTimeDef(TradeTimeDefinition.builder().timeSlots(times).build())
+    				.build())
     		.build();
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -366,6 +375,80 @@ class BarMergerTest {
 		assertThat(result.get(1).actionTime()).isEqualTo(LocalTime.of(21, 3));
     }
     
+    @Test
+    void testCloseTimeBarTime() {
+        LocalDate date = LocalDate.of(2024, 9, 9);
+        Bar b1 = genBar(contract, date, LocalTime.of(21, 0), Interval.M1, 5500, 4500, 5000, 5100, 10010, 10, 20200, 200, 30001, 1);
+        Bar b2 = genBar(contract, date, LocalTime.of(21, 1), Interval.M1, 5600, 4800, 5100, 5200, 10020, 10, 20400, 200, 30002, 2);
+        Bar b3 = genBar(contract, date, LocalTime.of(21, 2), Interval.M1, 5400, 4900, 5200, 5100, 10030, 10, 20600, 200, 30002, 0);
+        Bar b4 = genBar(contract, date, LocalTime.of(21, 3), Interval.M1, 5300, 4600, 5300, 5150, 10040, 10, 20800, 200, 30003, 1);
+        BarMerger merger = new BarMerger(Interval.M3, contract);
+        List<Bar> results = new ArrayList<>();
+        merger.addListener(results::add);
+        merger.onBar(b1);
+        merger.onBar(b2);
+        merger.onBar(b3);
+        merger.onBar(b4);
+        assertThat(results).hasSize(1);
+        Bar bar = results.get(0);
+        assertThat(bar.actionDay()).isEqualTo(date);
+        assertThat(bar.actionTime()).isEqualTo(LocalTime.of(21, 3));
+        assertThat(bar.actionTimestamp()).isEqualTo(CommonUtils.localDateTimeToMills(LocalDateTime.of(date, LocalTime.of(21, 3))));
+        assertThat(bar.interval()).isEqualTo(Interval.M3);
+    }
+
+    @Test
+    void testOpenTimeBarTime() {
+        LocalDate date = LocalDate.of(2024, 9, 9);
+        Bar b1 = genBar(contractStart, date, LocalTime.of(21, 0), Interval.M1, 5500, 4500, 5000, 5100, 10010, 10, 20200, 200, 30001, 1);
+        Bar b2 = genBar(contractStart, date, LocalTime.of(21, 1), Interval.M1, 5600, 4800, 5100, 5200, 10020, 10, 20400, 200, 30002, 2);
+        Bar b3 = genBar(contractStart, date, LocalTime.of(21, 2), Interval.M1, 5400, 4900, 5200, 5100, 10030, 10, 20600, 200, 30002, 0);
+        BarMerger merger = new BarMerger(Interval.M3, contractStart);
+        List<Bar> results = new ArrayList<>();
+        merger.addListener(results::add);
+        merger.onBar(b1);
+        merger.onBar(b2);
+        merger.onBar(b3);
+        assertThat(results).hasSize(1);
+        Bar bar = results.get(0);
+        assertThat(bar.actionDay()).isEqualTo(date);
+        assertThat(bar.actionTime()).isEqualTo(LocalTime.of(21, 0));
+        assertThat(bar.actionTimestamp()).isEqualTo(CommonUtils.localDateTimeToMills(LocalDateTime.of(date, LocalTime.of(21, 0))));
+        assertThat(bar.interval()).isEqualTo(Interval.M3);
+    }
+
+    @Test
+    void testTickOnlyCloseTime() {
+        LocalDate date = LocalDate.of(2024, 9, 9);
+        Tick t1 = genTick(contract, date, LocalTime.of(21, 0, 10), 5500, 4500, 5000, 5055, 10000, 10, 20000, 200, 30001, 300);
+        BarMerger merger = new BarMerger(Interval.M3, contract);
+        List<Bar> results = new ArrayList<>();
+        merger.addListener(results::add);
+        merger.onTick(t1);
+        assertThat(results).hasSize(1);
+        Bar bar = results.get(0);
+        assertThat(bar.unstable()).isTrue();
+        assertThat(bar.actionDay()).isEqualTo(date);
+        assertThat(bar.actionTime()).isEqualTo(LocalTime.of(21, 3));
+        assertThat(bar.interval()).isEqualTo(Interval.M3);
+    }
+
+    @Test
+    void testTickOnlyOpenTime() {
+        LocalDate date = LocalDate.of(2024, 9, 9);
+        Tick t1 = genTick(contractStart, date, LocalTime.of(21, 0, 10), 5500, 4500, 5000, 5055, 10000, 10, 20000, 200, 30001, 300);
+        BarMerger merger = new BarMerger(Interval.M3, contractStart);
+        List<Bar> results = new ArrayList<>();
+        merger.addListener(results::add);
+        merger.onTick(t1);
+        assertThat(results).hasSize(1);
+        Bar bar = results.get(0);
+        assertThat(bar.unstable()).isTrue();
+        assertThat(bar.actionDay()).isEqualTo(date);
+        assertThat(bar.actionTime()).isEqualTo(LocalTime.of(21, 0));
+        assertThat(bar.interval()).isEqualTo(Interval.M3);
+    }
+
     List<Bar> sampling(LocalTime start){
     	List<Bar> result = new ArrayList<>();
     	LocalDateTime dtStart = LocalDateTime.of(LocalDate.of(2024, 12, 12), start);
@@ -395,6 +478,26 @@ class BarMergerTest {
 				.turnover(tr)
 				.turnoverDelta(trDelta)
     			.build();
+    }
+    
+    Tick genTick(Contract contract, LocalDate date, LocalTime time, double h, double l, double o, double c, long op, int opDelta, long vol, int volDelta, double tr, double trDelta) {
+        return Tick.builder()
+                .contract(contract)
+                .tradingDay(date)
+                .actionDay(date)
+                .actionTime(time)
+                .actionTimestamp(LocalDateTime.of(date, time).toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
+                .openPrice(o)
+                .lastPrice(c)
+                .highPrice(h)
+                .lowPrice(l)
+                .openInterest(op)
+                .openInterestDelta(opDelta)
+                .volume(vol)
+                .volumeDelta(volDelta)
+                .turnover(tr)
+                .turnoverDelta(trDelta)
+                .build();
     }
     
     Bar genBar(LocalDate date, LocalTime time, double h, double l, double o, double c, long op, int opDelta, long vol, int volDelta, double tr, double trDelta){
