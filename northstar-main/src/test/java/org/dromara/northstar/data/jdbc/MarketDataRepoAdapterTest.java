@@ -1,8 +1,6 @@
 package org.dromara.northstar.data.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -12,17 +10,15 @@ import java.util.List;
 
 import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.gateway.IContract;
-import org.dromara.northstar.gateway.IContractManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-
-import org.dromara.northstar.common.constant.Interval;
 
 @DataJpaTest
 class MarketDataRepoAdapterTest {
@@ -82,11 +78,9 @@ class MarketDataRepoAdapterTest {
 
 	@BeforeEach
 	void prepare() {
-		IContractManager contractMgr = mock(IContractManager.class);
 		IContract contract = mock(IContract.class);
 		when(contract.contract()).thenReturn(c);
-		when(contractMgr.getContract(any(ChannelType.class), anyString())).thenReturn(contract);
-		repo = new MarketDataRepoAdapter(delegate, contractMgr);
+		repo = new MarketDataRepoAdapter(delegate);
 	}
 
 	@Test

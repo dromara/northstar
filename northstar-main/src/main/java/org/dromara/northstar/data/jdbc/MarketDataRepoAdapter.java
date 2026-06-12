@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Objects;
 
 import org.dromara.northstar.common.IDataSource;
-import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.core.Bar;
@@ -18,7 +17,6 @@ import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.jdbc.entity.BarDO;
 import org.dromara.northstar.gateway.IContract;
-import org.dromara.northstar.gateway.IContractManager;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -35,11 +33,8 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 
 	private MarketDataRepository delegate;
 	
-	private IContractManager contractMgr;
-	
-	public MarketDataRepoAdapter(MarketDataRepository delegate, IContractManager contractMgr) {
+	public MarketDataRepoAdapter(MarketDataRepository delegate) {
 		this.delegate = delegate;
-		this.contractMgr = contractMgr;
 	}
 	
 	@Override
@@ -58,18 +53,17 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 		List<Bar> resultList = new ArrayList<>();
 		LocalDate date = startDate;
 		while(!date.isAfter(endDate)) {
-			resultList.addAll(findBarData(date, contract.contract().unifiedSymbol()));
+			resultList.addAll(findBarData(date, contract.contract()));
 			date = date.plusDays(1);
 		}
 		return resultList;
 	}
 	
-	private List<Bar> findBarData(LocalDate date, String unifiedSymbol){
+	private List<Bar> findBarData(LocalDate date, Contract contract){
 		String tradingDay = date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
-		log.debug("加载 [{}] 本地行情数据：{}", unifiedSymbol, tradingDay);
-		Contract contract = contractMgr.getContract(ChannelType.CTP, unifiedSymbol).contract();
+		log.debug("加载 [{}] 本地行情数据：{}", contract.name(), tradingDay);
 		try {
-			return delegate.findByUnifiedSymbolAndTradingDay(unifiedSymbol, tradingDay)
+			return delegate.findByUnifiedSymbolAndTradingDay(contract.unifiedSymbol(), tradingDay)
 					.stream()
 					.map(BarDO::getBarData)
 					.map(this::convertFrom)
