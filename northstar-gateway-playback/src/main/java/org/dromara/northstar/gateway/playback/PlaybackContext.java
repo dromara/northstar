@@ -357,7 +357,7 @@ public class PlaybackContext {
 		
 		dataProvider.reset();
 		LocalDateTime initialDateTime = LocalDateTime.of(preloadDate(), LocalTime.of(0, 0));
-		State state =  preloadDate() == startDate() ? State.PRELOADED : State.INITIAL;
+		State state =  preloadDate().equals(startDate()) ? State.PRELOADED : State.INITIAL;
 		playbackStatus.setRunningDateTime(initialDateTime);
 		playbackStatus.setState(state);
 		log.info("回放状态重置：{}", playbackStatus);
