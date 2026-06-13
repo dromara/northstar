@@ -57,8 +57,6 @@ public class PlaybackContext {
 	@Getter
 	private PlaybackStatus playbackStatus;
 	
-	private Consumer<PlaybackStatus> onStatusChangeCallback;
-
 	private MarketCenter mktCenter;
 	
 	private final AtomicBoolean isRunning = new AtomicBoolean();
@@ -81,7 +79,12 @@ public class PlaybackContext {
 	}
 	
 	public void init() {
-		playbackStatus = null;
+		LocalDateTime initialDateTime = LocalDateTime.of(preloadDate(), LocalTime.of(0, 0));
+		playbackStatus = PlaybackStatus.builder()
+				.runningDateTime(initialDateTime)
+				.state(State.INITIAL)
+				.playInterval(settings().getSpeed().getPauseInterval())
+				.build();
 		Assert.isTrue(!startDate().isBefore(preloadDate()), "预热开始日不能迟于回放开始日");
 		this.dataProvider = new PlaybackDataProvider(this);
 		PlaybackGatewaySettings settings = (PlaybackGatewaySettings) gateway.getDescription().getSettings();
@@ -355,18 +358,8 @@ public class PlaybackContext {
 		dataProvider.reset();
 		LocalDateTime initialDateTime = LocalDateTime.of(preloadDate(), LocalTime.of(0, 0));
 		State state =  preloadDate() == startDate() ? State.PRELOADED : State.INITIAL;
-		int interval = switch (settings().getSpeed()) {
-			case NORMAL -> 500;
-			case SPRINT -> 50;
-			case RUSH -> 0;
-			default -> throw new IllegalArgumentException("Unexpected value: " + settings().getSpeed());
-		};
-		playbackStatus = PlaybackStatus.builder()
-				.runningDateTime(initialDateTime)
-				.state(state)
-				.playInterval(playbackStatus == null ? interval : playbackStatus.getPlayInterval())
-				.onStatusChangeCallback(onStatusChangeCallback)
-				.build();
+		playbackStatus.setRunningDateTime(initialDateTime);
+		playbackStatus.setState(state);
 		log.info("回放状态重置：{}", playbackStatus);
 	}
 	
@@ -408,7 +401,6 @@ public class PlaybackContext {
 	}
 
 	public void setOnStatusChangeCallback(Consumer<PlaybackStatus> onStatusChangeCallback) {
-		this.onStatusChangeCallback = onStatusChangeCallback;
 		playbackStatus.setOnStatusChangeCallback(onStatusChangeCallback);
 	}
 	

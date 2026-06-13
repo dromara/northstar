@@ -3,9 +3,9 @@ package org.dromara.northstar.app.service;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.dromara.northstar.account.GatewayManager;
@@ -59,11 +59,10 @@ public class PlaybackService {
 	
 	private AtomicLong lastStatusSent = new AtomicLong();
 	
-	private Set<State> playingStates = Set.of(State.PRELOADING, State.PLAYING);
+	private AtomicReference<State> lastState = new AtomicReference<>();
 	
 	private Consumer<PlaybackStatus> onStatusChangeCallback = status -> {
-		if(playingStates.contains(status.getState()) && System.currentTimeMillis() - lastStatusSent.get() < 100) {
-			// 自动过滤状态回报，避免IO拥挤
+		if(lastState.get() != null && lastState.get() == status.getState() && System.currentTimeMillis() - lastStatusSent.get() < 100) {
 			return;
 		}
 		PlaybackStatusVO vo = PlaybackStatusVO.builder()
@@ -73,6 +72,7 @@ public class PlaybackService {
 				.build();
 		emitterHolder.send(SseEmitter.event().name("PLAYBACK_STATUS").data(vo));
 		lastStatusSent.set(System.currentTimeMillis());
+		lastState.set(status.getState());
 	};
 	
 	public void start() {
