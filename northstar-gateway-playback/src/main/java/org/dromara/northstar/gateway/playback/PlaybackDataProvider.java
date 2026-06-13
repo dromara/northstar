@@ -2,6 +2,7 @@ package org.dromara.northstar.gateway.playback;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -34,7 +35,7 @@ public class PlaybackDataProvider {
 		this.context = context;
 		this.dataLoader = new PlaybackDataLoader(context.playbackContracts());
 		this.dataBuffer = new ArrayBlockingQueue<>(1024 * 4);
-		this.dataLoadCursor = context.getPlaybackStatus().getRunningDateTime();
+		this.dataLoadCursor = LocalDateTime.of(context.preloadDate(), LocalTime.of(0, 0));
 	}
 	
 	/**
@@ -80,7 +81,7 @@ public class PlaybackDataProvider {
 	 */
 	public void reset() {
 		dataBuffer.clear();
-		dataLoadCursor = context.getPlaybackStatus().getRunningDateTime();
+		dataLoadCursor = LocalDateTime.of(context.preloadDate(), LocalTime.of(0, 0));
 	}
 	
 	/**

@@ -352,6 +352,7 @@ public class PlaybackContext {
 		klineGeneratorMap = playbackContracts().stream().map(IContract::contract)
 				.collect(Collectors.toMap(c -> c, c -> new KlineGenerator(c, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar))));
 		
+		dataProvider.reset();
 		LocalDateTime initialDateTime = LocalDateTime.of(preloadDate(), LocalTime.of(0, 0));
 		State state =  preloadDate() == startDate() ? State.PRELOADED : State.INITIAL;
 		int interval = switch (settings().getSpeed()) {
@@ -367,7 +368,6 @@ public class PlaybackContext {
 				.onStatusChangeCallback(onStatusChangeCallback)
 				.build();
 		log.info("回放状态重置：{}", playbackStatus);
-		dataProvider.reset();
 	}
 	
 	public synchronized void setSpeed(int interval) {
