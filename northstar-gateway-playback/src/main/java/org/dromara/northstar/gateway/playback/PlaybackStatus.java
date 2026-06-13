@@ -55,5 +55,10 @@ public class PlaybackStatus {
 			onStatusChangeCallback.accept(this);
 		}
 	}
+
+	@Override
+	public String toString() {
+		return "PlaybackStatus [state=" + state + ", playInterval=" + playInterval + ", runningDateTime=" + runningDateTime + "]";
+	}
 	
 }
