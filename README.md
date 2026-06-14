@@ -17,8 +17,7 @@
 
 已对接的网关示例：
 - CTP网关：[https://gitee.com/NorthstarQuant/northstar-gateway-ctp](https://gitee.com/NorthstarQuant/northstar-gateway-ctp)
-- 老虎网关：[https://gitee.com/NorthstarQuant/northstar-gateway-tiger](https://gitee.com/NorthstarQuant/northstar-gateway-tiger)
-- 币安网关：[https://gitee.com/NorthstarQuant/northstar-gateway-binance](https://gitee.com/NorthstarQuant/northstar-gateway-binance)
+- OKX网关：[https://gitee.com/NorthstarQuant/northstar-gateway-okx](https://gitee.com/NorthstarQuant/northstar-gateway-okx)
 
 **程序化交易**  
 ● 模组管理  
