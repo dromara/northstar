@@ -67,7 +67,7 @@ public class PlaybackService {
 		}
 		PlaybackStatusVO vo = PlaybackStatusVO.builder()
 				.state(status.getState().toString())
-				.speed(500 - status.getPlayInterval())
+				.speed(status.getPlayInterval())
 				.playingTimestamp(CommonUtils.localDateTimeToMills(status.getRunningDateTime()))
 				.build();
 		emitterHolder.send(SseEmitter.event().name("PLAYBACK_STATUS").data(vo));
@@ -106,7 +106,7 @@ public class PlaybackService {
 	public PlaybackStatusVO getPlaybackStatus() {
 		PlaybackStatus pstatus = getPlaybackContext().getPlaybackStatus();
 		return PlaybackStatusVO.builder()
-				.speed(500 - pstatus.getPlayInterval())
+				.speed(pstatus.getPlayInterval())
 				.state(pstatus.getState().toString())
 				.playingTimestamp(CommonUtils.localDateTimeToMills(pstatus.getRunningDateTime()))
 				.build();
