@@ -159,15 +159,15 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean {
 
     @Bean
     RestTemplate restTemplate(BuildProperties buildProperties) {
-    	String token = System.getenv("NS_DS_SECRET");
-    	if(StringUtils.isNotBlank(dsSecret)) {
-    		token = dsSecret;
-    	}
-    	String partialToken = "空";
-    	if(StringUtils.isNotBlank(token)) {
-    		partialToken = token.split("\\.")[2];
-    	}
-    	log.info("数据服务token验证码: {}", partialToken);
+	    	String token = System.getenv("NS_DS_SECRET");
+	    	if(StringUtils.isNotBlank(dsSecret)) {
+	    		token = dsSecret;
+	    	}
+	    	String partialToken = "空";
+	    	if(StringUtils.isNotBlank(token)) {
+	    		partialToken = token.split("\\.")[2];
+	    	}
+	    	log.info("数据服务token验证码: {}", partialToken);
         return new RestTemplateBuilder()
                 .setReadTimeout(Duration.ofSeconds(60))
                 .setConnectTimeout(Duration.ofSeconds(10))
