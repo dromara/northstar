@@ -1,8 +1,10 @@
 package org.dromara.northstar.gateway;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.dromara.northstar.common.IHolidayManager;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.model.GatewayDescription;
 
@@ -43,4 +45,22 @@ public abstract class Gateway {
 	 * 断开
 	 */
 	public abstract void disconnect();
+	
+	/**
+	 * 获取网关对应的节假日管理器
+	 * 默认为空，由网关实现类提供
+	 * @return
+	 */
+	public Optional<IHolidayManager> getHolidayManager() {
+		return Optional.empty();
+	}
+
+	/**
+	 * 计算当前时间是否处于开市时间
+	 * 各个网关实现可以自行重写
+	 * @return
+	 */
+	public boolean isTradingTimeWindow() {
+		return true;
+	}
 }
