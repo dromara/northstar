@@ -152,9 +152,6 @@ public class PlaybackContext {
 			return;
 		}
 		df.items().forEach(bar -> klineGeneratorMap.get(bar.contract()).updateBar(bar));
-		
-		playbackStatus.setRunningDateTime(timeEntry.getEnd());
-		log.debug("当前回放状态：{}", playbackStatus);
 	};
 	
 	// 如何处理预加载的BAR数据帧
@@ -233,17 +230,20 @@ public class PlaybackContext {
 		isRunning.set(true);
 		log.info("回放网关 [{}] 连线。当前回放时间状态：{}", gateway.getDescription().getGatewayId(), playbackStatus.getRunningDateTime());
 		
-		log.info("数据回放阶段：{} -> {}", playbackStatus.getRunningDateTime(), endDate());
+		LocalDateTime endDateTime = endDate().plusDays(1).atStartOfDay();
+		log.info("数据回放阶段：{} -> {}", playbackStatus.getRunningDateTime(), endDateTime);
 		
 		dataProvider.startSupply();
 
 		// 回放
 		exec.execute(() -> {
 			try {
-				while(isRunning.get()) {
+				while(isRunning.get() && playbackStatus.getRunningDateTime().isBefore(endDateTime)) {
 					DataFrame<Bar> df = dataProvider.getBuffer().take();
 					generateTickFrames(df).forEach(onTickDataCallback::accept);
 					onBarDataCallback.accept(df);
+					playbackStatus.setRunningDateTime(df.getTime().getEnd());
+					log.debug("当前回放状态：{}", playbackStatus);
 				}
 			} catch (InterruptedException e) {
 				log.warn("回放等待被中断", e);
