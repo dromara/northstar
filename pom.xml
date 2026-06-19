@@ -39,6 +39,7 @@
     <netty-version>4.1.104.Final</netty-version>
     <h2-version>2.2.224</h2-version>
     <tensorflow-version>0.5.0</tensorflow-version>
+    <retrofit2.version>2.11.0</retrofit2.version>
   </properties>
   <modules>
     <module>northstar-api</module>
@@ -155,8 +156,23 @@
       <dependency>
         <groupId>com.squareup.retrofit2</groupId>
         <artifactId>retrofit</artifactId>
-        <version>2.11.0</version>
+        <version>${retrofit2.version}</version>
       </dependency>
+      <dependency>
+		<groupId>com.squareup.retrofit2</groupId>
+		<artifactId>converter-jackson</artifactId>
+		<version>${retrofit2.version}</version>
+	  </dependency>
+	  <dependency>
+		<groupId>com.squareup.retrofit2</groupId>
+		<artifactId>adapter-rxjava3</artifactId>
+		<version>${retrofit2.version}</version>
+	  </dependency>
+	  <dependency>
+		<groupId>com.squareup.retrofit2</groupId>
+		<artifactId>converter-scalars</artifactId>
+		<version>${retrofit2.version}</version>
+	  </dependency>
       <dependency>
         <groupId>net.sf.ehcache</groupId>
         <artifactId>ehcache</artifactId>
