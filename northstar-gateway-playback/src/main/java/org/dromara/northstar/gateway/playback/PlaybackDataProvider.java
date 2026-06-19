@@ -3,7 +3,6 @@ package org.dromara.northstar.gateway.playback;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -12,6 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.utils.CommonUtils;
+import org.dromara.northstar.gateway.playback.PlaybackStatus.State;
 import org.dromara.northstar.gateway.playback.model.DataFrame;
 
 import lombok.extern.slf4j.Slf4j;
@@ -42,16 +42,30 @@ public class PlaybackDataProvider {
 	 * 加载预热数据
 	 * @return 预热期间的数据帧列表
 	 */
-	public List<DataFrame<Bar>> loadPreloadData() throws InterruptedException {
-		List<DataFrame<Bar>> result = new ArrayList<>();
-		LocalDate date = context.preloadDate();
-		while(date.isBefore(context.startDate())) {
-			long startTime = CommonUtils.localDateTimeToMills(date.atStartOfDay());
-			long endTime = CommonUtils.localDateTimeToMills(date.plusDays(3).atStartOfDay());
-			result.addAll(dataLoader.loadData(startTime, endTime));
-			date = date.plusDays(3);
-		}
-		return result;
+	public ArrayBlockingQueue<DataFrame<Bar>> loadPreloadData() {
+		ArrayBlockingQueue<DataFrame<Bar>> preloadBuffer = new ArrayBlockingQueue<>(1024);
+		exec.execute(() -> {
+			try {
+				LocalDate date = context.preloadDate();
+				while(date.isBefore(context.startDate())) {
+					long startTime = CommonUtils.localDateTimeToMills(date.atStartOfDay());
+					long endTime = CommonUtils.localDateTimeToMills(date.plusDays(3).atStartOfDay());
+					for(DataFrame<Bar> df : dataLoader.loadData(startTime, endTime)) {
+						while(!preloadBuffer.offer(df, 100, TimeUnit.MILLISECONDS)) {
+							if(context.getPlaybackStatus().getState() != State.PRELOADING) {
+								preloadBuffer.clear();
+								return;
+							}
+						}
+					}
+					date = date.plusDays(3);
+				}
+			} catch(InterruptedException e) {
+				log.warn("加载中断", e);
+			}
+		});
+		
+		return preloadBuffer;
 	}
 	
 	/**

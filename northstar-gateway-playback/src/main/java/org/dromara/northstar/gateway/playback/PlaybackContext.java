@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -329,14 +330,16 @@ public class PlaybackContext {
 		}
 		playbackStatus.setState(State.PRELOADING);
 		gateway.setConnection(ConnectionState.CONNECTED);
-		log.info("回放网关 [{}] 正在加载预热数据，预热时间段：{} -> {}", gateway.getDescription().getGatewayId(), preloadDate(), startDate());
+		LocalDateTime preloadStart = preloadDate().atStartOfDay();
+		LocalDateTime preloadEnd = startDate().atStartOfDay();
+		log.info("回放网关 [{}] 正在加载预热数据，预热时间段：{} -> {}", gateway.getDescription().getGatewayId(), preloadStart, preloadEnd);
 
+		final ArrayBlockingQueue<DataFrame<Bar>> preloadBuffer = dataProvider.loadPreloadData();
 		// 预热处理
 		exec.execute(() -> {
 			try {
-				List<DataFrame<Bar>> preloadData = dataProvider.loadPreloadData();
-				for(DataFrame<Bar> dataFrame : preloadData) {
-					onPreLoadBarDataCallback.accept(dataFrame);
+				while(playbackStatus.getRunningDateTime().isBefore(preloadEnd)) {
+					onPreLoadBarDataCallback.accept(preloadBuffer.take());
 				}
 			} catch (InterruptedException e) {
 				log.warn("预热加载等待被中断", e);
