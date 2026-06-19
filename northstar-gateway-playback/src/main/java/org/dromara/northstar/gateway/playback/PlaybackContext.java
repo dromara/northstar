@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -152,9 +153,6 @@ public class PlaybackContext {
 			return;
 		}
 		df.items().forEach(bar -> klineGeneratorMap.get(bar.contract()).updateBar(bar));
-		
-		playbackStatus.setRunningDateTime(timeEntry.getEnd());
-		log.debug("当前回放状态：{}", playbackStatus);
 	};
 	
 	// 如何处理预加载的BAR数据帧
@@ -233,17 +231,20 @@ public class PlaybackContext {
 		isRunning.set(true);
 		log.info("回放网关 [{}] 连线。当前回放时间状态：{}", gateway.getDescription().getGatewayId(), playbackStatus.getRunningDateTime());
 		
-		log.info("数据回放阶段：{} -> {}", playbackStatus.getRunningDateTime(), endDate());
+		LocalDateTime endDateTime = endDate().plusDays(1).atStartOfDay();
+		log.info("数据回放阶段：{} -> {}", playbackStatus.getRunningDateTime(), endDateTime);
 		
 		dataProvider.startSupply();
 
 		// 回放
 		exec.execute(() -> {
 			try {
-				while(isRunning.get()) {
+				while(isRunning.get() && playbackStatus.getRunningDateTime().isBefore(endDateTime)) {
 					DataFrame<Bar> df = dataProvider.getBuffer().take();
 					generateTickFrames(df).forEach(onTickDataCallback::accept);
 					onBarDataCallback.accept(df);
+					playbackStatus.setRunningDateTime(df.getTime().getEnd());
+					log.debug("当前回放状态：{}", playbackStatus);
 				}
 			} catch (InterruptedException e) {
 				log.warn("回放等待被中断", e);
@@ -329,14 +330,16 @@ public class PlaybackContext {
 		}
 		playbackStatus.setState(State.PRELOADING);
 		gateway.setConnection(ConnectionState.CONNECTED);
-		log.info("回放网关 [{}] 正在加载预热数据，预热时间段：{} -> {}", gateway.getDescription().getGatewayId(), preloadDate(), startDate());
+		LocalDateTime preloadStart = preloadDate().atStartOfDay();
+		LocalDateTime preloadEnd = startDate().atStartOfDay();
+		log.info("回放网关 [{}] 正在加载预热数据，预热时间段：{} -> {}", gateway.getDescription().getGatewayId(), preloadStart, preloadEnd);
 
+		final ArrayBlockingQueue<DataFrame<Bar>> preloadBuffer = dataProvider.loadPreloadData();
 		// 预热处理
 		exec.execute(() -> {
 			try {
-				List<DataFrame<Bar>> preloadData = dataProvider.loadPreloadData();
-				for(DataFrame<Bar> dataFrame : preloadData) {
-					onPreLoadBarDataCallback.accept(dataFrame);
+				while(playbackStatus.getRunningDateTime().isBefore(preloadEnd)) {
+					onPreLoadBarDataCallback.accept(preloadBuffer.take());
 				}
 			} catch (InterruptedException e) {
 				log.warn("预热加载等待被中断", e);

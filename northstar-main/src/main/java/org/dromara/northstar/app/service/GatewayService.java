@@ -2,8 +2,10 @@ package org.dromara.northstar.app.service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,13 +30,14 @@ import org.dromara.northstar.gateway.GatewayFactory;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeGateway;
-import org.dromara.northstar.gateway.sim.trade.SimTradeGateway;
 import org.dromara.northstar.gateway.sim.trade.SimAccountRemote;
+import org.dromara.northstar.gateway.sim.trade.SimTradeGateway;
 import org.dromara.northstar.meta.GatewayMetaProvider;
 import org.dromara.northstar.support.utils.NamingValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -61,7 +64,26 @@ public class GatewayService implements CommandLineRunner {
 	private AccountManager accountMgr;
 	@Autowired
 	private SseStreamController sseController;
-
+	
+	private Map<Gateway, Long> disconnectTimeMap = new ConcurrentHashMap<>();
+	
+	@Scheduled(cron="0 0/1 * * * *")
+	void checkAutoConnect() {
+		gatewayMgr.findAll().stream()
+			.filter(gw -> gw.getDescription().isAutoConnect())
+			.forEach(gw -> {
+				if(disconnectTimeMap.containsKey(gw) && System.currentTimeMillis() - disconnectTimeMap.get(gw) < 300000) {
+					log.info("网关 [{}] 刚刚被手动断开，忽略自动连线", gw.getDescription().getGatewayId());
+					return;
+				}
+				
+				if(gw.isTradingTimeWindow()) {					
+					log.info("网关 [{}] 自动连线", gw.getDescription().getGatewayId());
+					gw.connect();
+				}
+			});
+	}
+	
 	public GatewayVO createGateway(GatewayDescription gd) {
 		if (Objects.nonNull(gatewayMgr.get(Identifier.of(gd.getGatewayId())))) {
 			throw new OperationException("error.duplicated_gateway",gd.getGatewayId());
@@ -203,6 +225,8 @@ public class GatewayService implements CommandLineRunner {
 		}
 		gateway.connect();
 		sseController.sendGatewayStatus();
+		
+		disconnectTimeMap.remove(gateway);
 	}
 
 	public void disconnect(String gatewayId) {
@@ -213,6 +237,8 @@ public class GatewayService implements CommandLineRunner {
 		}
 		gateway.disconnect();
 		sseController.sendGatewayStatus();
+		
+		disconnectTimeMap.put(gateway, System.currentTimeMillis());
 	}
 
 	public double moneyIO(String gatewayId, int amount) {
