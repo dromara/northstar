@@ -314,6 +314,8 @@ public class PlaybackContext {
 				DataFrame<Bar> df = dataProvider.getBuffer().take();
 				generateTickFrames(df).forEach(dft -> onTickDataCallback(dft, false));
 				onBarDataCallback(df);
+				playbackStatus.setRunningDateTime(df.getTime().getEnd());
+				log.debug("当前回放状态：{}", playbackStatus);
 			}
 		} catch(InterruptedException e) {
 			log.warn("等待中断");
