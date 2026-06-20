@@ -28,6 +28,7 @@ public class PlaybackDataProvider {
 	private final ArrayBlockingQueue<DataFrame<Bar>> dataBuffer;
 	private volatile LocalDateTime dataLoadCursor;
 	private final AtomicBoolean isRunning = new AtomicBoolean();
+	private final AtomicBoolean hasTerminated = new AtomicBoolean();
 	private final AtomicBoolean isLoadThreadActive = new AtomicBoolean();
 	private final ExecutorService exec = CommonUtils.newThreadPerTaskExecutor(getClass());
 	
@@ -72,6 +73,7 @@ public class PlaybackDataProvider {
 	 * 启动数据供应，从当前回放状态的时间开始
 	 */
 	public void startSupply() {
+		hasTerminated.set(false);
 		isRunning.set(true);
 		startLoadThreadIfNeeded();
 	}
@@ -91,19 +93,13 @@ public class PlaybackDataProvider {
 	}
 	
 	/**
-	 * 重置数据状态
-	 */
-	public void reset() {
-		dataBuffer.clear();
-		dataLoadCursor = LocalDateTime.of(context.preloadDate(), LocalTime.of(0, 0));
-	}
-	
-	/**
 	 * 设置运行时间
 	 */
 	public void setRunningTime(LocalDateTime runningDateTime) {
-		dataBuffer.clear();
+		hasTerminated.set(true);
 		dataLoadCursor = runningDateTime;
+		while(isLoadThreadActive.get());
+		startLoadThreadIfNeeded();
 	}
 	
 	private void startLoadThreadIfNeeded() {
@@ -111,6 +107,9 @@ public class PlaybackDataProvider {
 			exec.execute(() -> {
 				try {
 					while(true) {
+						if(hasTerminated.get()) {
+							return;
+						}
 						if(!isRunning.get()) {
 							Thread.sleep(100);
 							continue;
@@ -131,6 +130,9 @@ public class PlaybackDataProvider {
 								if(!isRunning.get()) {
 									Thread.sleep(100);
 								}
+								if(hasTerminated.get()) {
+									return;
+								}
 							}
 						}
 						if(isRunning.get()) {
@@ -139,6 +141,9 @@ public class PlaybackDataProvider {
 					}
 				} catch(InterruptedException e) {
 					log.warn("数据加载线程被中断", e);
+				} finally {
+					isLoadThreadActive.set(false);
+					dataBuffer.clear();
 				}
 			});
 		}

@@ -357,7 +357,6 @@ public class PlaybackContext {
 		klineGeneratorMap = playbackContracts().stream().map(IContract::contract)
 				.collect(Collectors.toMap(c -> c, c -> new KlineGenerator(c, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar))));
 		
-		dataProvider.reset();
 		LocalDateTime initialDateTime = LocalDateTime.of(preloadDate(), LocalTime.of(0, 0));
 		State state =  preloadDate().equals(startDate()) ? State.PRELOADED : State.INITIAL;
 		playbackStatus.setRunningDateTime(initialDateTime);
