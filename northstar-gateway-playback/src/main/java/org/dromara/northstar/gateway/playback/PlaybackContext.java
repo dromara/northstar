@@ -119,7 +119,7 @@ public class PlaybackContext {
 	}
 	
 	// 如何处理TICK数据帧
-	private Consumer<DataFrame<Tick>> onTickDataCallback = dft -> {
+	private void onTickDataCallback(DataFrame<Tick> dft, boolean hasInterval){
 		TimeEntry timeEntry = dft.getTime();
 		if(timeEntry.getStart().isBefore(playbackStatus.getRunningDateTime())) {
 			return;
@@ -129,6 +129,11 @@ public class PlaybackContext {
 			klineGeneratorMap.get(tick.contract()).updateTick(tick);
 			feEngine.emitEvent(NorthstarEventType.TICK, tick);
 		});
+		
+		if(!hasInterval) {
+			// 逐K回放时不需要停顿
+			return;
+		}
 		try {
 			Thread.sleep(playbackStatus.getPlayInterval());
 		} catch (InterruptedException e) {
@@ -137,7 +142,7 @@ public class PlaybackContext {
 	};
 	
 	// 如何处理BAR数据帧
-	private Consumer<DataFrame<Bar>> onBarDataCallback = df -> {
+	private void onBarDataCallback(DataFrame<Bar> df) {
 		TimeEntry timeEntry = df.getTime();
 		if(timeEntry.getStart().isBefore(playbackStatus.getRunningDateTime())) {
 			return;
@@ -231,8 +236,8 @@ public class PlaybackContext {
 			try {
 				while(isRunning.get() && playbackStatus.getRunningDateTime().isBefore(endDateTime)) {
 					DataFrame<Bar> df = dataProvider.getBuffer().take();
-					generateTickFrames(df).forEach(onTickDataCallback::accept);
-					onBarDataCallback.accept(df);
+					generateTickFrames(df).forEach(dft -> onTickDataCallback(dft, true));
+					onBarDataCallback(df);
 					playbackStatus.setRunningDateTime(df.getTime().getEnd());
 					log.debug("当前回放状态：{}", playbackStatus);
 				}
@@ -306,7 +311,9 @@ public class PlaybackContext {
 		dataProvider.startSupply();
 		try {			
 			for(int i=0; i < interval.getMinutes(); i++) {
-				onBarDataCallback.accept(dataProvider.getBuffer().take());
+				DataFrame<Bar> df = dataProvider.getBuffer().take();
+				generateTickFrames(df).forEach(dft -> onTickDataCallback(dft, false));
+				onBarDataCallback(df);
 			}
 		} catch(InterruptedException e) {
 			log.warn("等待中断");
