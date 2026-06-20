@@ -151,7 +151,7 @@ public class PlaybackContext {
 	};
 	
 	// 如何处理预加载的BAR数据帧
-	private Consumer<DataFrame<Bar>> onPreLoadBarDataCallback = df -> {
+	private void onPreLoadBarDataCallback(DataFrame<Bar> df) {
 		TimeEntry timeEntry = df.getTime();
 		if(timeEntry.getStart().isBefore(playbackStatus.getRunningDateTime())) {
 			return;
@@ -165,7 +165,6 @@ public class PlaybackContext {
 			feEngine.emitEvent(NorthstarEventType.BAR, bar);
 			klineGeneratorMap.get(bar.contract()).updateBar(bar);
 		});
-		playbackStatus.setRunningDateTime(timeEntry.getEnd());
 	};
 	
 	private List<Tick> dummyTickOfBar(Bar bar){
@@ -195,6 +194,50 @@ public class PlaybackContext {
 					builder.openPrice(bar.lowPrice()).highPrice(bar.lowPrice()).lowPrice(bar.lowPrice()).lastPrice(bar.lowPrice()).bidPrice(List.of(bar.lowPrice())).askPrice(List.of(bar.lowPrice())).build(),
 					builder.openPrice(bar.closePrice()).highPrice(bar.closePrice()).lowPrice(bar.closePrice()).lastPrice(bar.closePrice()).bidPrice(List.of(bar.closePrice())).askPrice(List.of(bar.closePrice())).build()
 				);
+	}
+	
+	private List<DataFrame<Tick>> generateTickFrames(DataFrame<Bar> barFrame){
+		long nanoPerStep = TimeUnit.MINUTES.toNanos(1) / precision.getNumberOfTickPerBar();
+		Map<Long, DataFrame<Tick>> tickDataMap = new HashMap<>();
+		barFrame.items().forEach(bar -> 
+			precision.getAlgorithm().generateFrom(bar).forEach(tickEntry -> {
+				LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(tickEntry.timestamp()), ZoneId.systemDefault());
+				tickDataMap.putIfAbsent(tickEntry.timestamp(), new DataFrame<>(ldt, ldt.plusNanos(nanoPerStep)));
+				
+				Tick tick = Tick.builder()
+						.preClosePrice(bar.preClosePrice())		// 采用分钟K线的模糊值
+						.preOpenInterest(bar.preOpenInterest())	// 采用分钟K线的模糊值
+						.preSettlePrice(bar.preSettlePrice())	// 采用分钟K线的模糊值
+						.highPrice(bar.highPrice())				// 采用分钟K线的模糊值
+						.lowPrice(bar.lowPrice())				// 采用分钟K线的模糊值
+						.contract(bar.contract())
+						.gatewayId(ChannelType.PLAYBACK.toString())
+						.tradingDay(bar.tradingDay())
+						.actionDay(ldt.toLocalDate())
+						.actionTime(ldt.toLocalTime())
+						.actionTimestamp(tickEntry.timestamp())
+						.type(TickType.PLAYBACK_TICK)
+						.lastPrice(tickEntry.price())
+						.askPrice(List.of(tickEntry.askPrice0())) // 仅模拟卖一价
+						.bidPrice(List.of(tickEntry.bidPrice0())) // 仅模拟买一价
+						.askVolume(List.of(ThreadLocalRandom.current().nextInt(10,500))) // 随机模拟卖一量
+						.bidVolume(List.of(ThreadLocalRandom.current().nextInt(10,500))) // 随机模拟买一量
+						.channelType(ChannelType.PLAYBACK)
+						.volume(bar.volume())								// 采用分钟K线的模糊值
+						.volumeDelta(Math.max(1, tickEntry.volume()))		// 采用模拟随机值
+						.openInterest(bar.openInterest())					// 采用分钟K线的模糊值
+						.openInterestDelta(tickEntry.openInterestDelta())	// 采用模拟随机值
+						.turnoverDelta(bar.turnoverDelta())					// 采用分钟K线的模糊值
+						.turnover(bar.turnover())							// 采用分钟K线的模糊值
+						.build();
+				tickDataMap.get(tick.actionTimestamp()).add(tick);
+			})
+		);
+		
+		return tickDataMap.entrySet().stream()
+				.sorted((a, b) -> a.getKey().compareTo(b.getKey()))
+				.map(Entry::getValue)
+				.toList();
 	}
 	
 	public synchronized void start() {
@@ -259,50 +302,6 @@ public class PlaybackContext {
 		});
 	}
 	
-	private List<DataFrame<Tick>> generateTickFrames(DataFrame<Bar> barFrame){
-		long nanoPerStep = TimeUnit.MINUTES.toNanos(1) / precision.getNumberOfTickPerBar();
-		Map<Long, DataFrame<Tick>> tickDataMap = new HashMap<>();
-		barFrame.items().forEach(bar -> 
-			precision.getAlgorithm().generateFrom(bar).forEach(tickEntry -> {
-				LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(tickEntry.timestamp()), ZoneId.systemDefault());
-				tickDataMap.putIfAbsent(tickEntry.timestamp(), new DataFrame<>(ldt, ldt.plusNanos(nanoPerStep)));
-				
-				Tick tick = Tick.builder()
-						.preClosePrice(bar.preClosePrice())		// 采用分钟K线的模糊值
-						.preOpenInterest(bar.preOpenInterest())	// 采用分钟K线的模糊值
-						.preSettlePrice(bar.preSettlePrice())	// 采用分钟K线的模糊值
-						.highPrice(bar.highPrice())				// 采用分钟K线的模糊值
-						.lowPrice(bar.lowPrice())				// 采用分钟K线的模糊值
-						.contract(bar.contract())
-						.gatewayId(ChannelType.PLAYBACK.toString())
-						.tradingDay(bar.tradingDay())
-						.actionDay(ldt.toLocalDate())
-						.actionTime(ldt.toLocalTime())
-						.actionTimestamp(tickEntry.timestamp())
-						.type(TickType.PLAYBACK_TICK)
-						.lastPrice(tickEntry.price())
-						.askPrice(List.of(tickEntry.askPrice0())) // 仅模拟卖一价
-						.bidPrice(List.of(tickEntry.bidPrice0())) // 仅模拟买一价
-						.askVolume(List.of(ThreadLocalRandom.current().nextInt(10,500))) // 随机模拟卖一量
-						.bidVolume(List.of(ThreadLocalRandom.current().nextInt(10,500))) // 随机模拟买一量
-						.channelType(ChannelType.PLAYBACK)
-						.volume(bar.volume())								// 采用分钟K线的模糊值
-						.volumeDelta(Math.max(1, tickEntry.volume()))		// 采用模拟随机值
-						.openInterest(bar.openInterest())					// 采用分钟K线的模糊值
-						.openInterestDelta(tickEntry.openInterestDelta())	// 采用模拟随机值
-						.turnoverDelta(bar.turnoverDelta())					// 采用分钟K线的模糊值
-						.turnover(bar.turnover())							// 采用分钟K线的模糊值
-						.build();
-				tickDataMap.get(tick.actionTimestamp()).add(tick);
-			})
-		);
-		
-		return tickDataMap.entrySet().stream()
-				.sorted((a, b) -> a.getKey().compareTo(b.getKey()))
-				.map(Entry::getValue)
-				.toList();
-	}
-	
 	/**
 	 * 逐K回放
 	 * @param interval
@@ -320,7 +319,6 @@ public class PlaybackContext {
 		} catch(InterruptedException e) {
 			log.warn("等待中断");
 		}
-		dataProvider.pauseSupply();
 	}
 	
 	public synchronized void preload() {
@@ -338,7 +336,9 @@ public class PlaybackContext {
 		exec.execute(() -> {
 			try {
 				while(playbackStatus.getRunningDateTime().isBefore(preloadEnd)) {
-					onPreLoadBarDataCallback.accept(preloadBuffer.take());
+					DataFrame<Bar> df = preloadBuffer.take();
+					onPreLoadBarDataCallback(df);
+					playbackStatus.setRunningDateTime(df.getTime().getEnd());
 				}
 			} catch (InterruptedException e) {
 				log.warn("预热加载等待被中断", e);
