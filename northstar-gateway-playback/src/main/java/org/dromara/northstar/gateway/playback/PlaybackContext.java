@@ -62,8 +62,6 @@ public class PlaybackContext {
 	
 	private final AtomicBoolean isRunning = new AtomicBoolean();
 	
-	private final AtomicBoolean isSuspended = new AtomicBoolean();
-	
 	private ExecutorService exec = CommonUtils.newThreadPerTaskExecutor(getClass());
 	
 	private Map<Contract, KlineGenerator> klineGeneratorMap;
@@ -123,14 +121,6 @@ public class PlaybackContext {
 	// 如何处理TICK数据帧
 	private Consumer<DataFrame<Tick>> onTickDataCallback = dft -> {
 		TimeEntry timeEntry = dft.getTime();
-		while(isSuspended.get()) {
-			try {
-				log.debug("回放进度被挂起等待");
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				log.error("", e);
-			}
-		}
 		if(timeEntry.getStart().isBefore(playbackStatus.getRunningDateTime())) {
 			return;
 		}
@@ -368,14 +358,6 @@ public class PlaybackContext {
 	
 	public synchronized void setSpeed(int interval) {
 		playbackStatus.setPlayInterval(interval);
-	}
-	
-	public synchronized void suspend() {
-		isSuspended.set(true);
-	}
-	
-	public synchronized void resume() {
-		isSuspended.set(false);
 	}
 	
 	public synchronized void pause() {

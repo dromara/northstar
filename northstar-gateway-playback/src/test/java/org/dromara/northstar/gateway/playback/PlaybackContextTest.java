@@ -229,11 +229,6 @@ class PlaybackContextTest {
 		context.start();
 		assertThat(takeLatch.await(2, TimeUnit.SECONDS)).isTrue();
 
-		context.suspend();
-		assertThat(context.getPlaybackStatus().getState()).isEqualTo(PlaybackStatus.State.PLAYING);
-
-		context.resume();
-		assertThat(context.getPlaybackStatus().getState()).isEqualTo(PlaybackStatus.State.PLAYING);
 	}
 
 	@Test

@@ -135,11 +135,13 @@ public class PlaybackService {
 	public List<Bar> getPreloadBars(String contractId, Interval interval){
 		log.info("预加载数据，合约{}，周期{} ", contractId, interval.getAlias());
 		
-		// 预加载数据时，需要先暂停回放进度
+		// 预加载数据时，需要先暂停回放进度。因多图同时刷新时会存在并发问题，只能统一暂停，然后手动开始
+		getPlaybackContext().pause();
+		
 		Contract contract = mktCenter.getContract(Identifier.of(contractId)).contract();
 		getPlaybackContext().resetBarMerger(contract, interval);
 		BarMerger merger = getPlaybackContext().getBarMerger(contract, interval);
-		getPlaybackContext().suspend();
+
 		if(getPlaybackContext().getPlaybackStatus().getState() == PlaybackStatus.State.INITIAL) {
 			getPlaybackContext().getPlaybackStatus().setState(PlaybackStatus.State.PRELOADED);
 		}
@@ -173,7 +175,6 @@ public class PlaybackService {
 			}
 		}
 		
-		getPlaybackContext().resume();
 		return mergedBars;
 	}
 	
