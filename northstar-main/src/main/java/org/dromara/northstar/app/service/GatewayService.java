@@ -71,6 +71,7 @@ public class GatewayService implements CommandLineRunner {
 	void checkAutoConnect() {
 		gatewayMgr.findAll().stream()
 			.filter(gw -> gw.getDescription().isAutoConnect())
+			.filter(gw -> gw.getConnection() != ConnectionState.CONNECTED)
 			.forEach(gw -> {
 				if(disconnectTimeMap.containsKey(gw) && System.currentTimeMillis() - disconnectTimeMap.get(gw) < 300000) {
 					log.info("网关 [{}] 刚刚被手动断开，忽略自动连线", gw.getDescription().getGatewayId());
