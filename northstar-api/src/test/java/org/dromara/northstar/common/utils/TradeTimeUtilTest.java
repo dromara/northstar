@@ -10,18 +10,18 @@ import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.junit.jupiter.api.Test;
 
 class TradeTimeUtilTest {
+	
+	TradeTimeDefinition ttd = TradeTimeDefinition.builder()
+			.timeSlots(List.of(
+					TimeSlot.builder().start(LocalTime.of(21, 0)).end(LocalTime.of(2, 30)).build(),
+					TimeSlot.builder().start(LocalTime.of(9, 0)).end(LocalTime.of(11, 30)).build(),
+					TimeSlot.builder().start(LocalTime.of(13, 0)).end(LocalTime.of(15, 0)).build()
+					))
+			.build();
+	TradeTimeUtil util = new TradeTimeUtil(ttd);
 
 	@Test
 	void test() {
-		TradeTimeDefinition ttd = TradeTimeDefinition.builder()
-				.timeSlots(List.of(
-						TimeSlot.builder().start(LocalTime.of(21, 0)).end(LocalTime.of(2, 30)).build(),
-						TimeSlot.builder().start(LocalTime.of(9, 0)).end(LocalTime.of(11, 30)).build(),
-						TimeSlot.builder().start(LocalTime.of(13, 0)).end(LocalTime.of(15, 0)).build()
-						))
-				.build();
-		TradeTimeUtil util = new TradeTimeUtil(ttd);
-		
 		assertThat(util.withinTradeTime(LocalTime.of(20, 59))).isFalse();
 		assertThat(util.withinTradeTime(LocalTime.of(21, 0))).isTrue();
 		assertThat(util.withinTradeTime(LocalTime.of(23, 59))).isTrue();
@@ -36,4 +36,10 @@ class TradeTimeUtilTest {
 		assertThat(util.withinTradeTime(LocalTime.of(12, 59, 59))).isFalse();
 	}
 
+	@Test
+	void testNearestTradeTime() {
+		assertThat(util.nearestTradeTime(LocalTime.of(20, 59))).isEqualTo(LocalTime.of(21, 0));
+		assertThat(util.nearestTradeTime(LocalTime.of(8, 59))).isEqualTo(LocalTime.of(9, 0));
+	}
+	
 }

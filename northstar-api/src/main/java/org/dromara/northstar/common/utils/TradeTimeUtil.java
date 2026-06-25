@@ -34,4 +34,25 @@ public class TradeTimeUtil {
 		LocalTime checkTime = t.withSecond(0).withNano(0).plusMinutes(1);
 		return endsOfSection.contains(t) || tradeTimeBitmap.get(checkTime.toSecondOfDay() / SEC_PER_MIN);
 	}
+	
+	public LocalTime nearestTradeTime(LocalTime t) {
+		LocalTime base = t.withSecond(0).withNano(0);
+		int minuteIdx = base.toSecondOfDay() / SEC_PER_MIN;
+		
+		for (int offset = 0; offset < MINS_OF_DAY; offset++) {
+			int forwardIdx = (minuteIdx + offset) % MINS_OF_DAY;
+			LocalTime forwardTime = LocalTime.ofSecondOfDay(forwardIdx * SEC_PER_MIN);
+			if (withinTradeTime(forwardTime)) {
+				return forwardTime;
+			}
+			if (offset > 0) {
+				int backwardIdx = (minuteIdx - offset + MINS_OF_DAY) % MINS_OF_DAY;
+				LocalTime backwardTime = LocalTime.ofSecondOfDay(backwardIdx * SEC_PER_MIN);
+				if (withinTradeTime(backwardTime)) {
+					return backwardTime;
+				}
+			}
+		}
+		return base;
+	}
 }
