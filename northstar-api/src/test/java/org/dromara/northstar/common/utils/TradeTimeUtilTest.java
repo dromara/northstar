@@ -40,6 +40,7 @@ class TradeTimeUtilTest {
 	void testNearestTradeTime() {
 		assertThat(util.nearestTradeTime(LocalTime.of(20, 59))).isEqualTo(LocalTime.of(21, 0));
 		assertThat(util.nearestTradeTime(LocalTime.of(8, 59))).isEqualTo(LocalTime.of(9, 0));
+		assertThat(util.nearestTradeTime(LocalTime.of(9, 0))).isEqualTo(LocalTime.of(9, 0));
 	}
 	
 }
