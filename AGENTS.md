@@ -1,240 +1,314 @@
 # Northstar Pro - AGENTS.md
 
-> 本文件包含 AI 编程代理处理 Northstar Pro 项目所需的关键信息。
+> 本文件包含 AI 编程代理处理 Northstar Pro 项目所需的关键信息。信息基于项目实际文件整理，如发现与源码不一致，请以源码为准。
 
 ## 项目概述
 
-**Northstar Pro（盈富量化交易平台）** 是一个基于 Java 21 和 Spring Boot 3.3.5 开发的量化交易平台，提供模块化的策略开发、回测和交易部署框架。
+**Northstar Pro（盈富量化交易平台）** 是一个基于 Java 和 Spring Boot 开发的量化交易平台，提供模块化的策略开发、回测、模拟交易和实盘部署框架。
 
-- **版本**: 8.9.0-BETA1
-- **语言**: Java 21
-- **构建工具**: Maven
-- **框架**: Spring Boot 3.3.5
-- **许可证**: Dromara 开源组织
-- **仓库**: https://gitee.com/dromara/northstar
+- **当前源码版本**: `9.0.0-M2`（定义在根 `pom.xml` 的 `<northstar-version>` 属性）
+- **当前分支**: `upgrade/jdk25`
+- **语言**: Java 25（源码 `pom.xml` 当前声明）
+- **构建工具**: Maven 3.x
+- **框架**: Spring Boot 3.5.11
+- **Group ID**: `org.dromara.northstar.pro`
+- **Artifact ID**: `northstar`
+- **仓库**: `https://gitee.com/dromara/northstar`
+- **前端子模块**: `northstar-monitor-next`（Git 子模块，独立仓库 `git@gitee.com:kevinhuangwl/northstar-monitor-next.git`）
+
+### 重要说明：JDK 25 升级
+
+当前检出分支为 `upgrade/jdk25`，源码 `pom.xml` 已声明 `<java.version>25</java.version>`，Spring Boot 已升级到 `3.5.11`。`env.sh` / `env.ps1` 环境脚本会自动安装 Oracle JDK 25。工作目录中存在的 `.flattened-pom.xml` 会在构建时重新生成，未纳入 Git 跟踪，应以源码 `pom.xml` 为准。
 
 ## 技术栈
 
-### 核心框架
-- **Spring Boot 3.3.5** - 应用框架
+### 后端
+
+- **Spring Boot 3.5.11** - 应用框架
 - **Spring Data JPA** - 数据持久化
 - **Spring Web** - REST API 层
 - **Spring Scheduling** - 任务调度
-- **Spring Retry** - 重试机制
+- **Spring Retry 2.0.5** - 重试机制
 - **Spring Boot Cache** - 缓存支持
-
-### 数据与消息
-- **H2 Database 2.2.224** - 嵌入式数据库（生产环境使用文件模式，测试使用内存模式）
+- **H2 Database 2.2.224** - 嵌入式数据库（生产环境文件模式，测试内存模式）
 - **Protocol Buffers 4.28.3** - 数据序列化
 - **Disruptor 3.4.4** - 高性能事件处理
-- **Netty-SocketIO 2.0.11** - 实时 WebSocket 通信
-
-### 工具库
+- **Netty-SocketIO 2.0.11** / **socket.io-client 1.0.0** - 实时 WebSocket 通信
+- **Netty 4.1.104.Final**
 - **Lombok 1.18.42** - 减少样板代码
-- **Fastjson2 2.0.56** - JSON 处理
-- **Guava 33.0.0** - Google 核心库
-- **Apache Commons** (Lang3, Math3, IO, Codec) - 工具函数
-- **Hutool 5.7.22** - 国产工具库（加密）
-- **Jackson 2.16.1** - JSON/XML 处理
-
-### AI/ML（可选）
-- **TensorFlow Java 0.5.0** - 机器学习集成
-- **ND4J 1.0.0-M2.1** - JVM 科学计算
+- **Fastjson2 2.0.56** / **Jackson 2.16.1** - JSON 处理
+- **Guava 33.0.0-jre** / **Apache Commons**（Lang3 3.17.0、IO 2.15.1、Math3 3.6.1、Codec 1.16.0）- 工具库
+- **Hutool-crypto 5.7.22** - 加密
+- **OkHttp3 4.12.0** / **Retrofit2 2.11.0** - HTTP 客户端
+- **java-jwt 4.4.0** - 仅用于解码数据服务订阅令牌
+- **Ehcache 3.10.8**
+- **可选 `smart` profile**: TensorFlow Java 0.5.0
 
 ### AI Copilot 模块
-- **OkHttp3 4.12.0** - HTTP 客户端
-- **jtokkit 1.1.0** - Token 管理
+
+- **OkHttp3 SSE** / **jtokkit 1.1.0** - Token 管理
 - 支持多种 LLM 平台：OpenAI、Moonshot、DeepSeek、Ollama、Hunyuan、Zhipu 等
+- Pinecone 向量存储、SearXNG 网页搜索、函数调用框架
+
+### 前端
+
+- **Vue 3.4.27** + **Vite 5.2.12** + **TypeScript 5.4.5**
+- **Vue Router 4.3.2** + **Pinia 2.1.7** + **Vue I18n 9.13.1**
+- **Element Plus 2.8.4** + **TailwindCSS 3.4.4**
+- **Klinecharts 9.8.12** + **ECharts 5.5.0**
+- **Monaco Editor 0.55.1**
+- **Cypress 15.11.0** - E2E 测试
+- 包管理器：**pnpm >= 9**
+
+前端项目有独立的 `northstar-monitor-next/AGENTS.md`，前端开发请优先参考该文件。
 
 ## 项目结构
 
 ```
-northstar-pro/
-├── pom.xml                          # 父 POM，定义版本和依赖管理
-├── northstar-api/                   # API 模块 - 核心接口和数据模型
-│   ├── 策略框架接口 (TradeStrategy, IModuleContext)
-│   ├── 指标框架 (Indicator, AbstractIndicator)
-│   ├── 网关接口 (Gateway, MarketGateway, TradeGateway)
-│   └── 核心数据模型 (Tick, Bar, Contract, Order, Trade, Position)
-├── northstar-main/                  # 主应用模块
-│   ├── REST 控制器
-│   ├── 服务层
-│   ├── 数据访问层 (JPA)
-│   └── 启动类 (NorthstarApplication)
-├── northstar-gateway-sim/           # 模拟网关模块
-│   ├── 模拟行情网关
-│   └── 模拟交易网关
+northstar/
+├── pom.xml                          # 父 POM，定义版本、模块、依赖管理
+├── northstar-api/                   # API 模块 - 核心接口、数据模型、指标与策略框架
+├── northstar-gateway-sim/           # 模拟网关模块（模拟行情/交易）
 ├── northstar-gateway-playback/      # 回放网关模块（回测）
-│   └── 历史数据回放功能
 ├── northstar-strategy-example/      # 策略示例模块
-│   └── 各种示例策略实现
 ├── northstar-copilot/               # AI 助手模块
-│   ├── 多平台 LLM 集成
-│   ├── 向量存储 (Pinecone)
-│   └── 工具调用框架
-└── northstar-monitor-next/          # 前端项目（Vue3 + Vite）
+├── northstar-main/                  # 主 Spring Boot 应用模块
+├── northstar-monitor-next/          # 前端项目（Vue3 + Vite），以 Git 子模块引入
+└── northstar-dist/                  # 构建产物目录，非 Maven 模块
 ```
+
+### 后端源码根包
+
+| 模块 | 根包 |
+|---|---|
+| `northstar-api` | `org.dromara.northstar` |
+| `northstar-main` | `org.dromara.northstar` |
+| `northstar-gateway-sim` | `org.dromara.northstar.gateway.sim` |
+| `northstar-gateway-playback` | `org.dromara.northstar.gateway.playback` |
+| `northstar-strategy-example` | `org.dromara.northstar.strategy.example` |
+| `northstar-copilot` | `org.dromara.northstar.copilot` |
+
+### 关键代码目录
+
+- `northstar-api/src/main/java/org/dromara/northstar/common/model/core/` - 核心数据模型（`Tick`、`Bar`、`Contract`、`Order`、`Trade`、`Position`、`Account`、`SubmitOrderReq` 等）
+- `northstar-api/src/main/java/org/dromara/northstar/common/constant/` - 公共常量（`Constants.java`）
+- `northstar-api/src/main/java/org/dromara/northstar/strategy/` - 策略框架（`TradeStrategy`、`AbstractStrategy`、`IModuleContext`、`IAccount`、`IModuleAccount`）
+- `northstar-api/src/main/java/org/dromara/northstar/indicator/` - 指标框架（`Indicator`、`AbstractIndicator`、`Configuration`、`Num`）及指标实现
+- `northstar-api/src/main/java/org/dromara/northstar/gateway/` - 网关抽象层（`Gateway`、`MarketGateway`、`TradeGateway`、`IMarketCenter`）
+- `northstar-main/src/main/java/org/dromara/northstar/app/restful/` - REST 控制器
+- `northstar-main/src/main/java/org/dromara/northstar/app/service/` - 服务层
+- `northstar-main/src/main/java/org/dromara/northstar/data/jdbc/` - JPA Repository、Adapter、Entity
+- `northstar-main/src/main/java/org/dromara/northstar/event/` - 事件引擎/Disruptor 处理器
+- `northstar-main/src/main/java/org/dromara/northstar/module/` - 模组运行时
+- `northstar-main/src/main/java/org/dromara/northstar/account/` - 账户与网关管理器
+- `northstar-main/src/main/java/org/dromara/northstar/config/` - Spring 配置类
+- `northstar-main/src/main/java/org/dromara/northstar/app/auth/`、`app/security/` - 认证与安全
+- `northstar-monitor-next/src/` - 前端源码
+
+### 主应用入口
+
+`northstar-main/src/main/java/org/dromara/northstar/NorthstarApplication.java`
+
+```java
+@SpringBootApplication
+@EnableScheduling
+@EnableJpaRepositories(basePackages = "org.dromara.northstar.data.jdbc")
+public class NorthstarApplication { ... }
+```
+
+## 关键配置文件
+
+| 文件 | 说明 |
+|---|---|
+| `pom.xml` | 根 Maven POM，定义版本、模块、依赖管理 |
+| `northstar-main/src/main/resources/application.yml` | 主应用配置（Profile、SSL、数据库、日志、虚拟线程） |
+| `northstar-main/src/main/resources/logback-spring.xml` | 日志配置 |
+| `northstar-monitor-next/package.json` | 前端依赖与脚本 |
+| `northstar-monitor-next/vite.config.ts` | Vite 构建配置 |
+| `lombok.config` | Lombok 配置（`lombok.addLombokGeneratedAnnotation=true`） |
+| `.gitmodules` | Git 子模块配置 |
+| `env.sh` / `env.ps1` | Linux / Windows 环境初始化脚本（安装 JDK 25） |
+| `startup.sh` | 生产启动脚本 |
+| `update-protobuf-obj.ps1` | 重新生成 protobuf Java 类 |
 
 ## 构建命令
 
-### 基本构建
+### 后端
+
 ```bash
-# 编译打包
+# 编译打包（默认会执行单元测试）
 mvn clean package
 
 # 跳过测试加速构建
 mvn clean package -DskipTests
 
-# 运行特定 Profile（smart = 包含 TensorFlow）
+# 包含 TensorFlow 的 smart profile
 mvn clean package -P smart
-```
 
-### 测试
-```bash
 # 运行单元测试
 mvn test
 
-# 运行集成测试（*IT.java 结尾的测试）
+# 运行集成测试（Failsafe，当前项目无 *IT.java）
 mvn failsafe:integration-test
 
-# 生成代码覆盖率报告（JaCoCo）
+# 生成覆盖率报告
 mvn jacoco:report
 
-# 覆盖率要求：最低 30% 行覆盖率
+# 完整验证（含覆盖率检查）
+mvn clean verify
 ```
 
-### 开发 Profile
-- `prod` - 生产环境（端口 443，SSL 启用）
-- `demo` - 演示模式（端口 443，SSL 启用）
-- `dev` - 开发环境（端口 80，SSL 禁用）
-- `test` - 测试环境（内存 H2）
-- `unittest` - 单元测试
-- `train` - 机器学习训练模式
-- `e2e` - 端到端测试
+构建完成后，`northstar-main` 的可执行 jar 会输出到 `northstar-dist/`，默认名称为 `northstar-9.0.0-M2.jar`。
 
-## 运行时配置
+### 前端
 
-### 应用配置
-主配置文件：`northstar-main/src/main/resources/application.yml`
-
-关键配置段：
-- **服务器**: SSL 配置（JKS 密钥库），压缩，会话管理
-- **数据库**: H2 文件模式（生产），内存模式（测试）
-- **数据服务**: Marketplace URL 行情数据源
-- **日志**: 文件日志输出到 `logs/` 目录
-- **虚拟线程**: Spring Boot 3.2+ 启用虚拟线程
-
-### 环境变量
-- `env` - 激活的 Spring Profile（默认 `prod`）
-- `server.port` - 覆盖服务端口
-- `loader.path` - 外部库路径
-
-### 启动脚本
-生产启动示例（`startup.sh`）：
 ```bash
-java -Xms2500m -Xmx2500m \
-     -Dserver.port=443 \
-     -Dloader.path=$(pwd) \
-     -Denv=demo \
-     -jar northstar-8.9.0-BETA1.jar
+cd northstar-monitor-next
+pnpm install
+pnpm dev       # 开发服务（默认端口 8848）
+pnpm build     # 生产构建，输出到 dist/
+pnpm lint      # eslint + prettier + stylelint
+pnpm typecheck # tsc + vue-tsc
+pnpm e2e       # Cypress E2E 测试
 ```
 
-## 代码组织
-
-### 策略框架
-交易策略实现 `TradeStrategy` 接口或继承 `AbstractStrategy`：
-
-```java
-// 关键接口
-TradeStrategy          # 策略接口 - 所有策略必须实现
-AbstractStrategy       # 抽象基类 - 推荐继承
-IModuleContext         # 模组上下文 - 策略与框架交互
-IAccount               # 合约绑定物理账户
-IModuleAccount         # 模组级账户操作
-```
-
-策略注解：`@StrategicComponent` - 标记可发现策略
-
-### 指标框架
-技术指标实现 `Indicator` 接口：
-
-```java
-Indicator              # 所有指标的基础接口
-Configuration          # 指标配置
-Num                    # 带元数据的数值包装
-```
-
-指标分类：
-- `momentum/` - 动量指标（RSI、KD 等）
-- `trend/` - 趋势指标（MA、EMA、PBX 等）
-- `volatility/` - 波动率指标（BOLL、TrueRange 等）
-- `volume/` - 成交量指标（VWAP、VolumeBoosting 等）
-- `wave/` - 波浪分析指标
-
-### 网关框架
-网关抽象层用于行情和交易：
-
-```java
-Gateway                # 基础网关接口
-MarketGateway          # 行情网关（Tick/K线）
-TradeGateway           # 交易网关（订单/成交）
-IMarketCenter          # 合约和行情数据管理
-```
-
-### 核心数据模型
-位于 `northstar-api/src/main/java/org/dromara/northstar/common/model/core/`：
-- `Tick` - 实时行情 Tick 数据
-- `Bar` - OHLCV K线数据
-- `Contract` - 交易工具定义
-- `Order` - 订单对象
-- `Trade` - 成交记录
-- `Position` - 当前持仓
-- `Account` - 账户信息
-- `SubmitOrderReq` - 订单提交请求
-
-### 数据访问层
-使用 Spring Data JPA，位于 `northstar-main/src/main/java/org/dromara/northstar/data/jdbc/`：
-- Repository 接口定义查询
-- Adapter 类处理业务逻辑适配
-- Entity 类对应数据库表
+前端 `dist/` 会在 `northstar-main` 的 Maven `generate-resources` 阶段被复制到 `src/main/resources/static/`。因此完整构建时需要先执行 `pnpm build`。
 
 ## 测试策略
 
 ### 单元测试
+
 - 位置：各模块的 `src/test/java`
-- 框架：JUnit 5 (Jupiter)
-- 模拟：Mockito
+- 框架：JUnit 5（Jupiter）、Mockito、AssertJ、Spring Boot Test
 - 命名：`*Test.java`
+- 插件：Maven Surefire 3.5.3
+- 当前项目约有 80+ 个 `*Test.java` 文件
 
 ### 集成测试
+
 - 位置：`northstar-main/src/test/java`
-- 命名：`*IT.java` (Integration Test)
-- 插件：Maven Failsafe Plugin
+- 命名：`*IT.java`
+- 插件：Maven Failsafe 3.5.3
+- 当前工作树中未发现 `*IT.java` 文件，但 Failsafe 已配置支持
 
 ### 测试覆盖率
-- 工具：JaCoCo
-- 最低行覆盖率：30%
-- `northstar-api` 排除项：protobuf 生成代码、指标、策略、合约代码
-- `northstar-gateway-sim` 排除项：市场模拟代码
 
-### 主要测试类
-- `AccountManagerTest` - 账户管理测试
-- `GatewayManagerTest` - 网关生命周期测试
-- `TradeAccountTest` - 交易账户测试
-- 各种 Controller 测试在 `northstar-main` 中
+- 工具：JaCoCo 0.8.13
+- 最低行覆盖率：**30%**
+- 排除项：
+  - `northstar-api`: protobuf 生成代码、指标、策略、合约代码
+  - `northstar-gateway-sim`: `org/dromara/northstar/gateway/sim/market/*`
+
+### 测试 Profile
+
+多数 `northstar-main` 的 Spring 测试使用：
+
+```java
+@SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=unittest")
+```
+
+## 运行时配置
+
+主配置文件：`northstar-main/src/main/resources/application.yml`
+
+### Spring Profile
+
+| Profile | 端口 | SSL | 数据库 | 虚拟线程 |
+|---|---|---|---|---|
+| `prod` / `demo`（默认） | 443 | 启用 | H2 文件模式 `./data/storage` | 启用 |
+| `dev` | 80 | 禁用 | H2 文件模式 | 禁用 |
+| `test` / `unittest` / `train` / `devtest` | 80 | 禁用 | H2 内存模式 `jdbc:h2:mem:testdb` | 启用 |
+| `e2e` | 443 | 启用 | H2 内存模式 | 启用 |
+
+默认激活的 profile 由环境变量 `env` 决定：
+
+```yaml
+spring:
+  profiles:
+    active: ${env:prod}
+```
+
+可通过 `-Denv=<profile>` 或 `-Dspring.profiles.active=<profile>` 覆盖。
+
+### SSL/TLS
+
+```yaml
+server:
+  ssl:
+    key-store-type: JKS
+    key-store: classpath:keystore/northstar.quantit.tech.jks
+    key-store-password: s20ku0o017
+    enabled-protocols: TLSv1.2,TLSv1.3
+```
+
+### 数据库
+
+- 生产/默认：`jdbc:h2:file:./data/storage;DB_CLOSE_ON_EXIT=FALSE;`
+- 测试内存模式：`jdbc:h2:mem:testdb`
+- JPA：`ddl-auto: update`，H2Dialect
+- H2 Console 在所有 profile 下均启用，路径 `/h2-console`
+
+### 日志
+
+- 使用 SLF4J + Logback
+- 日志文件输出到 `logs/` 目录
+- 主日志：`logs/Northstar_%d{yyyy-MM-dd}.log`，保留 30 天
+- 调试日志：`BroadcastHandler`、`MarketCenter`、`KlineData` 等，保留 3 天
+
+### 外部数据服务
+
+- 数据源基础 URL：`https://marketplace.quantit.tech`
+- 订阅令牌通过 `quantit.datasource.secret` 或环境变量 `NS_DS_SECRET` 配置
+
+## 安全考虑
+
+### 认证机制
+
+项目使用**自定义 Session + CSRF Token 方案**，**未使用 Spring Security**。
+
+- `AuthCheckerInterceptor`：对 `/northstar/**` 请求校验 CSRF Token，放行 `/northstar/user/**` 和 `/northstar/reset`
+- `UserController`：登录、登出、校验接口
+- `UserInfo`：保存用户账号密码及登录失败次数
+- 默认账号密码定义在 `northstar-api/src/main/java/org/dromara/northstar/common/constant/Constants.java`：
+  - 用户 ID：`admin`
+  - 密码：`123456`
+- 可通过环境变量覆盖：
+  - `NS_USER`
+  - `NS_PWD`
+- 登录失败 3 次后锁定账户
+
+### CSRF / Session 流程
+
+1. `POST /northstar/user/login` 校验凭据
+2. 成功后，随机 UUID 作为 CSRF Token 存入 HTTP Session（键 `SESS_CSRF`）
+3. 后续 `/northstar/**` 请求须携带请求头 `CSRF_token` 并匹配 Session 值
+4. `InternalLoopCallUtils` 生成一次性 UUID 用于内部循环调用（如 Copilot 函数调用），3 分钟后过期
+5. `GET /northstar/user/validate` 检查 Session 有效性
+
+### 其他安全措施
+
+- `MaliciousIPCollector` / `MaliciousRequestFilter`：统计 404 请求 IP，单日超过 10 次则拦截
+- `CommonControllerAdvice`：全局异常处理，将 404 请求 IP 记录到 `MaliciousIPCollector`
+- Session Cookie 配置：`SameSite=strict`、`secure=true`
+- CORS：在 `AppConfig` 中配置，允许任意来源，暴露 `token` 响应头
+
+### JWT
+
+`java-jwt` 仅用于**解码数据服务订阅令牌**（`UserController.payedServices()`），不用于用户认证。
 
 ## REST API 控制器
 
-位于 `northstar-main/src/main/java/org/dromara/northstar/app/restful/`：
+位于 `northstar-main/src/main/java/org/dromara/northstar/app/restful/`，基础路径 `/northstar/...`：
 
 | 控制器 | 功能 |
-|--------|------|
+|---|---|
 | `GatewayController` | 网关 CRUD 和连接管理 |
 | `ModuleController` | 交易模组管理 |
 | `TradeController` | 订单提交和管理 |
 | `MarketDataController` | 行情数据查询 |
 | `PlaybackController` | 回测回放控制 |
 | `StrategyExplorerController` | 策略开发工具 |
+| `CustomIndicatorController` | 自定义指标管理 |
 | `CopilotChatController` | AI 助手对话接口 |
 | `UserController` | 用户认证和管理 |
 | `SseStreamController` | 服务器推送实时数据 |
@@ -242,56 +316,88 @@ IMarketCenter          # 合约和行情数据管理
 | `LoggingController` | 应用日志访问 |
 | `MetaDataController` | 元数据管理 |
 | `NotificationController` | 通知设置 |
-| `ResetController` | 系统重置操作 |
+| `ContractConfigController` | 合约配置 |
+| `ResetController` | 系统重置操作（仅在 `e2e`、`dev` profile 启用） |
+| `CommonControllerAdvice` | 全局异常处理 |
 
-API 基础路径：`/northstar/...`
+## 服务层
 
-## 安全考虑
+位于 `northstar-main/src/main/java/org/dromara/northstar/app/service/`，与控制器一一对应：
 
-### 认证
-- 基于 JWT 的认证（`java-jwt` 库）
-- 使用 Hutool crypto 进行密码加密
-- Session Cookie 设置 `SameSite=strict` 和 `secure` 标志
+- `GatewayService` - 网关生命周期管理，启动时恢复网关
+- `ModuleService` - 模组生命周期、回测、模拟交易，启动时恢复模组
+- `TradeService` - 交易订单处理
+- `MarketDataService` - 行情数据服务
+- `PlaybackService` - 回放服务
+- `StrategyExplorerService` - 策略探索
+- `CopilotChatService` - AI 对话
+- `ContractConfigService` - 合约配置
+- `CustomIndicatorService` - 自定义指标
+- `LoggingService` - 日志服务
+- `MetaDataService` - 元数据
+- `MultichartsService` - 多图表
+- `NotificationService` - 通知
 
-### SSL/TLS
-- 生产环境默认启用 SSL（端口 443）
-- JKS 密钥库：`keystore/northstar.quantit.tech.jks`
-- 支持协议：TLSv1.2、TLSv1.3
+## 数据访问层
 
-### 输入验证
-- `AuthCheckerInterceptor` - 请求验证
-- `MaliciousIPCollector` - IP 安全监控
+采用 **Adapter 模式** 包装 Spring Data JPA Repository：
 
-## 开发规范
+- `northstar-api/src/main/java/org/dromara/northstar/data/` 定义 Repository 接口：
+  - `IGatewayRepository`
+  - `IModuleRepository`
+  - `IMarketDataRepository`
+  - `IAccountRepository`
+- `northstar-main/src/main/java/org/dromara/northstar/data/jdbc/` 提供：
+  - `entity/` - JPA 实体（以 `DO` 为后缀）
+  - `*Repository.java` - Spring Data JPA Repository
+  - `*Adapter.java` - Repository 适配器
+- `RepositoryConfig` 通过 `@Bean` 将 Adapter 暴露为接口实现
 
-### 代码风格
-- 使用 Lombok 减少样板代码（`@Data`、`@Slf4j` 等）
-- 优先使用构造器注入而非字段注入
-- 不可变字段使用 `final`
-- 代码注释主要使用中文
+部分 JPA 实体采用 JSON 字符串字段（`dataStr`、`dataEncoded`）存储复杂对象，并提供 `convertFrom` / `convertTo` 静态方法。
+
+## 事件引擎
+
+- `DisruptorFastEventEngine` 基于 LMAX Disruptor 实现，RingBuffer 大小 65536
+- 事件处理器位于 `northstar-main/src/main/java/org/dromara/northstar/event/`，包括：
+  - `AccountHandler` - 账户事件
+  - `ConnectionHandler` - 网关连接事件
+  - `ModuleHandler` - 模组事件
+  - `SseBroadcastHandler` - SSE 实时广播
+  - `MarketDataPersistanceHandler` - 行情数据持久化
+  - `SimMarketHandler` - 模拟市场
+  - `EventNotificationHandler` - 事件通知
+  - `IllegalOrderHandler` - 废单处理
+  - `PlannedTradeHandler` - 计划交易
+  - `KlineDispatcher` - K 线分发
+  - `InternalDispatcher` - 内部事件分发
+
+## 代码组织与开发规范
 
 ### 命名规范
-- 接口：`I` 前缀（如 `IGatewayService`）或无前缀
-- 抽象类：`Abstract` 前缀
-- 实现类：描述性名称（如 `GatewayManager`）
+
+- 接口：`I` 前缀（如 `IAccount`、`IModuleContext`、`IGatewayRepository`）或无前缀（如 `TradeStrategy`、`Indicator`）
+- 抽象类：`Abstract` 前缀（如 `AbstractStrategy`、`AbstractIndicator`、`AbstractEventHandler`）
+- 实现类：描述性名称（如 `GatewayManager`、`MarketCenter`）
 - 测试类：`*Test.java`（单元测试），`*IT.java`（集成测试）
+- JPA 实体：以 `DO` 为后缀（如 `GatewayDescriptionDO`、`BarDO`）
+- API 模型：视情况使用 `VO` / `DTO` 后缀
 
-### 异常处理
-- `CommonControllerAdvice` - 全局异常处理器
-- 可恢复错误使用受检异常
-- 编程错误使用非受检异常
+### 代码风格
 
-### 日志
-- 使用 SLF4J + Logback
-- 日志级别：ERROR、WARN、INFO、DEBUG
-- 日志文件：`logs/` 目录，支持轮转
+- 使用 Lombok 减少样板代码（`@Data`、`@Slf4j`、`@Builder`、`@AllArgsConstructor` 等）
+- 控制器优先使用构造器注入配合 `private final` 字段
+- 服务/管理器类也常见 `@Autowired` 字段注入
+- 不可变字段使用 `final`
+- 代码注释主要使用中文
+- 编码：UTF-8
 
-## 版本管理
+### 版本管理
 
-- 使用 Maven Flatten Plugin 管理版本
-- 版本定义在父 POM：`northstar-version` 属性（8.9.0-BETA1）
-- `${revision}` 占位符用于 CI/CD 集成
+- 使用 Maven Flatten Plugin 1.2.5 管理版本
+- 版本定义在父 POM：`<northstar-version>9.0.0-M2</northstar-version>`
+- 通过 `<revision>${northstar-version}</revision>` 占位符供各模块继承
 - 构建时生成 `.flattened-pom.xml`
+- 前端 `package.json` 版本同步为 `9.0.0-M2`
 
 ## 数据流架构
 
@@ -307,290 +413,143 @@ API 基础路径：`/northstar/...`
 
 3. **事件流**：
    ```
-   FastEventEngine → 事件处理器 → 组件更新
+   FastEventEngine / Disruptor → 事件处理器 → 组件更新
    ```
 
-## 外部集成
-
-### 数据服务
-- 基础 URL：`https://marketplace.quantit.tech`
-- 提供历史行情数据
-- 合约定义
-
-### AI Copilot
-- 通过 HTTP/SSE 集成 LLM
-- 使用 `jtokkit` 进行 Token 管理
-- OkHttp3 客户端进行 API 调用
+4. **实时推送**：
+   ```
+   事件 → SseBroadcastHandler → SseStreamController → 前端 SSE 连接
+   ```
 
 ## 策略开发指南
 
-### 核心架构
-
-#### 1. 策略框架关键接口
+### 核心接口
 
 ```java
-TradeStrategy              # 策略接口
-├── onTick()              # TICK 数据回调
-├── onMergedBar()         # K线数据回调
-├── onOrder()             # 订单状态回调
-├── onTrade()             # 成交回调
-└── name()                # 策略名称
-
-AbstractStrategy           # 策略抽象基类
-├── ctx                   # IModuleContext 模组上下文
-├── logger                # 日志对象
-├── initIndicators()      # 指标初始化钩子
-└── storeObject           # 状态存储对象
-
-IModuleContext             # 模组上下文
-├── submitOrderReq()      # 提交订单
-├── getState()            # 获取模组状态
-├── registerIndicator()   # 注册指标
-└── getModuleAccount()    # 获取模组账户
+TradeStrategy          # 策略接口 - 所有策略必须实现
+AbstractStrategy       # 抽象基类 - 推荐继承
+IModuleContext         # 模组上下文 - 策略与框架交互
+IAccount               # 合约绑定物理账户
+IModuleAccount         # 模组级账户操作
 ```
 
-#### 2. 指标框架
+策略使用 `@StrategicComponent("策略名称")` 注解标记，框架通过 Spring 自动发现。
+
+### 指标框架
 
 ```java
 public interface Indicator {
-    Num get(int step);           // 回溯获取指标值（0=当前, -1=上一根）
-    double value(int step);      // 获取数值
-    boolean isReady();           // 指标是否初始化完成
-    void update(Num num);        // 数据更新（幂等设计）
-    List<Indicator> dependencies(); // 依赖指标
-    Configuration getConfiguration(); // 配置信息
+    Num get(int step);                 // 0=当前, -1=上一根
+    double value(int step);
+    boolean isReady();
+    void update(Num num);              // 幂等更新
+    List<Indicator> dependencies();
+    Configuration getConfiguration();
 }
 ```
 
-**Num Record** - 指标值包装：
+`Num` 记录：
+
 ```java
 public record Num(double value, long timestamp, boolean unstable)
 ```
-- `unstable=true` 表示当前 K 线未完成，值可能变化
 
-#### 3. 模组状态机
+### 交易操作
 
-```java
-ModuleState state = ctx.getState();
-// EMPTY          - 空仓
-// HOLDING_LONG   - 持多仓
-// HOLDING_SHORT  - 持空仓
-// PLACING_ORDER  - 下单中
-// PENDING_ORDER  - 等待订单反馈
-```
+使用 `TradeIntent` 提交订单，可自动处理撤单追单：
 
-#### 4. 交易操作
-
-**TradeIntent** - 交易意图（自动撤单追单）：
 ```java
 ctx.submitOrderReq(TradeIntent.builder()
     .contract(contract)
-    .operation(SignalOperation.BUY_OPEN)   // BUY_OPEN, SELL_OPEN, BUY_CLOSE, SELL_CLOSE, BUY_REVERSE, SELL_REVERSE
-    .priceType(PriceType.OPP_PRICE)        // ANY_PRICE, OPP_PRICE, LAST_PRICE, WAITING_PRICE, LIMIT_PRICE
+    .operation(SignalOperation.BUY_OPEN)
+    .priceType(PriceType.OPP_PRICE)
     .volume(1)
-    .timeout(5000)                         // 超时毫秒
+    .timeout(5000)
     .build());
 ```
 
-**TradeHelper** - 简化交易助手：
+或使用 `TradeHelper` 简化交易：
+
 ```java
 TradeHelper helper = TradeHelper.builder()
     .context(ctx)
     .tradeContract(contract)
     .build();
-
-helper.doBuyOpen(1);      // 对手价买开
-helper.doSellClose(1);    // 对手价卖平
-helper.doBuyCloseAll();   // 平掉所有多头持仓
+helper.doBuyOpen(1);
+helper.doSellCloseAll();
 ```
 
-### 实现交易策略 - 关键步骤
+### 实现步骤概要
 
-#### Step 1: 类定义
-```java
-@StrategicComponent(MyStrategy.NAME)   // 必须注解，value 为策略名称
-public class MyStrategy extends AbstractStrategy implements TradeStrategy {
-    protected static final String NAME = "我的策略";
-    
-    private InitParams params;          // 策略参数
-    private Indicator fastLine;         // 指标定义
-    private TradeHelper helper;         // 交易助手
-}
-```
+1. 类标注 `@StrategicComponent(MyStrategy.NAME)`，继承 `AbstractStrategy`，实现 `TradeStrategy`
+2. 定义 `InitParams extends DynamicParams`，用 `@Setting` 标注参数字段
+3. 重写 `initWithParams(DynamicParams params)` 接收参数
+4. 重写 `initIndicators()` 创建并注册指标
+5. 实现 `onMergedBar()` 或 `onTick()` 交易逻辑
+6. 交易前检查 `ctx.getState()` 和 `indicator.isReady()`
 
-#### Step 2: 参数配置
-```java
-public static class InitParams extends DynamicParams {
-    @Setting(label="指标合约", order=0)
-    private String indicatorSymbol;
-    
-    @Setting(label="快线周期", type = FieldType.NUMBER, order=1)
-    private int fast = 5;
-    
-    @Setting(label="价格类型", type = FieldType.SELECT, 
-             options = {"市价","对手价","排队价"}, 
-             optionsVal = {"ANY_PRICE", "OPP_PRICE", "WAITING_PRICE"}, 
-             order=2)
-    private String priceType = "OPP_PRICE";
-}
+### 模组状态
 
-@Override
-public DynamicParams getDynamicParams() {
-    return new InitParams();
-}
+`ModuleState` 主要取值：
 
-@Override
-public void initWithParams(DynamicParams params) {
-    this.params = (InitParams) params;
-}
-```
+- `EMPTY` - 空仓
+- `HOLDING_LONG` - 持多仓
+- `HOLDING_SHORT` - 持空仓
+- `PLACING_ORDER` - 下单中
+- `PENDING_ORDER` - 等待订单反馈
 
-#### Step 3: 指标初始化
-```java
-@Override
-protected void initIndicators() {
-    logger = ctx.getLogger(getClass());
-    Contract contract = ctx.getContract(params.indicatorSymbol);
-    
-    // 创建指标
-    this.fastLine = new EMAIndicator(Configuration.builder()
-        .contract(contract)
-        .indicatorName("EMA10")
-        .numOfUnits(ctx.numOfMinPerMergedBar())  // 使用模组 K 线周期
-        .build(), 10);
-    
-    // 注册指标（必须注册才会被框架管理）
-    ctx.registerIndicator(fastLine);
-    
-    // 初始化交易助手
-    helper = TradeHelper.builder().context(ctx).tradeContract(contract).build();
-}
-```
+### 自定义指标
 
-#### Step 4: 交易逻辑实现
-
-**K线驱动策略** (`onMergedBar`)：
-```java
-@Override
-public void onMergedBar(Bar bar) {
-    // 确保指标已准备好
-    if(!fastLine.isReady() || !slowLine.isReady()) {
-        return;
-    }
-    
-    switch (ctx.getState()) {
-        case EMPTY -> {
-            if(shouldBuy()) {
-                helper.doBuyOpen(1);
-            }
-            if(shouldSell()) {
-                helper.doSellOpen(1);
-            }
-        }
-        case HOLDING_LONG -> {
-            if(fastLine.value(0) < slowLine.value(0)) {
-                helper.doSellClose(1);
-            }
-        }
-        case HOLDING_SHORT -> {
-            if(fastLine.value(0) > slowLine.value(0)) {
-                helper.doBuyClose(1);
-            }
-        }
-        default -> { /* 其他状态不处理 */ }
-    }
-}
-```
-
-**TICK驱动策略** (`onTick`)：
-```java
-@Override
-public void onTick(Tick tick) {
-    logger.info("时间：{} {} 价格：{} 指标值：{}", 
-        tick.actionDay(), tick.actionTime(), 
-        tick.lastPrice(), fastLine.value(0));
-}
-```
-
-### 实现自定义指标
-
-```java
-public class MyIndicator extends AbstractIndicator implements Indicator {
-    
-    private double factor;
-    private Indicator srcIndicator;  // 可选：依赖其他指标
-    
-    public MyIndicator(Configuration cfg, int barCount) {
-        super(cfg);
-        this.factor = 2D / (barCount + 1);
-    }
-    
-    @Override
-    protected Num evaluate(Num num) {
-        // num 包含当前 K 线的值、时间戳、稳定性标识
-        // 返回计算后的值
-        double val = calculate(...);
-        return Num.of(val, num.timestamp(), num.unstable());
-    }
-    
-    @Override
-    public List<Indicator> dependencies() {
-        // 如果有依赖其他指标，返回依赖列表
-        return Objects.isNull(srcIndicator) ? 
-            Collections.emptyList() : List.of(srcIndicator);
-    }
-}
-```
-
-### 核心原则总结
-
-1. **事件驱动**: 策略通过事件回调 (`onTick`, `onMergedBar`, `onOrder`, `onTrade`) 驱动
-2. **基于状态的交易**: 始终检查 `ctx.getState()` 避免无效交易
-3. **指标就绪检查**: 交易前检查 `indicator.isReady()` 确保指标已初始化
-4. **幂等更新**: 指标 `update()` 方法是幂等的，同一数据多次更新效果相同
-5. **TradeIntent**: 使用 `TradeIntent` 自动处理撤单追单，避免手动管理订单生命周期
-6. **模组状态**: 框架管理模组状态，策略根据状态决定交易行为
-7. **依赖注入**: 通过 `ctx.registerIndicator()` 让框架管理指标生命周期
-8. **配置**: 使用 `Configuration.builder()` 配置指标参数，与模组 K 线周期对齐
+1. 继承 `AbstractIndicator`，实现 `evaluate(Num num)`
+2. 如有依赖其他指标，重写 `dependencies()`
+3. 使用 `Configuration.builder()` 配置参数
+4. 返回 `Num.of(value, timestamp, unstable)`
+5. 在策略中通过 `ctx.registerIndicator(indicator)` 注册
 
 ### 示例参考
 
 - `BeginnerExampleStrategy` - 最简策略示例
 - `IndicatorExampleStrategy` - 带指标的策略示例
-- `MultiContractExampleStrategy` - 多合约多周期示例
+- `MultiContractExampleStrategy` - 多合约示例
 - `SimpleSpreadStrategy` - 套利策略示例
 
-## 常见任务
+## 部署与启动
 
-### 添加新策略
-1. 在 `northstar-strategy-example` 或独立模块创建类
-2. 继承 `AbstractStrategy` 并实现 `TradeStrategy`
-3. 使用 `@StrategicComponent("策略名称")` 注解
-4. 定义 `InitParams extends DynamicParams` 和 `@Setting` 字段
-5. 重写 `initIndicators()` 创建和注册指标
-6. 实现 `onMergedBar()` 或 `onTick()` 交易逻辑
-7. 适当处理不同 `ModuleState` 值
-8. 使用 `TradeHelper` 或 `TradeIntent` 提交订单
+### 生产启动（`startup.sh`）
 
-### 添加新指标
-1. 在 `northstar-api/src/main/java/org/dromara/northstar/indicator/` 下创建类，继承 `AbstractIndicator`
-2. 重写 `evaluate(Num num)` 实现计算逻辑
-3. 如需依赖其他指标，重写 `dependencies()`
-4. 使用 Configuration builder 配置指标参数
-5. 返回 `Num.of(value, timestamp, unstable)` 带正确元数据
-6. 通过 `ctx.registerIndicator(indicator)` 在策略中注册
+```bash
+nohup java -Xlog:gc*:gc.log -Xms2g -Xmx2g \
+  -Dloader.path=$(pwd) \
+  -Denv=prod \
+  -jar $(find /root/northstar-dist -name 'northstar-[0-9]*.*.jar') \
+  >/root/northstar-dist/ns.log &
+```
 
-### 添加新网关
-1. 实现 `MarketGateway` 或 `TradeGateway` 接口
-2. 创建 `GatewayFactory` 实现
-3. 处理连接生命周期（connect/disconnect）
-4. 实现到内部模型的数据转换
+### 环境初始化
+
+- `env.sh`（Linux）：创建 `~/northstar-env` 和 `~/northstar-dist`，安装 Oracle JDK 25
+- `env.ps1`（Windows）：创建 `c:\northstar_env\` 和 `c:\northstar_dist\`，安装 JDK 25 MSI 并更新用户 PATH
+
+### Docker / CI
+
+- 仓库中**没有后端 Dockerfile 或 docker-compose.yml**
+- 仅有前端 Dockerfile：`northstar-monitor-next/Dockerfile`（基于 Nginx 部署构建产物）
+- 仓库中**没有 GitHub Actions、Gitee CI、Jenkinsfile 等 CI/CD 配置**
+
+## Git 子模块
+
+```
+northstar-external       → git@gitee.com:kevinhuangwl/northstar-external.git
+northstar-monitor-next   → git@gitee.com:kevinhuangwl/northstar-monitor-next.git
+```
 
 ## 重要注意事项
 
-- **虚拟线程**: Spring 配置中启用（Spring Boot 3.2+）
-- **编码**: 整个项目使用 UTF-8
-- **Protobuf**: 生成类在 `xyz.redtorch.pb` 包中 - **请勿手动修改**
-- **H2 Console**: 开发 Profile 中在 `/h2-console` 启用
-- **静态资源**: Web UI 资源从 `src/main/resources/static` 提供
-- **前端项目**: `northstar-monitor-next` 是 Vue3 + Vite 前端，构建时复制到 `northstar-main`
+1. **JDK 25 升级已完成**：源码 POM 已目标 Java 25 / Spring Boot 3.5.11。构建前请确认本地 JDK 与 POM 配置一致。
+2. **Protobuf 生成类不可手动修改**：生成类位于 `xyz.redtorch.pb` 包中，更新请使用 `update-protobuf-obj.ps1`。
+3. **H2 用于生产数据存储**：生产环境使用 H2 文件模式，历史行情数据主要依赖外部 marketplace 服务。
+4. **虚拟线程**：默认在非 `dev` profile 下启用。
+5. **`.flattened-pom.xml` 不一致**：工作目录中的 `.flattened-pom.xml` 文件未纳入 Git，且可能与源码 POM 不符，请勿以其为准。
+6. **H2 Console 在生产环境启用**：路径 `/h2-console`，仅通过 CSRF 拦截器保护。
+7. **前端构建顺序**：打包后端前必须先在前端目录执行 `pnpm build` 生成 `dist/`。
+8. **测试环境默认账号**：`admin` / `123456`，可通过 `NS_USER` / `NS_PWD` 环境变量覆盖。
