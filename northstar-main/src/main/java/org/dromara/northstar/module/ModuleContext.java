@@ -47,7 +47,6 @@ import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.contract.OptionChainContract;
-import org.dromara.northstar.gateway.sim.trade.AccountPosition;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.IndicatorValueUpdateHelper;
 import org.dromara.northstar.indicator.model.Configuration;

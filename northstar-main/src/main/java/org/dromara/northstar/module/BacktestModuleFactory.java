@@ -19,7 +19,6 @@ import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.ExplorerTaskDescription;
 import org.dromara.northstar.common.model.Identifier;
-
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.model.StrategyMetaInfo;
@@ -32,7 +31,6 @@ import org.dromara.northstar.common.model.core.SubmitOrderReq;
 import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.data.IAccountRepository;
 import org.dromara.northstar.data.IModuleRepository;
-import org.dromara.northstar.data.jdbc.DealRecordRepository;
 import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.gateway.mktdata.NorthstarDataSource;

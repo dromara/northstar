@@ -1,6 +1,5 @@
 package org.dromara.northstar.data.jdbc;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.dromara.northstar.common.model.DealRecord;

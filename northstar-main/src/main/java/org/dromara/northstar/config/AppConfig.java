@@ -169,8 +169,8 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean {
 	    	}
 	    	log.info("数据服务token验证码: {}", partialToken);
         return new RestTemplateBuilder()
-                .setReadTimeout(Duration.ofSeconds(60))
-                .setConnectTimeout(Duration.ofSeconds(10))
+                .readTimeout(Duration.ofSeconds(60))
+                .connectTimeout(Duration.ofSeconds(10))
                 .rootUri(baseUrl)
 				.defaultHeader("Authorization", String.format("Bearer %s", token))
 				.defaultHeader("NS_Version", buildProperties.getVersion())

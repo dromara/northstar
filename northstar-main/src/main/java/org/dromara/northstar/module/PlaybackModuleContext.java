@@ -22,7 +22,6 @@ import org.springframework.util.Assert;
 
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
-import xyz.redtorch.pb.CoreEnum.PriceSourceEnum;
 
 public class PlaybackModuleContext extends ModuleContext implements IModuleContext{
 	

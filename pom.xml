@@ -437,9 +437,19 @@
             <dependency>
               <groupId>org.springframework.boot</groupId>
               <artifactId>spring-boot-maven-plugin</artifactId>
-              <version>3.5.11</version>
             </dependency>
           </dependencies>
+        </plugin>
+        <plugin>
+        		<groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>build-info</goal>
+                    </goals>
+                </execution>
+            </executions>
         </plugin>
         <plugin>
           <groupId>org.jacoco</groupId>
