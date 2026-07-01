@@ -1,5 +1,6 @@
 package org.dromara.northstar.common.model.core;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -15,6 +16,39 @@ public record TradeTimeDefinition(
 		if(weekendClosure == null) {
 			weekendClosure = true;
 		}
+	}
+	
+	public boolean withinTradeTime(LocalTime t) {
+		for(TimeSlot ts : timeSlots) {
+			if(ts.withinSection(t)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private static final int SEC_PER_MIN = 60;
+	private static final int MINS_OF_DAY = 1440;
+	
+	public LocalTime nearestTradeTime(LocalTime t) {
+		LocalTime base = t.withSecond(0).withNano(0);
+		int minuteIdx = base.toSecondOfDay() / SEC_PER_MIN;
+		
+		for (int offset = 0; offset < MINS_OF_DAY; offset++) {
+			int forwardIdx = (minuteIdx + offset) % MINS_OF_DAY;
+			LocalTime forwardTime = LocalTime.ofSecondOfDay(forwardIdx * SEC_PER_MIN);
+			if (withinTradeTime(forwardTime)) {
+				return forwardTime;
+			}
+			if (offset > 0) {
+				int backwardIdx = (minuteIdx - offset + MINS_OF_DAY) % MINS_OF_DAY;
+				LocalTime backwardTime = LocalTime.ofSecondOfDay(backwardIdx * SEC_PER_MIN);
+				if (withinTradeTime(backwardTime)) {
+					return backwardTime;
+				}
+			}
+		}
+		return base;
 	}
 
 	@Override
