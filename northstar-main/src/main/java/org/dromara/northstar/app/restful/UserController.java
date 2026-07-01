@@ -11,6 +11,10 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.Constants;
+import org.dromara.northstar.app.security.LoginIPLockService;
+import org.dromara.northstar.app.security.LoginIPLockService.LockStatus;
+import org.dromara.northstar.common.exception.IPBannedException;
+import org.dromara.northstar.common.exception.IPFrozenException;
 import org.dromara.northstar.common.exception.IllegalLoginException;
 import org.dromara.northstar.common.exception.TooManyLoginException;
 import org.dromara.northstar.common.exception.UserLockedException;
@@ -31,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.Claim;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 @RequestMapping("northstar/user")
@@ -48,6 +53,9 @@ public class UserController {
 	
 	@Autowired
 	private EventEmitterHolder emitterHolder;
+	
+	@Autowired
+	private LoginIPLockService ipLockService;
 	
 	@Value("${quantit.datasource.secret:}")
 	private String dsSecret;
@@ -71,9 +79,17 @@ public class UserController {
 	
 	
 	@PostMapping("login")
-	public ResponseEntity<String> login(@RequestBody NsUser loginUser){
+	public ResponseEntity<String> login(@RequestBody NsUser loginUser, HttpServletRequest req){
 		if(emitterHolder.getEmitters().size() > 100) {
 			throw new TooManyLoginException();
+		}
+		String ip = req.getRemoteAddr();
+		LockStatus ipStatus = ipLockService.checkStatus(ip);
+		if(ipStatus == LockStatus.BANNED) {
+			throw new IPBannedException(ipLockService.getRemainingSeconds(ip));
+		}
+		if(ipStatus == LockStatus.FROZEN) {
+			throw new IPFrozenException(ipLockService.getRemainingSeconds(ip));
 		}
 		session.invalidate();
 		String usrname = loginUser.getUsername();
@@ -85,10 +101,16 @@ public class UserController {
 			String csrfToken = UUID.randomUUID().toString();
 			session.setAttribute(Constants.SESS_CSRF, csrfToken);
 			user.resetAttempt();
+			ipLockService.clear(ip);
 			return ResponseEntity.ok(csrfToken);
 		}
 		user.errorAttempt();
-		throw new IllegalLoginException();
+		LockStatus failureStatus = ipLockService.recordFailure(ip);
+		switch(failureStatus) {
+			case FROZEN -> throw new IPFrozenException(ipLockService.getRemainingSeconds(ip));
+			case BANNED -> throw new IPBannedException(ipLockService.getRemainingSeconds(ip));
+			default -> throw new IllegalLoginException();
+		}
 	}
 	
 	@GetMapping("logout")

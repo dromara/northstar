@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.app.auth.AuthCheckerInterceptor;
+import org.dromara.northstar.app.security.LoginIPLockService;
 import org.dromara.northstar.app.security.MaliciousIPCollector;
 import org.dromara.northstar.app.security.MaliciousRequestFilter;
 import org.dromara.northstar.common.model.ContractConfigDTO;
@@ -149,9 +150,9 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean {
     }
     
     @Bean
-    FilterRegistrationBean<MaliciousRequestFilter> maliciousRequestFilter(MaliciousIPCollector colltr){
+    FilterRegistrationBean<MaliciousRequestFilter> maliciousRequestFilter(MaliciousIPCollector colltr, LoginIPLockService loginIpLockService){
     	FilterRegistrationBean<MaliciousRequestFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new MaliciousRequestFilter(colltr));
+        registrationBean.setFilter(new MaliciousRequestFilter(colltr, loginIpLockService));
         registrationBean.addUrlPatterns("/*"); 
         registrationBean.setOrder(1); 
         return registrationBean;
