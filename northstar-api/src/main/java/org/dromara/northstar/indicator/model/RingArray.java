@@ -76,6 +76,10 @@ public class RingArray<T> {
 		return result;
 	}
 	
+	/**
+	 * 返回的列表按自然顺序排列
+	 * @return
+	 */
 	public List<T> toList(){
 		List<T> result = new ArrayList<>(array.length);
 		for(int i=0; i<array.length; i++) {
@@ -83,7 +87,7 @@ public class RingArray<T> {
 				result.add(get(-i));
 			}
 		}
-		return result;
+		return result.reversed();
 	}
 	
 	/**

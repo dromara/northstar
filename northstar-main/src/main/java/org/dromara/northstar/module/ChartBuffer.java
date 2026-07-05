@@ -50,7 +50,7 @@ public class ChartBuffer {
     public Map<Contract, List<Bar>> getBarBuffers(){
 		return barBuffMap.entrySet()
 				.stream()
-				.collect(HashMap::new, (m,e) -> m.put(e.getKey(), e.getValue().toList().reversed()), HashMap::putAll);
+				.collect(HashMap::new, (m,e) -> m.put(e.getKey(), e.getValue().toList()), HashMap::putAll);
 	}
 
     public List<ModuleIndicatorDescription> getIndicatorDescriptions(){
@@ -59,7 +59,7 @@ public class ChartBuffer {
 						.name(e.getKey().getConfiguration().indicatorID())
 						.contract(ContractSimpleInfo.from(e.getKey().getConfiguration().contract()))
 						.style(e.getKey().getConfiguration().lineStyle())
-						.values(e.getValue().toList().reversed().stream().map(n -> new TimeSeriesValue(n.value(), n.timestamp())).toList())
+						.values(e.getValue().toList().stream().map(n -> new TimeSeriesValue(n.value(), n.timestamp())).toList())
 						.build())
 				.toList();
 	}

@@ -122,11 +122,11 @@ public class CustomVisibilityExampleStrategy extends AbstractStrategy implements
 				.dueDate(c.lastTradeDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 				.precision(c.pricePrecision()).build();
 		String indicatorName = "ZigZag";
-		List<Entry> simpleEntries = barsToEntries(barBuff.toList().reversed());
+		List<Entry> simpleEntries = barsToEntries(barBuff.toList());
 		List<Entry> basicEntries = basicProcess(simpleEntries);
 		List<Entry> resultEntries = iteration(params.iterations, basicEntries);
 		Map<Long, Entry> timeEntryMap = resultEntries.stream().collect(Collectors.toMap(e -> e.timestamp, e -> e));
-		List<TimeSeriesValue> values = barBuff.toList().reversed().stream()
+		List<TimeSeriesValue> values = barBuff.toList().stream()
 				.map(bar -> {
 					Entry point = timeEntryMap.get(bar.actionTimestamp());
 					Double val = null;
