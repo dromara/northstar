@@ -21,7 +21,7 @@
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <revision>${northstar-version}</revision>
-    <lombok-version>1.18.42</lombok-version>
+    <lombok-version>1.18.46</lombok-version>
     <slf4j-version>2.0.9</slf4j-version>
     <commons-lang3-version>3.17.0</commons-lang3-version>
     <commons-codec-version>1.16.0</commons-codec-version>
