@@ -1,5 +1,6 @@
 package org.dromara.northstar.common.model;
 
+import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.indicator.model.Num;
 
 import lombok.EqualsAndHashCode;
@@ -43,6 +44,11 @@ public class TimeSeriesValue implements Comparable<TimeSeriesValue> {
 	@Override
 	public int compareTo(TimeSeriesValue o) {
 		return timestamp < o.timestamp ? -1 : 1;
+	}
+
+	@Override
+	public String toString() {
+		return "TimeSeriesValue [value=" + value + ", t=" + CommonUtils.millsToLocalDateTime(timestamp) + ", unsettled=" + unsettled + "]";
 	}
 	
 }
