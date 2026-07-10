@@ -7,7 +7,6 @@ import java.time.LocalTime;
 import java.time.Period;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -68,6 +67,7 @@ import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.TradeStrategy;
+import org.dromara.northstar.support.utils.ModuleDataLoader;
 import org.dromara.northstar.support.utils.NamingValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -294,17 +294,13 @@ public class ModuleService implements CommandLineRunner {
 	}
 	
 	private void loadDataForInit(IContract c, int weeks, IModuleContext mctx) {
-		LocalDate from = LocalDate.now().minusWeeks(weeks);
-		LocalDate to = LocalDate.now();
-		List<Bar> bars = c.dataSource().getData(c.contract(), Interval.M1, from, to);
+		KlineGenerator kg = new KlineGenerator(c.contract(), mctx::onBar);
+		ModuleDataLoader loader = new ModuleDataLoader(c, kg);
+		loader.load(weeks);
+		
 		// 本地仅加载最近的数据
 		List<Bar> data = mdRepo.loadBars(c, LocalDate.now(), LocalDate.now().plusDays(3));
-		List<Bar> minuteBars = new LinkedList<>();
-		minuteBars.addAll(bars.reversed());
-		minuteBars.addAll(data);
-		
-		KlineGenerator kg = new KlineGenerator(c.contract(), mctx::onBar);
-		for(Bar bar : minuteBars) {
+		for(Bar bar : data) {
 			kg.updateBar(bar);
 		}
 	}
