@@ -48,7 +48,7 @@ public class TimeSeriesValue implements Comparable<TimeSeriesValue> {
 
 	@Override
 	public String toString() {
-		return "TimeSeriesValue [value=" + value + ", t=" + CommonUtils.millsToLocalDateTime(timestamp) + ", unsettled=" + unsettled + "]";
+		return String.format("TimeSeriesValue [value=%s, t=%s (%d), unsettled=%s]", value, CommonUtils.millsToLocalDateTime(timestamp), timestamp, unsettled);
 	}
 	
 }
