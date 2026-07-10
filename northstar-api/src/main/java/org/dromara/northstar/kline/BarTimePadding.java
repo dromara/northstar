@@ -23,9 +23,9 @@ import lombok.Data;
 public class BarTimePadding {
 
 	/**
-	 * 把分钟时间对齐，并保存一份映射表，以快速得到任意时刻的K线结算时间
+	 * 把分钟时间对齐，并保存一份映射表，以快速得到任意时刻的K线开盘时间与收盘时间
 	 */
-	protected final Map<MinuteEntry, LocalTime> barTimeEntryMap = new LinkedHashMap<>();
+	protected final Map<MinuteEntry, BarTimeEntry> barTimeEntryMap = new LinkedHashMap<>();
 
 	protected final List<MinuteEntry> entryTimeList = new ArrayList<>();
 
@@ -69,8 +69,10 @@ public class BarTimePadding {
 			if (section.isEmpty()) {
 				break;
 			}
+			LocalTime openTime = section.getFirst().start;
 			LocalTime cutoffTime = section.getLast().end;
-			section.forEach(me -> barTimeEntryMap.put(me, cutoffTime));
+			BarTimeEntry barTimeEntry = new BarTimeEntry(openTime, cutoffTime);
+			section.forEach(me -> barTimeEntryMap.put(me, barTimeEntry));
 			i += barInterval;
 		}
 
@@ -114,7 +116,7 @@ public class BarTimePadding {
 		if (!barTimeEntryMap.containsKey(me)) {
 			throw new IllegalStateException(String.format("[%s, %s] 没有找到对应的cutoffTime", me.start, me.end));
 		}
-		LocalTime cutoffTime = barTimeEntryMap.get(me);
+		LocalTime cutoffTime = barTimeEntryMap.get(me).getCloseTime();
 		List<TimeSlot> times = contract.contractDefinition().tradeTimeDef().timeSlots();
 		TimeSlot firstSection = times.getFirst();
 		boolean isChnFuturesWithNightTrade = times.size() > 1 && firstSection.start().isAfter(TRADE_DATE_CUTOFF);
@@ -146,6 +148,51 @@ public class BarTimePadding {
 	public LocalDateTime cutoffTimeInMinute(long time) {
 		LocalDateTime ldt = CommonUtils.millsToLocalDateTime(time);
 		return cutoffDateTime(entryOf(time, true), ldt.toLocalDate(), ldt.toLocalTime());
+	}
+
+	/**
+	 * 根据K线数据计算其对应的K线开盘时间
+	 */
+	public LocalDateTime openTimeInMinute(Bar bar) {
+		return openDateTime(entryOf(bar.actionTimestamp(), true), bar.actionDay(), bar.actionTime());
+	}
+
+	/**
+	 * 根据Tick数据计算其对应的K线开盘时间
+	 */
+	public LocalDateTime openTimeInMinute(Tick tick) {
+		return openDateTime(entryOf(tick.actionTimestamp(), false), tick.actionDay(), tick.actionTime());
+	}
+
+	/**
+	 * 根据时间戳计算其对应的K线开盘时间
+	 */
+	public LocalDateTime openTimeInMinute(long time) {
+		LocalDateTime ldt = CommonUtils.millsToLocalDateTime(time);
+		return openDateTime(entryOf(time, true), ldt.toLocalDate(), ldt.toLocalTime());
+	}
+
+	private LocalDateTime openDateTime(MinuteEntry me, LocalDate actionDay, LocalTime actionTime) {
+		if (!barTimeEntryMap.containsKey(me)) {
+			throw new IllegalStateException(String.format("[%s, %s] 没有找到对应的openTime", me.start, me.end));
+		}
+		LocalDateTime cutoffDt = cutoffDateTime(me, actionDay, actionTime);
+		LocalTime openTime = barTimeEntryMap.get(me).getOpenTime();
+		LocalDate openDay = cutoffDt.toLocalDate();
+		// 当开盘时间（如23:00）晚于收盘时间（如00:00）时，说明K线跨越了午夜，开盘日期应为收盘日期的前一天
+		if (openTime.isAfter(cutoffDt.toLocalTime())) {
+			openDay = openDay.minusDays(1);
+		}
+		return LocalDateTime.of(openDay, openTime);
+	}
+
+	@AllArgsConstructor
+	@Data
+	protected class BarTimeEntry {
+
+		private LocalTime openTime;
+
+		private LocalTime closeTime;
 	}
 
 	@AllArgsConstructor

@@ -24,6 +24,7 @@ import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.dromara.northstar.common.utils.CommonUtils;
+import org.dromara.northstar.kline.BarTimePadding.BarTimeEntry;
 import org.dromara.northstar.kline.BarTimePadding.MinuteEntry;
 import org.dromara.northstar.strategy.MergedBarListener;
 import org.junit.jupiter.api.Test;
@@ -110,7 +111,7 @@ class BarMergerTest {
 	@Test
     void testMapping1Min(){
         BarMerger merger = new BarMerger(Interval.M1, contract);
-        for(Entry<MinuteEntry, LocalTime> e : merger.barTimePadding.barTimeEntryMap.entrySet()) {
+        for(Entry<MinuteEntry, BarTimeEntry> e : merger.barTimePadding.barTimeEntryMap.entrySet()) {
         	System.out.println(String.format("%s -> %s", e.getKey(), e.getValue()));
         }
         assertThat(new HashSet(merger.barTimePadding.barTimeEntryMap.values())).hasSize(555);
@@ -138,7 +139,7 @@ class BarMergerTest {
 	@Test
     void testMapping5Min(){
         BarMerger merger = new BarMerger(Interval.M5, contract);
-        for(Entry<MinuteEntry, LocalTime> e : merger.barTimePadding.barTimeEntryMap.entrySet()) {
+        for(Entry<MinuteEntry, BarTimeEntry> e : merger.barTimePadding.barTimeEntryMap.entrySet()) {
         	System.out.println(String.format("%s -> %s", e.getKey(), e.getValue()));
         }
         assertThat(new HashSet(merger.barTimePadding.barTimeEntryMap.values())).hasSize(111);
@@ -149,7 +150,7 @@ class BarMergerTest {
 	@Test
     void testMapping120Min(){
         BarMerger merger = new BarMerger(Interval.H2, contract);
-        for(Entry<MinuteEntry, LocalTime> e : merger.barTimePadding.barTimeEntryMap.entrySet()) {
+        for(Entry<MinuteEntry, BarTimeEntry> e : merger.barTimePadding.barTimeEntryMap.entrySet()) {
         	System.out.println(String.format("%s -> %s", e.getKey(), e.getValue()));
         }
         assertThat(new HashSet(merger.barTimePadding.barTimeEntryMap.values())).hasSize(5);
@@ -160,7 +161,7 @@ class BarMergerTest {
 	@Test
     void testMapping240Min(){
         BarMerger merger = new BarMerger(Interval.H4, contract3);
-        for(Entry<MinuteEntry, LocalTime> e : merger.barTimePadding.barTimeEntryMap.entrySet()) {
+        for(Entry<MinuteEntry, BarTimeEntry> e : merger.barTimePadding.barTimeEntryMap.entrySet()) {
         	System.out.println(String.format("%s -> %s", e.getKey(), e.getValue()));
         }
         assertThat(new HashSet(merger.barTimePadding.barTimeEntryMap.values())).hasSize(2);
@@ -171,7 +172,7 @@ class BarMergerTest {
 	@Test
     void testWholeDayMapping1Min(){
         BarMerger merger = new BarMerger(Interval.M1, contract2);
-        for(Entry<MinuteEntry, LocalTime> e : merger.barTimePadding.barTimeEntryMap.entrySet()) {
+        for(Entry<MinuteEntry, BarTimeEntry> e : merger.barTimePadding.barTimeEntryMap.entrySet()) {
         	System.out.println(String.format("%s -> %s", e.getKey(), e.getValue()));
         }
         assertThat(new HashSet(merger.barTimePadding.barTimeEntryMap.values())).hasSize(1440);
@@ -182,7 +183,7 @@ class BarMergerTest {
 	@Test
     void testWholeDayMapping60Min(){
         BarMerger merger = new BarMerger(Interval.H1, contract2);
-        for(Entry<MinuteEntry, LocalTime> e : merger.barTimePadding.barTimeEntryMap.entrySet()) {
+        for(Entry<MinuteEntry, BarTimeEntry> e : merger.barTimePadding.barTimeEntryMap.entrySet()) {
         	System.out.println(String.format("%s -> %s", e.getKey(), e.getValue()));
         }
         assertThat(new HashSet(merger.barTimePadding.barTimeEntryMap.values())).hasSize(24);

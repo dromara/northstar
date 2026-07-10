@@ -329,9 +329,10 @@ public class ModuleContext implements IModuleContext{
 	public ModuleChartDescription getChartDescription() {
 		List<ContractChartDescription> mergeData = new ArrayList<>();
 		List<ModuleIndicatorDescription> allIndicators = new ArrayList<>();
-		validateCustomIndicators(tradeStrategy.customIndicators());
+		List<ModuleIndicatorDescription> customIndicators = tradeStrategy.customIndicators();
+		validateCustomIndicators(customIndicators);
 		allIndicators.addAll(chartBuffer.getIndicatorDescriptions());
-		allIndicators.addAll(tradeStrategy.customIndicators());
+		allIndicators.addAll(customIndicators);
 
 		chartBuffer.getBarBuffers().entrySet().forEach(e -> {
 			Contract c = e.getKey();
@@ -355,9 +356,13 @@ public class ModuleContext implements IModuleContext{
 			for(ModuleIndicatorDescription ind : moduleIndicators) {
 				ind.getValues().stream()
 					.filter(tv -> tv.getTimestamp() > 0)
-					.forEach(tv -> 
-						indicatorValueTable.put(CommonUtils.localDateTimeToMills(padding.cutoffTimeInMinute(tv.getTimestamp())), ind.getName(), tv.getValue())
-					);
+					.forEach(tv -> {
+						if(c.usingStartTimeInBarTime()) {
+							indicatorValueTable.put(CommonUtils.localDateTimeToMills(padding.openTimeInMinute(tv.getTimestamp())), ind.getName(), tv.getValue());
+						} else {
+							indicatorValueTable.put(CommonUtils.localDateTimeToMills(padding.cutoffTimeInMinute(tv.getTimestamp())), ind.getName(), tv.getValue());
+						}
+					});
 			}
 			bars.forEach(bar -> {
 				List<Double> values = new LinkedList<>();
