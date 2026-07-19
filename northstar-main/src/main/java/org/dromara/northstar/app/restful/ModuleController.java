@@ -3,15 +3,13 @@ package org.dromara.northstar.app.restful;
 import java.util.List;
 
 import org.dromara.northstar.app.service.ModuleService;
-import org.dromara.northstar.common.model.ModuleMockTradeDTO;
-import org.dromara.northstar.common.exception.ForbiddenInDemoException;
 import org.dromara.northstar.common.model.ModuleChartDescription;
 import org.dromara.northstar.common.model.ModuleDealRecordVO;
 import org.dromara.northstar.common.model.ModuleDescription;
+import org.dromara.northstar.common.model.ModuleMockTradeDTO;
 import org.dromara.northstar.common.model.ModuleRuntimeVO;
 import org.dromara.northstar.common.model.ModuleVO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,9 +26,6 @@ public class ModuleController {
 	@Autowired
 	private ModuleService service;
 	
-	@Autowired
-	private Environment env;
-
     @PostMapping
     public ModuleVO createModule(@RequestBody ModuleDescription md) throws Exception{
         return service.createModule(md);
@@ -78,10 +73,7 @@ public class ModuleController {
 
     @GetMapping("/{moduleName}/backtest")
     public void backtest(@PathVariable String moduleName, int numOfMonthToTest) throws Exception{
-    	if(env != null && env.matchesProfiles("demo")) {
-			throw new ForbiddenInDemoException();
-		}
-    	service.backtest(moduleName, numOfMonthToTest);
+    		throw new UnsupportedOperationException("不再支持模组的快速回测");
     }
 
     @PostMapping("/mocktrade")
