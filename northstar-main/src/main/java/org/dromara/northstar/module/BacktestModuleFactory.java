@@ -100,7 +100,6 @@ public class BacktestModuleFactory {
 						.bindedAccounts(Collections.emptyList())
 						.bindedContracts(List.of(c))
 						.moduleCacheDataSize(BUF_SIZE)
-						.klineInterval(barInterval.getAlias())
 						.defaultVolume(defaultVol)
 						.build();
 				ModuleRuntimeDescription mrd = ModuleRuntimeDescription.builder()

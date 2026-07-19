@@ -120,13 +120,13 @@ public class ModuleContext implements IModuleContext{
 			.forEach(csi -> {
 				IContract contract = contractMgr.getContract(Identifier.of(csi.getId()));
 				Contract c = contract.contract();
-				Interval barInterval = Interval.fromAlias(moduleDescription.getKlineInterval());
-				barTimePaddingMap.put(c, new BarTimePadding(barInterval, c));
-				if(contract instanceof OptionChainContract) {
-					contractMap.put(c.unifiedSymbol(), c);
-					contract.memberContracts().forEach(mc -> initForContract(mc.contract(), barInterval));
-				} else {
-					initForContract(contract.contract(), barInterval);
+				for(Interval barInterval : Interval.values()) {
+					if(contract instanceof OptionChainContract) {
+						contractMap.put(c.unifiedSymbol(), c);
+						contract.memberContracts().forEach(mc -> initForContract(mc.contract(), barInterval));
+					} else {
+						initForContract(contract.contract(), barInterval);
+					}
 				}
 			});
 		
@@ -191,11 +191,6 @@ public class ModuleContext implements IModuleContext{
 		if(moduleAccount.cancelOrder(cancelReq)) {
 			orderReqMap.remove(cancelReq.originOrderId());
 		}
-	}
-
-	@Override
-	public Interval moduleBarInterval() {
-		return Interval.fromAlias(moduleDescription.getKlineInterval());
 	}
 
 	@Override

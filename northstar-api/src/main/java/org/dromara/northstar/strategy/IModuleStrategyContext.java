@@ -60,11 +60,6 @@ public interface IModuleStrategyContext {
 	 */
 	Logger getLogger(Class<?> clz);
 	/**
-	 * 获取模组周期设置
-	 * @return
-	 */
-	Interval moduleBarInterval();
-	/**
 	 * 获取默认交易交易量
 	 * @return
 	 */
