@@ -25,6 +25,10 @@ public class PlaybackContract implements Instrument {
 				.contractId(contract.unifiedSymbol() + "@" + ChannelType.PLAYBACK)
 				.channelType(ChannelType.PLAYBACK)
 				.thirdPartyId(contract.symbol() + "@" + ChannelType.PLAYBACK)
+				.maxLimitOrderVolume(10000D)
+				.maxMarketOrderVolume(10000D)
+				.minLimitOrderVolume(1D)
+				.minMarketOrderVolume(1D)
 				.tradable(!contract.symbol().contains(Constants.PRIMARY_SUFFIX) && !contract.symbol().contains("指数"))
 				.build();
 		this.dataSrc = dataSrc;
