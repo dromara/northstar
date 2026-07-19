@@ -1,5 +1,6 @@
 package org.dromara.northstar.strategy.example;
 
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.common.model.core.Contract;
@@ -86,7 +87,7 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 	
 	private Configuration makeConfig(String name) {
 		Contract c = ctx.getContract(params.indicatorSymbol);
-		return Configuration.builder().contract(c).indicatorName(name).interval(ctx.moduleBarInterval()).build();
+		return Configuration.builder().contract(c).indicatorName(name).interval(Interval.M15).build();
 	}
 	
 	@Override

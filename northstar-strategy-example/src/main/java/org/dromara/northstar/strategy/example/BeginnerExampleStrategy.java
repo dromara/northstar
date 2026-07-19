@@ -3,6 +3,7 @@ package org.dromara.northstar.strategy.example;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.dromara.northstar.common.constant.FieldType;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
@@ -75,7 +76,9 @@ public class BeginnerExampleStrategy extends AbstractStrategy	// 抽象类预实
 	protected void initIndicators() {
 		// 在该方法中创建必要的指标实例
 		Contract contract = ctx.bindedContracts().get(0);
-		close = new SimpleValueIndicator(Configuration.builder().indicatorName("C").contract(contract).interval(ctx.moduleBarInterval()).build());
+		
+		// 构建指标
+		close = new SimpleValueIndicator(Configuration.builder().indicatorName("C").contract(contract).interval(Interval.M15).build());
 		
 		ctx.registerIndicator(close);
 		
