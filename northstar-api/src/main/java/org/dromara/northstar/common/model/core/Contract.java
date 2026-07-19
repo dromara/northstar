@@ -39,10 +39,10 @@ public record Contract(
 		LocalDate lastTradeDate,  // 最后交易日或合约月
 		@JsonIgnore
 		LocalDate onboardingDate, // 上市时间
-		int maxMarketOrderVolume,  // 市价单最大下单量
-		int minMarketOrderVolume,  // 市价单最小下单量
-		int maxLimitOrderVolume,  // 限价单最大下单量
-		int minLimitOrderVolume,  // 限价单最小下单量
+		double maxMarketOrderVolume,  // 市价单最大下单量
+		double minMarketOrderVolume,  // 市价单最小下单量
+		double maxLimitOrderVolume,  // 限价单最大下单量
+		double minLimitOrderVolume,  // 限价单最小下单量
 		CombinationTypeEnum combinationType, // 组合类型
 		@JSONField(serialize = false)
 		@JsonIgnore
@@ -104,10 +104,6 @@ public record Contract(
 			builder.setChannelType(channelType.toString());
 		}
 		builder.setUnderlyingMultiplier(underlyingMultiplier);
-		builder.setMaxMarketOrderVolume(maxMarketOrderVolume);
-		builder.setMinMarketOrderVolume(minMarketOrderVolume);
-		builder.setMaxLimitOrderVolume(maxLimitOrderVolume);
-		builder.setMinLimitOrderVolume(minLimitOrderVolume);
 		builder.setMultiplier(multiplier);
 		builder.setPriceTick(priceTick);
 		builder.setPricePrecision(pricePrecision);
