@@ -22,62 +22,57 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("northstar/module")
 @RestController
 public class ModuleController {
-	
+
 	@Autowired
 	private ModuleService service;
-	
-    @PostMapping
-    public ModuleVO createModule(@RequestBody ModuleDescription md) throws Exception{
-        return service.createModule(md);
-    }
 
-    @PutMapping
-    public ModuleVO updateModule(@RequestBody ModuleDescription md, boolean reset) throws Exception{
-        return service.updateModule(md, reset);
-    }
+	@PostMapping
+	public ModuleVO createModule(@RequestBody ModuleDescription md) throws Exception {
+		return service.createModule(md);
+	}
 
-    @GetMapping
-    public List<ModuleVO> getModules(){
-        return service.getModules();
-    }
+	@PutMapping
+	public ModuleVO updateModule(@RequestBody ModuleDescription md, boolean reset) throws Exception {
+		return service.updateModule(md, reset);
+	}
 
-    @DeleteMapping
-    public void removeModule(String moduleName){
-    	service.removeModule(moduleName);
-    }
+	@GetMapping
+	public List<ModuleVO> getModules() {
+		return service.getModules();
+	}
 
-    @GetMapping("/{moduleName}/enable")
-    public void enableModule(@PathVariable String moduleName){
-        service.enableModule(moduleName);
-    }
+	@DeleteMapping
+	public void removeModule(String moduleName) {
+		service.removeModule(moduleName);
+	}
 
-    @GetMapping("/{moduleName}/disable")
-    public void disableModule(@PathVariable String moduleName){
-    	service.disableModule(moduleName);
-    }
+	@GetMapping("/{moduleName}/enable")
+	public void enableModule(@PathVariable String moduleName) {
+		service.enableModule(moduleName);
+	}
 
-    @GetMapping("/{moduleName}/rt")
-    public ModuleRuntimeVO getRuntime(@PathVariable String moduleName){
-        return service.getRuntime(moduleName);
-    }
-    
-    @GetMapping("/{moduleName}/deals")
-    public List<ModuleDealRecordVO> getDeals(@PathVariable String moduleName) {
-    	return service.getDealRecords(moduleName);
-    }
+	@GetMapping("/{moduleName}/disable")
+	public void disableModule(@PathVariable String moduleName) {
+		service.disableModule(moduleName);
+	}
 
-    @GetMapping("/{moduleName}/chart")
-    public ModuleChartDescription getChart(@PathVariable String moduleName){
-        return service.getChart(moduleName);
-    }
+	@GetMapping("/{moduleName}/rt")
+	public ModuleRuntimeVO getRuntime(@PathVariable String moduleName) {
+		return service.getRuntime(moduleName);
+	}
 
-    @GetMapping("/{moduleName}/backtest")
-    public void backtest(@PathVariable String moduleName, int numOfMonthToTest) throws Exception{
-    		throw new UnsupportedOperationException("不再支持模组的快速回测");
-    }
+	@GetMapping("/{moduleName}/deals")
+	public List<ModuleDealRecordVO> getDeals(@PathVariable String moduleName) {
+		return service.getDealRecords(moduleName);
+	}
 
-    @PostMapping("/mocktrade")
-    public void mockTrade(@RequestBody ModuleMockTradeDTO trade){
-    	service.mockTrade(trade);
-    }
+	@GetMapping("/{moduleName}/chart")
+	public ModuleChartDescription getChart(@PathVariable String moduleName) {
+		return service.getChart(moduleName);
+	}
+
+	@PostMapping("/mocktrade")
+	public void mockTrade(@RequestBody ModuleMockTradeDTO trade) {
+		service.mockTrade(trade);
+	}
 }
