@@ -15,8 +15,6 @@ public class BacktestModuleVO {
 
 	private ContractSimpleInfo contract;
 	
-	private String barInterval;
-	
 	private int totalTrades;
 	
 	private int transactionFees;
