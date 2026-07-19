@@ -3,6 +3,7 @@ package org.dromara.northstar.module;
 import java.time.LocalDate;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -242,7 +243,7 @@ public class ModuleContext implements IModuleContext{
 	
 	@Override
 	public ModuleChartDescription getChartDescription() {
-		EnumMap<Interval, List<ContractChartDescription>> dataMap = new EnumMap<>(Interval.class);
+		Map<Interval, List<ContractChartDescription>> dataMap = new EnumMap<>(Interval.class);
 		for(Entry<Interval, TimeFrameScopedRegistry> entry : timeFrameScoped.entrySet()) {
 			dataMap.put(entry.getKey(), entry.getValue().visulize());
 		}

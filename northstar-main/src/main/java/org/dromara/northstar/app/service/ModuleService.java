@@ -62,7 +62,6 @@ import org.dromara.northstar.module.TradeModule;
 import org.dromara.northstar.strategy.DynamicParamsAware;
 import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
-import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.support.utils.ModuleDataLoader;
 import org.dromara.northstar.support.utils.NamingValidator;
@@ -259,7 +258,7 @@ public class ModuleService implements CommandLineRunner {
 		}
 		strategy.setContext(moduleCtx);
 		log.info("模组[{}] 初始化数据起始计算日为：{}", md.getName(), date);
-		final IModuleContext mctx = moduleCtx;
+		TradeModule module = new TradeModule(moduleCtx);
 		if(md.getUsage() != ModuleUsage.PLAYBACK && weeksOfDataForPreparation > 0) {
 			// 只有在非回测状态下，才需要预热数据
 			for(ContractSimpleInfo csi : md.getBindedContracts()) {
@@ -268,13 +267,13 @@ public class ModuleService implements CommandLineRunner {
 				Assert.notNull(dataSrc, () -> String.format("合约 [%s] 缺少数据源配置，无法加载历史数据", c.name()));
 				if(c instanceof OptionChainContract) {
 					// 对于期权链合约，要加载的是成员合约
-					c.memberContracts().parallelStream().forEach(rc -> loadDataForInit(rc, weeksOfDataForPreparation, mctx));
+					c.memberContracts().parallelStream().forEach(rc -> loadDataForInit(rc, weeksOfDataForPreparation, module));
 				} else {
-					loadDataForInit(c, weeksOfDataForPreparation, mctx);
+					loadDataForInit(c, weeksOfDataForPreparation, module);
 				}
 			}
 		}
-		return new TradeModule(moduleCtx);
+		return module;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -290,8 +289,8 @@ public class ModuleService implements CommandLineRunner {
 		return (T) obj;
 	}
 	
-	private void loadDataForInit(IContract c, int weeks, IModuleContext mctx) {
-		KlineGenerator kg = new KlineGenerator(c.contract(), mctx::onBar);
+	private void loadDataForInit(IContract c, int weeks, TradeModule module) {
+		KlineGenerator kg = module.getKlineGenerator(c.contract());
 		ModuleDataLoader loader = new ModuleDataLoader(c, kg);
 		loader.load(weeks);
 		
