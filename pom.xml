@@ -13,7 +13,7 @@
   <description>盈富量化交易平台</description>
   <url>https://gitee.com/dromara/northstar</url>
   <properties>
-    <northstar-version>9.0.0-M3</northstar-version>
+    <northstar-version>9.0.0</northstar-version>
     <java.version>25</java.version>
     <argLine>-Dfile.encoding=UTF-8</argLine>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -31,8 +31,6 @@
     <protobuf-version>4.28.3</protobuf-version>
     <protobuf-java-format-version>1.4</protobuf-java-format-version>
     <disruptor-version>3.4.4</disruptor-version>
-    <netty-socketio-version>2.0.11</netty-socketio-version>
-    <socketio-client-version>1.0.0</socketio-client-version>
     <hutool-version>5.7.22</hutool-version>
     <jackson-version>2.16.1</jackson-version>
     <byte-buddy-version>1.17.5</byte-buddy-version>
@@ -232,16 +230,6 @@
         <groupId>com.lmax</groupId>
         <artifactId>disruptor</artifactId>
         <version>${disruptor-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.corundumstudio.socketio</groupId>
-        <artifactId>netty-socketio</artifactId>
-        <version>${netty-socketio-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.socket</groupId>
-        <artifactId>socket.io-client</artifactId>
-        <version>${socketio-client-version}</version>
       </dependency>
       <dependency>
         <groupId>com.alibaba.fastjson2</groupId>
