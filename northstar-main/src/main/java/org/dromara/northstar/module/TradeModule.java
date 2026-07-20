@@ -35,8 +35,15 @@ public class TradeModule implements IModule {
 	
 	private final Logger logger;
 	
+	private final boolean backtestOnly;
+	
 	public TradeModule(ModuleContext ctx) {
+		this(ctx, false);
+	}
+	
+	public TradeModule(ModuleContext ctx, boolean backtestOnly) {
 		this.ctx = ctx;
+		this.backtestOnly = backtestOnly;
 		logger = ctx.getLogger(getClass());
 		contracts = ctx.bindedContracts().stream().collect(Collectors.toSet());
 		logger.info("模组 [{}] 创建成功", ctx.getModuleDescription().getName());
@@ -45,7 +52,7 @@ public class TradeModule implements IModule {
 	@Override
 	public void setEnabled(boolean enabled) {
 		ModuleAccount account = (ModuleAccount)ctx.getModuleAccount();
-		if(enabled && account != null) {
+		if(enabled && !backtestOnly && account != null) {
 			account.getContractAccountMap().values().stream().distinct().forEach(acc -> {
 				TradeGateway gateway = acc.getTradeGateway();
 				if(gateway.getConnection() != ConnectionState.CONNECTED) {

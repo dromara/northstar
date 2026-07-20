@@ -6,14 +6,17 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Interval;
@@ -36,10 +39,13 @@ import org.dromara.northstar.data.IAccountRepository;
 import org.dromara.northstar.gateway.mktdata.NorthstarDataSource;
 import org.dromara.northstar.gateway.playback.ticker.SimplePriceSimulation;
 import org.dromara.northstar.gateway.playback.ticker.TickEntry;
+import org.dromara.northstar.kline.BarMerger;
+import org.dromara.northstar.kline.BarMergerFactory;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
 
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.TradeField;
 
@@ -47,6 +53,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * 一个runner代表了一个策略探索任务
  * 它包含了多个探索模组实例
  */
+@Slf4j
 @Builder
 public class BacktestRunner {
 	
@@ -70,38 +77,76 @@ public class BacktestRunner {
 	
 	private final AtomicBoolean isRunning = new AtomicBoolean();
 	
-	private final Map<IModule, LinkedList<ModuleChartDescription>> moduleChartCache = new HashMap<>();
-	
+	/* 回测图表分段缓存。由于模组内部RingArray只保留最近500根Bar，需要定期保存快照，查询时再合并 */
+	private final Map<String, List<ModuleChartDescription>> moduleChartCache = new ConcurrentHashMap<>();
+
+	private final Map<String, Integer> moduleBarCounterMap = new ConcurrentHashMap<>();
+
+	private final Map<Contract, EnumMap<Interval, BarMerger>> contractBarMergerMap = new HashMap<>();
+
 	public void execute() {
 		if(isRunning.get()) {
 			return;
 		}
 		isRunning.set(true);
 		
+		resetChartCache();
+		initBarMergers();
+
 		for(IModule m : moduleList) {
 			m.setEnabled(false);
 			accountRepo.removeDealRecords(m.getModuleContext().getModuleDescription().getName());
 		}
 		
 		CompletableFuture.runAsync(() -> {
-			// 预热阶段
-			doRun(preloadDate, fromDate);
-			
-			// 实测阶段
-			for(IModule m : moduleList) {
-				m.setEnabled(true);
-				moduleChartCache.put(m, new LinkedList<>());
-				((BacktestModule)m).addListener(chart -> moduleChartCache.get(m).add(chart));
-			}
-			doRun(fromDate, toDate);
+			try {
+		        doRun(preloadDate, fromDate);
+		        log.info("预热结束");
+		        // 图表只保留实测阶段的数据，预热数据仅用于指标与策略状态准备
+		        resetChartCache();
+
+		        for(IModule m : moduleList) {
+		            m.setEnabled(true);
+		        }
+
+		        doRun(fromDate, toDate);
+		    } catch (Throwable e) {
+		        log.error("策略探索任务执行失败", e);
+		        isRunning.set(false);
+		    }
 		});
 	}
 	
+	private void resetChartCache() {
+		moduleChartCache.clear();
+		moduleBarCounterMap.clear();
+		for(IModule module : moduleList) {
+			String moduleName = module.getModuleContext().getModuleDescription().getName();
+			moduleChartCache.put(moduleName, new CopyOnWriteArrayList<>());
+			moduleBarCounterMap.put(moduleName, 0);
+		}
+	}
+
+	private void initBarMergers() {
+		contractBarMergerMap.clear();
+		contractModulesMap.forEach((contract, modules) -> {
+			EnumMap<Interval, BarMerger> mergerMap = new EnumMap<>(Interval.class);
+			Arrays.stream(Interval.values())
+					.filter(interval -> interval != Interval.M1)
+					.forEach(interval -> {
+						BarMerger merger = BarMergerFactory.newInstance(interval, contract);
+						merger.addListener(mergedBar -> modules.forEach(module -> module.getModuleContext().onBar(mergedBar)));
+						mergerMap.put(interval, merger);
+					});
+			contractBarMergerMap.put(contract, mergerMap);
+		});
+	}
+
 	private int progress() {
 		double progressRatio = 0;
 		if(cursorDate != null) {			
 			long totalDays = ChronoUnit.DAYS.between(preloadDate, toDate);
-			long passedDays = Math.min(totalDays, Math.max(0, ChronoUnit.DAYS.between(preloadDate, cursorDate)));
+			long passedDays = Math.clamp(ChronoUnit.DAYS.between(preloadDate, cursorDate), 0, totalDays);
 			progressRatio = 1.0 * passedDays / totalDays;
 		}
 		
@@ -129,6 +174,8 @@ public class BacktestRunner {
 						tickEntryList.forEach(entry -> module.getModuleContext().onTick(makeTick(entry, bar)));
 						module.getModuleContext().onBar(bar);
 					}
+					mergeBars(contract, bar);
+					modules.forEach(this::cacheChartIfNecessary);
 				}
 			}
 			cursorDate = loadStart.plusWeeks(1);
@@ -138,6 +185,21 @@ public class BacktestRunner {
 		cursorDate = to.plusDays(1);
 	}
 	
+	private void mergeBars(Contract contract, Bar bar) {
+		contractBarMergerMap.getOrDefault(contract, new EnumMap<>(Interval.class))
+				.values()
+				.forEach(merger -> merger.onBar(bar));
+	}
+
+	private void cacheChartIfNecessary(IModule module) {
+		IModuleContext ctx = module.getModuleContext();
+		String moduleName = ctx.getModuleDescription().getName();
+		int barCount = moduleBarCounterMap.merge(moduleName, 1, Integer::sum);
+		if(barCount % BacktestModuleFactory.BUF_SIZE == 0) {
+			moduleChartCache.get(moduleName).add(ctx.getChartDescription());
+		}
+	}
+
 	private Tick makeTick(TickEntry tickEntry, Bar bar) {
 		LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(tickEntry.timestamp()), ZoneId.systemDefault());
 		
@@ -273,33 +335,56 @@ public class BacktestRunner {
 							.build();
 				})
 				.toList();
-		AtomicReference<ContractChartDescription> mcd = new AtomicReference<>();
-		moduleChartCache.entrySet().stream()
-			.filter(e -> e.getKey().getModuleContext().getModuleDescription().getName().equals(moduleName))
-			.findAny()
-			.ifPresent(e -> {
-				ModuleChartDescription bufChart = e.getKey().getModuleContext().getChartDescription();
-				ContractChartDescription contractChart = bufChart.getData().getFirst();
-				List<ModuleChartDescription> sections = e.getValue();
-				List<ContractChartDescription> charts = sections.stream().map(item -> item.getData().getFirst()).toList();
-				List<TimeValues> values = charts.stream().flatMap(ccd -> ccd.getTimedValues().stream()).toList();
-				if(values.isEmpty()) {
-					return;
-				}
-				List<TimeValues> bufValues = contractChart.getTimedValues().stream().filter(tv -> tv.getTimestamp() > values.getLast().getTimestamp()).toList();
-				List<TimeValues> mergedValues = new ArrayList<>(values.size() + bufValues.size());
-				mergedValues.addAll(values);
-				mergedValues.addAll(bufValues);
-				mcd.set(ContractChartDescription.builder()
-						.contract(charts.getFirst().getContract())
-						.fields(charts.getFirst().getFields())
-						.indicators(charts.getFirst().getIndicators())
-						.timedValues(mergedValues)
-						.build());
-			});
+		ModuleChartDescription currentChart = moduleList.stream()
+				.filter(m -> m.getModuleContext().getModuleDescription().getName().equals(moduleName))
+				.findAny()
+				.map(m -> m.getModuleContext().getChartDescription())
+				.orElse(null);
+		List<ModuleChartDescription> chartSections = new ArrayList<>(moduleChartCache.getOrDefault(moduleName, List.of()));
+		if(currentChart != null) {
+			chartSections.add(currentChart);
+		}
 		return BacktestModuleTradeDetailsVO.builder()
 				.dealRecords(dealRecords)
-				.chartData(mcd.get())
+				.chartData(mergeChartDescriptions(chartSections))
+				.build();
+	}
+
+	static ModuleChartDescription mergeChartDescriptions(List<ModuleChartDescription> chartSections) {
+		if(chartSections.isEmpty()) {
+			return null;
+		}
+		Map<Interval, List<ContractChartDescription>> dataMap = new EnumMap<>(Interval.class);
+		for(Interval interval : Interval.values()) {
+			Map<String, List<ContractChartDescription>> chartsByContract = new LinkedHashMap<>();
+			for(ModuleChartDescription section : chartSections) {
+				if(section.getData() == null) {
+					continue;
+				}
+				section.getData().getOrDefault(interval, List.of()).forEach(chart ->
+						chartsByContract.computeIfAbsent(chart.getContract().getId(), _ -> new ArrayList<>()).add(chart));
+			}
+			dataMap.put(interval, chartsByContract.values().stream()
+					.map(BacktestRunner::mergeContractCharts)
+					.toList());
+		}
+		return ModuleChartDescription.builder()
+				.data(dataMap)
+				.strategyInfos(chartSections.getLast().getStrategyInfos())
+				.build();
+	}
+
+	private static ContractChartDescription mergeContractCharts(List<ContractChartDescription> charts) {
+		ContractChartDescription latest = charts.getLast();
+		Map<Long, TimeValues> valuesByTimestamp = new LinkedHashMap<>();
+		charts.stream()
+				.flatMap(chart -> chart.getTimedValues().stream())
+				.forEach(tv -> valuesByTimestamp.put(tv.getTimestamp(), tv));
+		return ContractChartDescription.builder()
+				.contract(latest.getContract())
+				.fields(latest.getFields())
+				.indicators(latest.getIndicators())
+				.timedValues(new ArrayList<>(valuesByTimestamp.values()))
 				.build();
 	}
 	

@@ -82,54 +82,51 @@ public class BacktestModuleFactory {
 		LocalDate startDate = LocalDate.parse(task.getStartDate(), DateTimeConstant.D_FORMAT_FORMATTER);
 		LocalDate endDate = LocalDate.parse(task.getEndDate(), DateTimeConstant.D_FORMAT_FORMATTER);
 		task.getContracts().forEach(c -> {
-			task.getIntervals().forEach(interval -> {
-				Interval barInterval = Interval.fromAlias(interval);
-				String moduleName = moduleName(task.getTaskName(), c, barInterval);
-				Contract contract = mktCenter.getContract(Identifier.of(c.getId())).contract();
-				List<Bar> preloadBars = dataSource.getData(contract, Interval.D1, startDate.minusMonths(1), startDate);
-				double avgPrice = preloadBars.stream().mapToDouble(Bar::closePrice).average().getAsDouble();
-				double costPerShare = avgPrice * contract.multiplier() * contract.contractDefinition().marginRatio();	// 每手成本
-				// 在初始资金的一半决定默认仓位
-				int defaultVol = Math.max(1, (int) (task.getInitBalance() / (2 * costPerShare)));
-				ModuleDescription md = ModuleDescription.builder()
-						.name(moduleName)
-						.initBalance(task.getInitBalance())
-						.type(ModuleType.SPECULATION)
-						.usage(ModuleUsage.PLAYBACK)
-						.closingPolicy(ClosingPolicy.FIRST_IN_FIRST_OUT)
-						.bindedAccounts(Collections.emptyList())
-						.bindedContracts(List.of(c))
-						.moduleCacheDataSize(BUF_SIZE)
-						.defaultVolume(defaultVol)
-						.build();
-				ModuleRuntimeDescription mrd = ModuleRuntimeDescription.builder()
-						.moduleName(md.getName())
-						.storeObject(new JSONObject())
-						.build();
-				
-				Table<Contract, PositionDirectionEnum, AccountPosition> positionTbl = HashBasedTable.create();
-				positionTbl.put(contract, PositionDirectionEnum.PD_Long, new AccountPosition(moduleName, contract, PositionDirectionEnum.PD_Long, accountRepo));
-				positionTbl.put(contract, PositionDirectionEnum.PD_Short, new AccountPosition(moduleName, contract, PositionDirectionEnum.PD_Short, accountRepo));
-				
-				ModuleAccount moduleAccount = new ModuleAccount(md.getName(), md.getInitBalance(), 0, 0, 
-						positionTbl, Map.of(contract, new DummyAccount()));
-				TradeStrategy strategy;
-				try {
-					strategy = resolveComponent(strategyComponent);
-				} catch (Exception e) {
-					throw new IllegalStateException(e);
-				}
-				ModuleContext moduleCtx = new PlaybackModuleContext(strategy, md, moduleAccount, mktCenter, moduleRepo);
-				strategy.setContext(moduleCtx);
-				strategy.setStoreObject(mrd.getStoreObject());
-				IModule module = new BacktestModule(moduleCtx);
-				
-				if(!contractModulesMap.containsKey(contract)) {
-					contractModulesMap.put(contract, new ArrayList<>());
-				}
-				contractModulesMap.get(contract).add(module);
-				moduleList.add(module);
-			});
+			String moduleName = moduleName(task.getTaskName(), c);
+			Contract contract = mktCenter.getContract(Identifier.of(c.getId())).contract();
+			List<Bar> preloadBars = dataSource.getData(contract, Interval.D1, startDate.minusMonths(1), startDate);
+			double avgPrice = preloadBars.stream().mapToDouble(Bar::closePrice).average().getAsDouble();
+			double costPerShare = avgPrice * contract.multiplier() * contract.contractDefinition().marginRatio();	// 每手成本
+			// 在初始资金的一半决定默认仓位
+			int defaultVol = Math.max(1, (int) (task.getInitBalance() / (2 * costPerShare)));
+			ModuleDescription md = ModuleDescription.builder()
+					.name(moduleName)
+					.initBalance(task.getInitBalance())
+					.type(ModuleType.SPECULATION)
+					.usage(ModuleUsage.PLAYBACK)
+					.closingPolicy(ClosingPolicy.FIRST_IN_FIRST_OUT)
+					.bindedAccounts(Collections.emptyList())
+					.bindedContracts(List.of(c))
+					.moduleCacheDataSize(BUF_SIZE)
+					.defaultVolume(defaultVol)
+					.build();
+			ModuleRuntimeDescription mrd = ModuleRuntimeDescription.builder()
+					.moduleName(md.getName())
+					.storeObject(new JSONObject())
+					.build();
+			
+			Table<Contract, PositionDirectionEnum, AccountPosition> positionTbl = HashBasedTable.create();
+			positionTbl.put(contract, PositionDirectionEnum.PD_Long, new AccountPosition(moduleName, contract, PositionDirectionEnum.PD_Long, accountRepo));
+			positionTbl.put(contract, PositionDirectionEnum.PD_Short, new AccountPosition(moduleName, contract, PositionDirectionEnum.PD_Short, accountRepo));
+			
+			ModuleAccount moduleAccount = new ModuleAccount(md.getName(), md.getInitBalance(), 0, 0, 
+					positionTbl, Map.of(contract, new DummyAccount()));
+			TradeStrategy strategy;
+			try {
+				strategy = resolveComponent(strategyComponent);
+			} catch (Exception e) {
+				throw new IllegalStateException(e);
+			}
+			ModuleContext moduleCtx = new PlaybackModuleContext(strategy, md, moduleAccount, mktCenter, moduleRepo);
+			strategy.setContext(moduleCtx);
+			strategy.setStoreObject(mrd.getStoreObject());
+			IModule module = new TradeModule(moduleCtx, true);
+			
+			if(!contractModulesMap.containsKey(contract)) {
+				contractModulesMap.put(contract, new ArrayList<>());
+			}
+			contractModulesMap.get(contract).add(module);
+			moduleList.add(module);
 		});
 		
 		return BacktestRunner.builder()
@@ -144,8 +141,8 @@ public class BacktestModuleFactory {
 				.build();
 	}
 	
-	private String moduleName(String taskName, ContractSimpleInfo c, Interval barInterval) {
-		return String.format("Test_%s_%s_%s", taskName, c.getName(), barInterval.getAlias());
+	private String moduleName(String taskName, ContractSimpleInfo c) {
+		return String.format("策略探索_%s_%s", taskName, c.getName());
 	}
 	
 	@SuppressWarnings("unchecked")
