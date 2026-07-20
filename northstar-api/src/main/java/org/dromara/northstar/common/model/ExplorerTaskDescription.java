@@ -34,11 +34,6 @@ public class ExplorerTaskDescription {
 	private String endDate;
 	
 	/**
-	 * 测试周期
-	 */
-	private List<String> intervals; 
-	
-	/**
 	 * 测试合约
 	 */
 	private List<ContractSimpleInfo> contracts;
