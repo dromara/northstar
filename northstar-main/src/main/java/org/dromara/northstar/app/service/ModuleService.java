@@ -290,7 +290,7 @@ public class ModuleService implements CommandLineRunner {
 	}
 	
 	private void loadDataForInit(IContract c, int weeks, TradeModule module) {
-		KlineGenerator kg = module.getKlineGenerator(c.contract());
+		KlineGenerator kg = new KlineGenerator(c.contract(), module.getModuleContext()::onBar);
 		ModuleDataLoader loader = new ModuleDataLoader(c, kg);
 		loader.load(weeks);
 		

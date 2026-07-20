@@ -1,8 +1,6 @@
 package org.dromara.northstar.strategy;
 
 import org.dromara.northstar.common.event.NorthstarEvent;
-import org.dromara.northstar.common.model.core.Contract;
-import org.dromara.northstar.kline.KlineGenerator;
 
 /**
  * 模组抽象接口
@@ -30,10 +28,5 @@ public interface IModule {
 	 * @return
 	 */
 	IModuleContext getModuleContext();
-	/**
-	 * 获取K线合成器
-	 * @param contract
-	 * @return
-	 */
-	KlineGenerator getKlineGenerator(Contract contract);
+	
 }
