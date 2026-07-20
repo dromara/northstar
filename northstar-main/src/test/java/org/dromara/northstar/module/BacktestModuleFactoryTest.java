@@ -117,7 +117,6 @@ class BacktestModuleFactoryTest {
 				.endDate("2025-01-03")
 				.initBalance(100000)
 				.contracts(List.of(csi))
-				.intervals(List.of("1m"))
 				.build();
 		
 		assertNotNull(factory.createTestRunner(task));

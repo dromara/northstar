@@ -31,10 +31,6 @@ public class LongPeriodExampleStrategy extends AbstractStrategy implements Trade
 	
 	@Override
 	protected void initIndicators() {
-		if(Interval.H1 != ctx.moduleBarInterval() || Interval.H2 != ctx.moduleBarInterval()) {
-			throw new IllegalArgumentException("只能设置60分钟或120分钟作为K线周期");
-		}
-		
 		Contract c = ctx.getContract(params.indicatorSymbol);
 		c1 = new SimpleValueIndicator(Configuration.builder().indicatorName("C").contract(c).interval(Interval.D1).ifPlotPerBar(true).build());
 		h1 = new SimpleValueIndicator(Configuration.builder().indicatorName("H").contract(c).interval(Interval.D1).ifPlotPerBar(true).valueType(ValueType.HIGH).build());

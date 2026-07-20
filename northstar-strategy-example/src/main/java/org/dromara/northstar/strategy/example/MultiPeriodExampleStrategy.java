@@ -90,25 +90,24 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 		this.fastLine1 = new MAIndicator(Configuration.builder()
 				.indicatorName("快线")
 				.contract(c)
-				.interval(ctx.moduleBarInterval())
+				.interval(Interval.M15)
 				.build(), params.fast);
 		this.slowLine1 = new MAIndicator(Configuration.builder()
 				.indicatorName("慢线")
 				.contract(c)
-				.interval(ctx.moduleBarInterval())
+				.interval(Interval.M15)
 				.build(), params.slow);
 		
 		// 参考周期线
 		this.fastLine2 = new MAIndicator(Configuration.builder()
 				.indicatorName("快线")
 				.contract(c)
-				.interval(Interval.fromAlias(params.refPeriod))
-				.interval(ctx.moduleBarInterval())
+				.interval(Interval.M1)
 				.build(), params.fast);
 		this.slowLine2 = new MAIndicator(Configuration.builder()
 				.indicatorName("慢线")
 				.contract(c)
-				.interval(Interval.fromAlias(params.refPeriod))
+				.interval(Interval.M1)
 				.build(), params.slow);
 		
 		ctx.registerIndicator(fastLine1);
@@ -148,9 +147,6 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 		
 		@Setting(label="慢线周期", type = FieldType.NUMBER, order=2)		
 		private int slow = 10;
-		
-		@Setting(label="参考周期", order=10)
-		private String refPeriod = "15m";
 	}
 
 	@Override

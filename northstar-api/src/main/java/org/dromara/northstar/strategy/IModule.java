@@ -19,7 +19,7 @@ public interface IModule {
 	 */
 	void onEvent(NorthstarEvent event);
 	/**
-	 * 获取
+	 * 获取模组账户
 	 * @return
 	 */
 	IAccount getModuleAccount();
@@ -28,4 +28,5 @@ public interface IModule {
 	 * @return
 	 */
 	IModuleContext getModuleContext();
+	
 }

@@ -1,5 +1,6 @@
 package org.dromara.northstar.strategy.example;
 
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
@@ -108,15 +109,15 @@ public class TestStrategy extends AbstractStrategy	// 为了简化代码，引�
 		this.fastLine = new EMAIndicator(Configuration.builder()
 				.contract(c)
 				.indicatorName("EMA10")
-				.interval(ctx.moduleBarInterval()).build(), 10);
+				.interval(Interval.M15).build(), 10);
 		this.slowLine = new EMAIndicator(Configuration.builder()
 				.contract(c)
 				.indicatorName("EMA20")
-				.interval(ctx.moduleBarInterval()).build(), 20);
+				.interval(Interval.M15).build(), 20);
 		MACDIndicator macd = new MACDIndicator(Configuration.builder()
 				.contract(c)
 				.indicatorName("MACD")
-				.interval(ctx.moduleBarInterval())
+				.interval(Interval.M15)
 				.build(), 12, 26, 9);
 		this.macdDiff = macd.getDiffLine();
 		this.macdDea = macd.getDeaLine();

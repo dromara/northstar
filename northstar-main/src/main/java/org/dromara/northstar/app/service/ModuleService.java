@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.dromara.northstar.account.AccountManager;
@@ -21,7 +20,6 @@ import org.dromara.northstar.app.restful.SseStreamController;
 import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
-import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.ModuleType;
 import org.dromara.northstar.common.constant.ModuleUsage;
@@ -43,7 +41,6 @@ import org.dromara.northstar.common.model.PositionVO;
 import org.dromara.northstar.common.model.StrategyMetaInfo;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
-import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.common.utils.OrderUtils;
@@ -65,7 +62,6 @@ import org.dromara.northstar.module.TradeModule;
 import org.dromara.northstar.strategy.DynamicParamsAware;
 import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
-import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.support.utils.ModuleDataLoader;
 import org.dromara.northstar.support.utils.NamingValidator;
@@ -262,7 +258,7 @@ public class ModuleService implements CommandLineRunner {
 		}
 		strategy.setContext(moduleCtx);
 		log.info("模组[{}] 初始化数据起始计算日为：{}", md.getName(), date);
-		final IModuleContext mctx = moduleCtx;
+		TradeModule module = new TradeModule(moduleCtx);
 		if(md.getUsage() != ModuleUsage.PLAYBACK && weeksOfDataForPreparation > 0) {
 			// 只有在非回测状态下，才需要预热数据
 			for(ContractSimpleInfo csi : md.getBindedContracts()) {
@@ -271,13 +267,13 @@ public class ModuleService implements CommandLineRunner {
 				Assert.notNull(dataSrc, () -> String.format("合约 [%s] 缺少数据源配置，无法加载历史数据", c.name()));
 				if(c instanceof OptionChainContract) {
 					// 对于期权链合约，要加载的是成员合约
-					c.memberContracts().parallelStream().forEach(rc -> loadDataForInit(rc, weeksOfDataForPreparation, mctx));
+					c.memberContracts().parallelStream().forEach(rc -> loadDataForInit(rc, weeksOfDataForPreparation, module));
 				} else {
-					loadDataForInit(c, weeksOfDataForPreparation, mctx);
+					loadDataForInit(c, weeksOfDataForPreparation, module);
 				}
 			}
 		}
-		return new TradeModule(moduleCtx);
+		return module;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -293,8 +289,8 @@ public class ModuleService implements CommandLineRunner {
 		return (T) obj;
 	}
 	
-	private void loadDataForInit(IContract c, int weeks, IModuleContext mctx) {
-		KlineGenerator kg = new KlineGenerator(c.contract(), mctx::onBar);
+	private void loadDataForInit(IContract c, int weeks, TradeModule module) {
+		KlineGenerator kg = new KlineGenerator(c.contract(), module.getModuleContext()::onBar);
 		ModuleDataLoader loader = new ModuleDataLoader(c, kg);
 		loader.load(weeks);
 		
@@ -347,71 +343,6 @@ public class ModuleService implements CommandLineRunner {
 		}
 		m.setEnabled(false);
 		sseController.sendModuleStatus();
-	}
-
-	@Transactional
-	public void backtest(String moduleName, int numOfMonthToTest) throws Exception {
-		log.info("回测模组 [{}]，回测时长{}个月", moduleName, numOfMonthToTest);
-		log.info("回测前，会自动重置模组");
-		updateModule(moduleMgr.get(Identifier.of(moduleName)).getModuleContext().getModuleDescription(), true);
-		
-		IModule m = moduleMgr.get(Identifier.of(moduleName));
-		if(m == null) {
-			throw new NoSuchModuleException(moduleName);
-		}
-		ModuleDescription md = m.getModuleContext().getModuleDescription();
-		ModuleUsage usage = md.getUsage();
-		if(usage != ModuleUsage.PLAYBACK) {
-			log.error("该模组用途为{}，不能进行回测", usage);
-			throw new IllegalStateException();
-		}
-		if(m.getModuleContext().bindedContracts().size() != 1) {
-			throw new OperationException("error.backtest_supports_module_with_single_contract");
-		}
-		
-		Contract c = m.getModuleContext().bindedContracts().getFirst();
-		// 计算回测时段与预热时段
-		LocalDate endDate = LocalDate.now();
-		LocalDate startDate = endDate.minusMonths(numOfMonthToTest);
-		LocalDate preloadStartDate = startDate.minusWeeks(md.getWeeksOfDataForPreparation());
-		
-		AtomicReference<LocalDate> yearMonth = new AtomicReference<>(preloadStartDate); 
-		IModuleContext ctx = m.getModuleContext();
-		c.contractDefinition().dataSource().getData(c, Interval.fromAlias(md.getKlineInterval()), preloadStartDate, endDate)
-			.reversed().stream().forEach(bar -> {
-				if(!bar.tradingDay().isBefore(startDate) && !ctx.isEnabled()) {
-					ctx.setEnabled(true);
-				}
-				if(!yearMonth.get().isAfter(bar.tradingDay())) {
-					yearMonth.set(yearMonth.get().plusWeeks(1));
-					log.info("当前回测至：{}", bar.tradingDay());
-				}
-				
-				ctx.onTick(Tick.builder()
-						.gatewayId(bar.gatewayId())
-						.contract(c)
-						.tradingDay(bar.tradingDay())
-						.actionDay(bar.actionDay())
-						.actionTime(bar.actionTime())
-						.actionTimestamp(bar.actionTimestamp())
-						.channelType(bar.channelType())
-						.preClosePrice(bar.preClosePrice())
-						.preOpenInterest(bar.preOpenInterest())
-						.preSettlePrice(bar.preSettlePrice())
-						.volume(bar.volume())
-						.volumeDelta(bar.volumeDelta())
-						.openInterest(bar.openInterest())
-						.openInterestDelta(bar.openInterestDelta())
-						.turnover(bar.turnover())
-						.turnoverDelta(bar.turnoverDelta())
-						.lastPrice(bar.closePrice())
-						.bidPrice(List.of(bar.closePrice()))
-						.askPrice(List.of(bar.closePrice()))
-						.build());
-				ctx.onBar(bar);
-			});
-		log.info("回测结束");
-		ctx.setEnabled(false);
 	}
 
 	public void mockTrade(ModuleMockTradeDTO trade) {

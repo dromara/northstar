@@ -14,7 +14,7 @@ import org.dromara.northstar.common.model.core.SubmitOrderReq;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.data.IModuleRepository;
-import org.dromara.northstar.gateway.IContractManager;
+import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.slf4j.Logger;
@@ -32,8 +32,8 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 	private Map<Contract, Tick> lastTickMap = new HashMap<>();
 	
 	public PlaybackModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription, 
-			ModuleAccount moduleAccount, IContractManager contractMgr, IModuleRepository moduleRepo) {
-		super(tradeStrategy, moduleDescription, moduleAccount, contractMgr, new MockModuleRepository());
+			ModuleAccount moduleAccount, MarketCenter mktCenter, IModuleRepository moduleRepo) {
+		super(tradeStrategy, moduleDescription, moduleAccount, mktCenter, new MockModuleRepository());
 		logger = getLogger(getClass());
 	}
 	

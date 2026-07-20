@@ -35,10 +35,6 @@ public class ModuleDescription {
 	 */
 	private ModuleUsage usage;
 	/**
-	 * K线周期数
-	 */
-	private String klineInterval;
-	/**
 	 * 预热数据量（单位：周）
 	 */
 	private int weeksOfDataForPreparation;
