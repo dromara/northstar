@@ -52,7 +52,7 @@ public class TimeFrameScopedRegistry {
 
     private final Map<Indicator, RingArray<Num>> indicatorBufMap = new HashMap<>();
     
-    private final Map<Contract, IndicatorValueUpdateHelper> indicatorHelperMap = new HashMap<>();
+    private final Map<Contract, List<IndicatorValueUpdateHelper>> indicatorHelperMap = new HashMap<>();
     
     private final Set<String> indicatorNameSet = new HashSet<>();
     
@@ -73,14 +73,25 @@ public class TimeFrameScopedRegistry {
 	}
 	
 	public void registerIndicator(Indicator indicator) {
+		doRegister(indicator, true);
+	}
+	
+	private void doRegister(Indicator indicator, boolean isRoot) {
+		if(indicatorBufMap.containsKey(indicator)) {
+			// 同一指标实例重复注册直接忽略，保证幂等
+			return;
+		}
 		checkIndicator(indicator);
-		Configuration cfg = indicator.getConfiguration();
 		indicatorBufMap.put(indicator, new RingArray<Num>(context.getModuleDescription().getModuleCacheDataSize()));
-		IndicatorValueUpdateHelper helper = new IndicatorValueUpdateHelper(indicator);
-		indicatorHelperMap.put(cfg.contract(), helper);
+		if(isRoot) {
+			// 更新助手自身会递归更新依赖指标，因此只需为根指标注册，
+			// 且同一合约可能注册多个指标，需要用列表保存避免相互覆盖
+			Configuration cfg = indicator.getConfiguration();
+			indicatorHelperMap.computeIfAbsent(cfg.contract(), _ -> new ArrayList<>()).add(new IndicatorValueUpdateHelper(indicator));
+		}
 		// 递归子指标
 		for(Indicator in : indicator.dependencies()) {
-			registerIndicator(in);
+			doRegister(in, false);
 		}
 	}
 	
@@ -113,7 +124,7 @@ public class TimeFrameScopedRegistry {
 		
 		// 更新指标计算
 		if(indicatorHelperMap.containsKey(bar.contract())) {
-			indicatorHelperMap.get(bar.contract()).onMergedBar(bar);
+			indicatorHelperMap.get(bar.contract()).forEach(helper -> helper.onMergedBar(bar));
 		}
 		indicatorBufMap.entrySet().stream()
 			.filter(e -> e.getKey().getConfiguration().contract().equals(bar.contract()))
