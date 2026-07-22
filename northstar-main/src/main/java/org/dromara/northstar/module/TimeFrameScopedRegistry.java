@@ -178,7 +178,7 @@ public class TimeFrameScopedRegistry {
 							.stream()
 							.filter(e -> e.getKey().getConfiguration().contract().equals(contract))
 							.map(e -> ModuleIndicatorDescription.builder()
-									.name(e.getKey().getConfiguration().indicatorID())
+									.name(e.getKey().getConfiguration().indicatorName())
 									.contract(ContractSimpleInfo.from(e.getKey().getConfiguration().contract()))
 									.style(e.getKey().getConfiguration().lineStyle())
 									.values(e.getValue().toList().stream().map(n -> new TimeSeriesValue(n.value(), n.timestamp())).toList())
