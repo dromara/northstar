@@ -1,6 +1,7 @@
 package org.dromara.northstar.common.model.core;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 
@@ -8,6 +9,8 @@ import org.dromara.northstar.common.Timed;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.Interval;
+import org.dromara.northstar.common.utils.CommonUtils;
+import org.dromara.northstar.kline.BarTimePadding;
 import org.springframework.util.Assert;
 
 import lombok.Builder;
@@ -92,6 +95,14 @@ public record Bar(
 				.interval(Interval.fromAlias(bar.getInterval()))
 				.unstable(bar.getUnstable())
 				.build();
+	}
+	
+	public LocalDateTime barEndDateTime() {
+		if(contract.usingStartTimeInBarTime()) {
+			BarTimePadding padding = new BarTimePadding(interval, contract);
+			return padding.cutoffTimeInMinute(this);
+		}
+		return CommonUtils.millsToLocalDateTime(actionTimestamp);
 	}
 
 }
