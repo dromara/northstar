@@ -29,7 +29,8 @@ public class PlaybackDataLoader {
 	
 	private final Collection<IContract> contracts;
 	
-	private final ExecutorService exec = Executors.newCachedThreadPool();
+	// 使用守护线程池，避免非守护线程阻塞 JVM 退出
+	private final ExecutorService exec = Executors.newCachedThreadPool(CommonUtils.platformThreadFactory(getClass()));
 	
 	public PlaybackDataLoader(Collection<IContract> contracts) {
 		this.contracts = contracts;

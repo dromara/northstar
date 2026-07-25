@@ -134,4 +134,18 @@ public class CommonUtils {
 	public static ExecutorService newThreadPerTaskExecutor(Class<?> clz) {
 		return Executors.newThreadPerTaskExecutor(virtualThreadFactory(clz));
 	}
+	
+	/**
+	 * 创建平台线程工厂并进行命名，类名前十位字符加-worker。线程为守护线程，避免阻塞JVM退出
+	 * @param clz
+	 * @return
+	 */
+	public static ThreadFactory platformThreadFactory(Class<?> clz) {
+		String className = clz.getSimpleName(); // 获取类名
+		if (className.length() > 10) {
+			className = className.substring(0, 10);
+		}
+		className += "-worker-";
+		return Thread.ofPlatform().daemon(true).name(className, 1).factory();
+	}
 }

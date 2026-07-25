@@ -3,8 +3,10 @@ package org.dromara.northstar.gateway.playback;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -311,6 +313,51 @@ class PlaybackContextTest {
 		assertStatesContain(callback, PlaybackStatus.State.FINISHED);
 	}
 
+	@Test
+	void shouldFinishEarlyWhenDataExhaustedBeforeEndTime() throws InterruptedException {
+		initContext(null);
+
+		CountDownLatch finishLatch = new CountDownLatch(1);
+		Consumer<PlaybackStatus> callback = mockCallback();
+		context.setOnStatusChangeCallback(status -> {
+			callback.accept(status);
+			if (status.getState() == PlaybackStatus.State.FINISHED) {
+				finishLatch.countDown();
+			}
+		});
+
+		// 数据帧的结束时间远早于回放结束时间，且供应已耗尽（模拟结束日当天无数据导致回放卡住的历史问题）
+		LocalDateTime frameStart = LocalDate.parse(START_DATE, DateTimeConstant.D_FORMAT_INT_FORMATTER).atStartOfDay();
+		DataFrame<Bar> frame = makeBarFrame(frameStart, frameStart.plusMinutes(1));
+		PlaybackDataProvider mockProvider = injectMockProviderForPlayback(List.of(frame));
+		when(mockProvider.isExhausted()).thenReturn(true);
+		when(mockProvider.hasMoreData()).thenReturn(false);
+
+		context.start();
+
+		// 数据耗尽后应提前正常结束，而不是永久空转卡住
+		assertThat(finishLatch.await(3, TimeUnit.SECONDS)).isTrue();
+		assertThat(context.getPlaybackStatus().getState()).isEqualTo(PlaybackStatus.State.FINISHED);
+		assertStatesContain(callback, PlaybackStatus.State.FINISHED);
+	}
+
+	@Test
+	void shouldRestartSupplyWhenLoadThreadDiesWithRemainingData() throws InterruptedException {
+		initContext(null);
+
+		// 模拟加载线程异常退出但仍有数据未加载的场景：缓冲区耗尽后应自动重启数据供应
+		LocalDateTime frameStart = LocalDate.parse(START_DATE, DateTimeConstant.D_FORMAT_INT_FORMATTER).atStartOfDay();
+		DataFrame<Bar> frame = makeBarFrame(frameStart, frameStart.plusMinutes(1));
+		PlaybackDataProvider mockProvider = injectMockProviderForPlayback(List.of(frame));
+		when(mockProvider.isExhausted()).thenReturn(true);
+		when(mockProvider.hasMoreData()).thenReturn(true);
+
+		context.start();
+
+		// start() 自身调用一次 startSupply，检测到供应耗尽且仍有数据后应再次重启
+		verify(mockProvider, timeout(3000).atLeast(2)).startSupply();
+	}
+
 	private void initContext(String preStartDate) {
 		initContext(preStartDate, END_DATE);
 	}
@@ -404,7 +451,7 @@ class PlaybackContextTest {
 		setField(context, "dataProvider", mockProvider);
 	}
 
-	private void injectMockProviderForPlayback(List<DataFrame<Bar>> frames) throws InterruptedException {
+	private PlaybackDataProvider injectMockProviderForPlayback(List<DataFrame<Bar>> frames) throws InterruptedException {
 		PlaybackDataProvider mockProvider = mock(PlaybackDataProvider.class);
 		ArrayBlockingQueue<DataFrame<Bar>> buffer = new ArrayBlockingQueue<>(10);
 		for (DataFrame<Bar> frame : frames) {
@@ -412,6 +459,7 @@ class PlaybackContextTest {
 		}
 		when(mockProvider.getBuffer()).thenReturn(buffer);
 		setField(context, "dataProvider", mockProvider);
+		return mockProvider;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -420,9 +468,9 @@ class PlaybackContextTest {
 		ArrayBlockingQueue<?> bufferMock = mock(ArrayBlockingQueue.class);
 		CountDownLatch blockLatch = new CountDownLatch(1);
 		try {
-			when(bufferMock.take()).thenAnswer(_ -> {
+			// PlaybackContext 现在使用带超时的 poll 读取缓冲区，模拟阻塞读取直到被中断
+			when(bufferMock.poll(anyLong(), any(TimeUnit.class))).thenAnswer(_ -> {
 				takeLatch.countDown();
-				// 模拟阻塞读取，直到被中断
 				blockLatch.await();
 				return null;
 			});

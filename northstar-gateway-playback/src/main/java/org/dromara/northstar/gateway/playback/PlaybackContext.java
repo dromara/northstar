@@ -14,9 +14,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -62,7 +64,14 @@ public class PlaybackContext {
 	
 	private final AtomicBoolean isRunning = new AtomicBoolean();
 	
-	private ExecutorService exec = CommonUtils.newThreadPerTaskExecutor(getClass());
+	// 用于保证同一时刻只有一个回放任务（连续回放或逐K回放）在消费缓冲区
+	private final AtomicBoolean playTaskActive = new AtomicBoolean();
+	
+	// 回放代际标识，每次启动/暂停/重置/调整时间后递增，用于让阻塞等待数据的任务及时退出，避免死锁
+	private final AtomicInteger playbackEpoch = new AtomicInteger();
+	
+	// 使用平台线程池（守护线程），避免虚拟线程无法被 jstack 排查，以及非守护线程阻塞 JVM 退出
+	private ExecutorService exec = Executors.newCachedThreadPool(CommonUtils.platformThreadFactory(getClass()));
 	
 	private Map<Contract, KlineGenerator> klineGeneratorMap;
 	
@@ -277,6 +286,11 @@ public class PlaybackContext {
 			}
 		}
 		
+		if(!playTaskActive.compareAndSet(false, true)) {
+			log.warn("已有回放任务在进行中，忽略本次启动请求");
+			return;
+		}
+		playbackEpoch.incrementAndGet();
 		gateway.setConnection(ConnectionState.CONNECTED);
 		playbackStatus.setState(State.PLAYING);
 		isRunning.set(true);
@@ -291,7 +305,20 @@ public class PlaybackContext {
 		exec.execute(() -> {
 			try {
 				while(isRunning.get() && playbackStatus.getRunningDateTime().isBefore(endDateTime)) {
-					DataFrame<Bar> df = dataProvider.getBuffer().take();
+					// 使用带超时的 poll 代替 take，确保暂停/重置后循环能及时退出，避免任务泄漏与重复消费
+					DataFrame<Bar> df = dataProvider.getBuffer().poll(100, TimeUnit.MILLISECONDS);
+					if(df == null) {
+						if(dataProvider.isExhausted()) {
+							if(dataProvider.hasMoreData()) {
+								// 加载线程异常退出但仍有数据未加载，重启数据供应，避免回放永久卡住
+								dataProvider.startSupply();
+							} else {
+								// 数据已全部加载并消费完毕（如结束日当天无数据），提前正常结束，避免永久空转
+								break;
+							}
+						}
+						continue;
+					}
 					generateTickFrames(df).forEach(dft -> onTickDataCallback(dft, true));
 					onBarDataCallback(df);
 					playbackStatus.setRunningDateTime(df.getTime().getEnd());
@@ -299,6 +326,9 @@ public class PlaybackContext {
 				}
 			} catch (InterruptedException e) {
 				log.warn("回放等待被中断", e);
+				Thread.currentThread().interrupt();
+			} finally {
+				playTaskActive.set(false);
 			}
 			if(isRunning.get()) {	
 				synchronized (PlaybackContext.this) {
@@ -316,14 +346,35 @@ public class PlaybackContext {
 	}
 	
 	/**
-	 * 逐K回放
+	 * 逐K回放。
+	 * 注意：本方法不能声明为 synchronized，阻塞等待数据时绝不能持有实例锁，
+	 * 否则缓冲区耗尽后会与 start/pause/reset 等 synchronized 方法形成死锁，导致整个回放卡死。
 	 * @param interval
 	 */
-	public synchronized void playNext(Interval interval) {
-		dataProvider.startSupply();
-		try {			
+	public void playNext(Interval interval) {
+		if(!playTaskActive.compareAndSet(false, true)) {
+			log.warn("已有回放任务在进行中，忽略本次逐K回放请求");
+			return;
+		}
+		final int epoch = playbackEpoch.get();
+		try {
+			dataProvider.startSupply();
 			for(int i=0; i < interval.getMinutes(); i++) {
-				DataFrame<Bar> df = dataProvider.getBuffer().take();
+				if(playbackEpoch.get() != epoch) {
+					// 期间发生了启动/暂停/重置/调时，立即退出，避免与新的回放任务并发消费
+					log.info("回放状态已变更，逐K回放提前结束");
+					return;
+				}
+				// 使用带超时的 poll 代替 take，避免无限期阻塞
+				DataFrame<Bar> df = dataProvider.getBuffer().poll(100, TimeUnit.MILLISECONDS);
+				if(df == null) {
+					if(dataProvider.isExhausted()) {
+						log.info("回放数据已耗尽，逐K回放结束");
+						return;
+					}
+					i--;	// 未取到数据不算消耗一根K线
+					continue;
+				}
 				generateTickFrames(df).forEach(dft -> onTickDataCallback(dft, false));
 				onBarDataCallback(df);
 				playbackStatus.setRunningDateTime(df.getTime().getEnd());
@@ -331,6 +382,9 @@ public class PlaybackContext {
 			}
 		} catch(InterruptedException e) {
 			log.warn("等待中断");
+			Thread.currentThread().interrupt();
+		} finally {
+			playTaskActive.set(false);
 		}
 	}
 	
@@ -349,12 +403,27 @@ public class PlaybackContext {
 		exec.execute(() -> {
 			try {
 				while(playbackStatus.getRunningDateTime().isBefore(preloadEnd)) {
-					DataFrame<Bar> df = preloadBuffer.take();
+					if(playbackStatus.getState() != State.PRELOADING) {
+						// 预热期间状态被外部变更（如重置），放弃预热
+						log.warn("预热期间回放状态被变更，预热中止");
+						return;
+					}
+					// 使用带超时的 poll 代替 take，避免预热期数据缺失（如节假日）时永久阻塞
+					DataFrame<Bar> df = preloadBuffer.poll(100, TimeUnit.MILLISECONDS);
+					if(df == null) {
+						if(dataProvider.isPreloadSupplyDone() && preloadBuffer.isEmpty()) {
+							// 预热数据已全部供应完毕，但运行时间未到达回放开始日（预热期内无更多数据），直接跳到回放开始时间
+							playbackStatus.setRunningDateTime(preloadEnd);
+							break;
+						}
+						continue;
+					}
 					onPreLoadBarDataCallback(df);
 					playbackStatus.setRunningDateTime(df.getTime().getEnd());
 				}
 			} catch (InterruptedException e) {
 				log.warn("预热加载等待被中断", e);
+				Thread.currentThread().interrupt();
 			}
 			synchronized (PlaybackContext.this) {
 				playbackStatus.setState(State.PRELOADED);
@@ -367,6 +436,7 @@ public class PlaybackContext {
 	}
 	
 	public synchronized void reset() {
+		playbackEpoch.incrementAndGet();
 		klineGeneratorMap = playbackContracts().stream().map(IContract::contract)
 				.collect(Collectors.toMap(c -> c, c -> new KlineGenerator(c, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar))));
 		
@@ -382,6 +452,7 @@ public class PlaybackContext {
 	}
 	
 	public synchronized void pause() {
+		playbackEpoch.incrementAndGet();
 		if(!isRunning.get()) {
 			return;
 		}
@@ -411,6 +482,7 @@ public class PlaybackContext {
 	}
 	
 	public void setRunningTime(long timestamp) {
+		playbackEpoch.incrementAndGet();
 		LocalDateTime runningDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
 		playbackStatus.setRunningDateTime(runningDateTime);
 		dataProvider.setRunningTime(runningDateTime);

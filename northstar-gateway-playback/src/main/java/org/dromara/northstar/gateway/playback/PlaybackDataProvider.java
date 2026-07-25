@@ -11,6 +11,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.dromara.northstar.common.model.core.Bar;
@@ -34,7 +35,11 @@ public class PlaybackDataProvider {
 	private final AtomicBoolean isRunning = new AtomicBoolean();
 	private final AtomicBoolean hasTerminated = new AtomicBoolean();
 	private final AtomicBoolean isLoadThreadActive = new AtomicBoolean();
-	private final ExecutorService exec = CommonUtils.newThreadPerTaskExecutor(getClass());
+	private final AtomicBoolean preloadSupplyDone = new AtomicBoolean();
+	
+	private static final int MAX_LOAD_RETRY = 3;
+	// 使用平台线程池（守护线程），避免虚拟线程无法被 jstack 排查，以及非守护线程阻塞 JVM 退出
+	private final ExecutorService exec = Executors.newCachedThreadPool(CommonUtils.platformThreadFactory(getClass()));
 	
 	public PlaybackDataProvider(PlaybackContext context) {
 		this.context = context;
@@ -49,13 +54,15 @@ public class PlaybackDataProvider {
 	 */
 	public ArrayBlockingQueue<DataFrame<Bar>> loadPreloadData() {
 		ArrayBlockingQueue<DataFrame<Bar>> preloadBuffer = new ArrayBlockingQueue<>(1024);
+		preloadSupplyDone.set(false);
 		exec.execute(() -> {
 			// 将预热时间段按3天一个窗口拆分，多线程并发加载数据，再按窗口的时间顺序依次写入缓冲区，保证预热数据按自然顺序回放
 			List<LocalDate> windowStartDates = new ArrayList<>();
 			for(LocalDate date = context.preloadDate(); date.isBefore(context.startDate()); date = date.plusDays(3)) {
 				windowStartDates.add(date);
 			}
-			ExecutorService loadPool = Executors.newFixedThreadPool(Math.max(1, Math.min(4, windowStartDates.size())));
+			ExecutorService loadPool = Executors.newFixedThreadPool(Math.max(1, Math.min(4, windowStartDates.size())),
+					CommonUtils.platformThreadFactory(getClass()));
 			try {
 				List<CompletableFuture<List<DataFrame<Bar>>>> futures = windowStartDates.stream()
 						.map(date -> CompletableFuture.supplyAsync(() -> {
@@ -87,6 +94,7 @@ public class PlaybackDataProvider {
 				log.warn("预热数据加载异常", e);
 			} finally {
 				loadPool.shutdown();
+				preloadSupplyDone.set(true);
 			}
 		});
 		
@@ -117,15 +125,63 @@ public class PlaybackDataProvider {
 	}
 	
 	/**
+	 * 数据供应是否已耗尽（加载线程已退出且缓冲区已空，即不会再有新数据）
+	 */
+	public boolean isExhausted() {
+		return !isLoadThreadActive.get() && dataBuffer.isEmpty();
+	}
+	
+	/**
+	 * 是否还有未加载的数据（加载游标未超过回放结束日）
+	 */
+	public boolean hasMoreData() {
+		LocalDateTime cursor = dataLoadCursor;
+		return cursor == null || !cursor.toLocalDate().isAfter(context.endDate());
+	}
+	
+	/**
+	 * 预热数据供应是否已完成（无论是否有数据，加载任务已结束）
+	 */
+	public boolean isPreloadSupplyDone() {
+		return preloadSupplyDone.get();
+	}
+	
+	/**
 	 * 设置运行时间
 	 */
 	public void setRunningTime(LocalDateTime runningDateTime) {
 		hasTerminated.set(true);
 		dataLoadCursor = runningDateTime;
-		while(isLoadThreadActive.get());
+		// 等待加载线程退出，避免忙等空转（虚拟线程空转会长时间占用载体线程）
+		while(isLoadThreadActive.get()) {
+			LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(10));
+		}
 		// 同步清空缓冲区，避免旧数据残留（加载线程终止时也会清理，此处保证方法返回时缓冲区已为空）
 		dataBuffer.clear();
 		startLoadThreadIfNeeded();
+	}
+	
+	/**
+	 * 带重试的数据加载。加载线程不能因异常退出，否则消费方会因缓冲区再无数据而永久卡住。
+	 * 重试多次仍失败时跳过当天数据，避免回放永久停滞在同一天。
+	 * @return 数据帧列表；返回 null 表示加载期间收到终止信号
+	 */
+	private List<DataFrame<Bar>> loadDataWithRetry(LocalDateTime cursor, long startTime, long endTime) throws InterruptedException {
+		for(int attempt = 1; attempt <= MAX_LOAD_RETRY; attempt++) {
+			if(hasTerminated.get()) {
+				return null;
+			}
+			try {
+				return dataLoader.loadData(startTime, endTime);
+			} catch (InterruptedException e) {
+				throw e;
+			} catch (Exception e) {
+				log.error("加载 [{}] 的回放数据异常（第{}/{}次）", cursor.toLocalDate(), attempt, MAX_LOAD_RETRY, e);
+				Thread.sleep(1000);
+			}
+		}
+		log.error("加载 [{}] 的回放数据多次失败，跳过当天数据继续回放", cursor.toLocalDate());
+		return List.of();
 	}
 	
 	private void startLoadThreadIfNeeded() {
@@ -151,7 +207,10 @@ public class PlaybackDataProvider {
 						}
 						long startTime = CommonUtils.localDateTimeToMills(cursor);
 						long endTime = CommonUtils.localDateTimeToMills(cursor.plusDays(1));
-						List<DataFrame<Bar>> data = dataLoader.loadData(startTime, endTime);
+						List<DataFrame<Bar>> data = loadDataWithRetry(cursor, startTime, endTime);
+						if(data == null) {
+							return;	// 加载过程中收到终止信号
+						}
 						for(DataFrame<Bar> df : data) {
 							while(!dataBuffer.offer(df, 100, TimeUnit.MILLISECONDS)) {
 								if(!isRunning.get()) {

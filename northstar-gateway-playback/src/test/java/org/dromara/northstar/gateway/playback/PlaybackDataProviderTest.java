@@ -242,6 +242,46 @@ class PlaybackDataProviderTest {
 		assertThat(exited).isTrue();
 	}
 
+	@Test
+	void loadThreadShouldRetryAndRecoverFromTransientException() throws Exception {
+		// 第一次加载抛异常，重试后恢复正常：加载线程不应因异常退出，否则消费方会永久卡住
+		LocalDateTime dayStart = LocalDateTime.of(2024, 1, 1, 0, 0);
+		DataFrame<Bar> frame = makeBarFrame(dayStart, dayStart.plusMinutes(1));
+		when(mockLoader.loadData(anyLong(), anyLong()))
+				.thenThrow(new RuntimeException("模拟瞬时异常"))
+				.thenReturn(List.of(frame))
+				.thenReturn(Collections.emptyList());
+
+		provider.startSupply();
+
+		DataFrame<Bar> df = provider.getBuffer().poll(5, TimeUnit.SECONDS);
+		assertThat(df).isNotNull();
+		assertThat(df.getTime().getStart()).isEqualTo(dayStart);
+	}
+
+	@Test
+	void loadThreadShouldSkipDayAfterPersistentFailure() throws Exception {
+		// 加载持续抛异常：重试多次后跳过当天继续推进游标，最终在超过结束日后正常退出，而不是卡死在某一天
+		when(mockLoader.loadData(anyLong(), anyLong())).thenThrow(new RuntimeException("模拟数据源持续异常"));
+
+		provider.startSupply();
+
+		// 2024-01-01 至 2024-01-03 共 3 天，每天重试 3 次、间隔 1 秒
+		long deadline = System.currentTimeMillis() + 20000;
+		boolean exited = false;
+		while (System.currentTimeMillis() < deadline) {
+			if (!isLoadThreadActive(provider)) {
+				exited = true;
+				break;
+			}
+			Thread.sleep(100);
+		}
+		assertThat(exited).isTrue();
+		assertThat(provider.isExhausted()).isTrue();
+		// 失败的天已被跳过，游标推进到结束日之后
+		assertThat(provider.hasMoreData()).isFalse();
+	}
+
 	private boolean isLoadThreadActive(PlaybackDataProvider p) {
 		try {
 			Field field = PlaybackDataProvider.class.getDeclaredField("isLoadThreadActive");
