@@ -63,6 +63,7 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		}
 		moduleStateMachine.onSubmitReq();
 		Order order = Order.builder()
+				.originOrderId(orderReq.originOrderId())
 				.gatewayId(PLAYBACK_GATEWAY)
 				.contract(orderReq.contract())
 				.totalVolume(orderReq.volume())
@@ -81,6 +82,7 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		tradeStrategy.onOrder(order);
 		
 		Trade trade = Trade.builder()
+				.originOrderId(orderReq.originOrderId())
 				.gatewayId(PLAYBACK_GATEWAY)
 				.contract(orderReq.contract())
 				.volume(orderReq.volume())
