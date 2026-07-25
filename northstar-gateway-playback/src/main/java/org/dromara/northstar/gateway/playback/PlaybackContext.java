@@ -70,6 +70,8 @@ public class PlaybackContext {
 	
 	private PlaybackDataProvider dataProvider;
 	
+	private volatile LocalDate cachedEndDate;
+	
 	public PlaybackContext(PlaybackGatewayAdapter gateway, FastEventEngine feEngine, MarketCenter mktCenter) {
 		this.feEngine = feEngine;
 		this.gateway = gateway;
@@ -115,7 +117,18 @@ public class PlaybackContext {
 	}
 	
 	LocalDate endDate() {
-		return LocalDate.parse(settings().getEndDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
+		if(cachedEndDate == null) {
+			LocalDate endDate = LocalDate.parse(settings().getEndDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
+			// 回放结束日不能大于等于当前日期，避免回放到尚未收盘的当日数据
+			LocalDate maxEndDate = LocalDate.now().minusDays(1);
+			if(endDate.isAfter(maxEndDate)) {
+				log.warn("回放结束日 [{}] 不能大于等于当前日期，自动调整为 [{}]", endDate, maxEndDate);
+				endDate = maxEndDate;
+			}
+			// 缓存计算结果，避免加载线程轮询调用时重复打印警告日志
+			cachedEndDate = endDate;
+		}
+		return cachedEndDate;
 	}
 	
 	// 如何处理TICK数据帧

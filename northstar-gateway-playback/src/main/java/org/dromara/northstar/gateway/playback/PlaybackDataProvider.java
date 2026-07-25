@@ -3,9 +3,13 @@ package org.dromara.northstar.gateway.playback;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -46,12 +50,28 @@ public class PlaybackDataProvider {
 	public ArrayBlockingQueue<DataFrame<Bar>> loadPreloadData() {
 		ArrayBlockingQueue<DataFrame<Bar>> preloadBuffer = new ArrayBlockingQueue<>(1024);
 		exec.execute(() -> {
+			// 将预热时间段按3天一个窗口拆分，多线程并发加载数据，再按窗口的时间顺序依次写入缓冲区，保证预热数据按自然顺序回放
+			List<LocalDate> windowStartDates = new ArrayList<>();
+			for(LocalDate date = context.preloadDate(); date.isBefore(context.startDate()); date = date.plusDays(3)) {
+				windowStartDates.add(date);
+			}
+			ExecutorService loadPool = Executors.newFixedThreadPool(Math.max(1, Math.min(4, windowStartDates.size())));
 			try {
-				LocalDate date = context.preloadDate();
-				while(date.isBefore(context.startDate())) {
-					long startTime = CommonUtils.localDateTimeToMills(date.atStartOfDay());
-					long endTime = CommonUtils.localDateTimeToMills(date.plusDays(3).atStartOfDay());
-					for(DataFrame<Bar> df : dataLoader.loadData(startTime, endTime)) {
+				List<CompletableFuture<List<DataFrame<Bar>>>> futures = windowStartDates.stream()
+						.map(date -> CompletableFuture.supplyAsync(() -> {
+							long startTime = CommonUtils.localDateTimeToMills(date.atStartOfDay());
+							long endTime = CommonUtils.localDateTimeToMills(date.plusDays(3).atStartOfDay());
+							try {
+								return dataLoader.loadData(startTime, endTime);
+							} catch (InterruptedException e) {
+								Thread.currentThread().interrupt();
+								throw new CompletionException(e);
+							}
+						}, loadPool))
+						.toList();
+				// 按时间顺序逐窗口取结果写入缓冲区，确保预热顺序与并发加载的完成顺序无关
+				for(CompletableFuture<List<DataFrame<Bar>>> future : futures) {
+					for(DataFrame<Bar> df : future.join()) {
 						while(!preloadBuffer.offer(df, 100, TimeUnit.MILLISECONDS)) {
 							if(context.getPlaybackStatus().getState() != State.PRELOADING) {
 								preloadBuffer.clear();
@@ -59,10 +79,14 @@ public class PlaybackDataProvider {
 							}
 						}
 					}
-					date = date.plusDays(3);
 				}
 			} catch(InterruptedException e) {
 				log.warn("加载中断", e);
+				Thread.currentThread().interrupt();
+			} catch(CompletionException e) {
+				log.warn("预热数据加载异常", e);
+			} finally {
+				loadPool.shutdown();
 			}
 		});
 		
@@ -99,6 +123,8 @@ public class PlaybackDataProvider {
 		hasTerminated.set(true);
 		dataLoadCursor = runningDateTime;
 		while(isLoadThreadActive.get());
+		// 同步清空缓冲区，避免旧数据残留（加载线程终止时也会清理，此处保证方法返回时缓冲区已为空）
+		dataBuffer.clear();
 		startLoadThreadIfNeeded();
 	}
 	
@@ -119,8 +145,9 @@ public class PlaybackDataProvider {
 							cursor = context.getPlaybackStatus().getRunningDateTime();
 						}
 						if(cursor.toLocalDate().isAfter(context.endDate())) {
-							Thread.sleep(100);
-							continue;
+							// 回放数据已全部加载完毕，加载线程正常退出。恢复回放时可通过 startSupply/setRunningTime 重新启动
+							log.debug("回放数据已加载完毕，加载线程退出");
+							return;
 						}
 						long startTime = CommonUtils.localDateTimeToMills(cursor);
 						long endTime = CommonUtils.localDateTimeToMills(cursor.plusDays(1));
@@ -143,7 +170,10 @@ public class PlaybackDataProvider {
 					log.warn("数据加载线程被中断", e);
 				} finally {
 					isLoadThreadActive.set(false);
-					dataBuffer.clear();
+					// 仅在强制重置（setRunningTime）时清空缓冲区；正常加载完毕退出时，缓冲区内可能仍有待消费的帧，不能清理
+					if(hasTerminated.get()) {
+						dataBuffer.clear();
+					}
 				}
 			});
 		}

@@ -202,6 +202,27 @@ class PlaybackContextTest {
 	}
 
 	@Test
+	void shouldClampEndDateToYesterdayWhenEndDateIsToday() {
+		initContext(null, LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+
+		assertThat(context.endDate()).isEqualTo(LocalDate.now().minusDays(1));
+	}
+
+	@Test
+	void shouldClampEndDateToYesterdayWhenEndDateIsInFuture() {
+		initContext(null, LocalDate.now().plusDays(3).format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+
+		assertThat(context.endDate()).isEqualTo(LocalDate.now().minusDays(1));
+	}
+
+	@Test
+	void shouldNotClampEndDateWhenEndDateIsBeforeToday() {
+		initContext(null, END_DATE);
+
+		assertThat(context.endDate()).isEqualTo(LocalDate.parse(END_DATE, DateTimeConstant.D_FORMAT_INT_FORMATTER));
+	}
+
+	@Test
 	void shouldNotStartWhenInInitialState() {
 		initContext(PRE_START_DATE);
 
@@ -291,10 +312,14 @@ class PlaybackContextTest {
 	}
 
 	private void initContext(String preStartDate) {
+		initContext(preStartDate, END_DATE);
+	}
+
+	private void initContext(String preStartDate, String endDate) {
 		PlaybackGatewaySettings settings = PlaybackGatewaySettings.builder()
 				.preStartDate(preStartDate)
 				.startDate(START_DATE)
-				.endDate(END_DATE)
+				.endDate(endDate)
 				.precision(PlaybackPrecision.LITE)
 				.speed(PlaybackSpeed.RUSH)
 				.build();
@@ -395,7 +420,7 @@ class PlaybackContextTest {
 		ArrayBlockingQueue<?> bufferMock = mock(ArrayBlockingQueue.class);
 		CountDownLatch blockLatch = new CountDownLatch(1);
 		try {
-			when(bufferMock.take()).thenAnswer(invocation -> {
+			when(bufferMock.take()).thenAnswer(_ -> {
 				takeLatch.countDown();
 				// 模拟阻塞读取，直到被中断
 				blockLatch.await();

@@ -20,8 +20,8 @@
 
 - 源码已升级到 Java 25 / Spring Boot 3.5.11，当前分支为 `dev/v9.1`，源码版本为 `9.1.0`。
 - 工作目录中存在的 `.flattened-pom.xml` 会在构建时重新生成，未纳入 Git 跟踪，应以源码 `pom.xml` 为准。
-- `northstar-monitor-next/package.json` 当前版本号为 `9.0.0`，与后端源码版本 `9.1.0` 暂时不一致。
-- `.gitmodules` 登记了两个子模块：`northstar-monitor-next`（已检出，当前工作树有未提交改动）和 `northstar-external`（工作树中不存在）。
+- `northstar-monitor-next/package.json` 版本号为 `9.1.0`，与后端源码版本一致。
+- `.gitmodules` 登记了两个子模块：`northstar-monitor-next` 和 `northstar-external`。其中 `northstar-monitor-next` 在父仓库中尚未初始化（`git submodule status` 显示 `-` 前缀），其目录内容系独立克隆，工作树干净；`northstar-external` 未注册进 git 索引，目录不存在。
 
 ## 项目结构
 
@@ -156,7 +156,8 @@ pnpm e2e       # Cypress E2E 测试
 - `org.dromara.northstar.common.model.core/` - 核心数据模型（`Tick`、`Bar`、`Contract`、`Order`、`Trade`、`Position`、`Account`、`SubmitOrderReq` 等）
 - `org.dromara.northstar.common.constant/` - 公共常量（`Constants.java`）
 - `org.dromara.northstar.strategy/` - 策略框架（`TradeStrategy`、`AbstractStrategy`、`IModuleContext`、`IAccount`、`IModuleAccount`）
-- `org.dromara.northstar.indicator/` - 指标框架（`Indicator`、`AbstractIndicator`、`Configuration`、`Num`）及指标实现
+- `org.dromara.northstar.indicator/` - 指标框架（`Indicator`、`AbstractIndicator`）及指标实现；`Configuration`、`Num` 位于 `indicator/model/` 子包
+- `org.dromara.northstar.ai/`、`datasource/`、`kline/`、`meta/` - 其他顶层包
 - `org.dromara.northstar.gateway/` - 网关抽象层（`Gateway`、`MarketGateway`、`TradeGateway`、`IMarketCenter`）
 - `org.dromara.northstar.data/` - 数据仓库接口（`IGatewayRepository`、`IModuleRepository`、`IMarketDataRepository`、`IAccountRepository`）
 
@@ -334,6 +335,8 @@ server:
 
 ### CSRF / Session 流程
 
+拦截器在 `AppConfig` 中注册（仅非 `unittest` profile 生效），拦截 `/northstar/**`，排除 `/northstar/user/**` 和 `/northstar/reset`；`AuthCheckerInterceptor` 内部还直接放行 `/northstar/sse/stream`。
+
 1. `POST /northstar/user/login` 校验凭据
 2. 成功后，随机 UUID 作为 CSRF Token 存入 HTTP Session（键 `SESS_CSRF`）
 3. 后续 `/northstar/**` 请求须携带请求头 `CSRF_token` 并匹配 Session 值
@@ -448,5 +451,5 @@ nohup java -Xlog:gc*:gc.log -Xms2g -Xmx2g \
 6. **H2 Console 在生产环境启用**：路径 `/h2-console`，仅通过 CSRF 拦截器保护。
 7. **前端构建顺序**：打包后端前必须先在前端目录执行 `pnpm build` 生成 `dist/`。
 8. **测试环境默认账号**：`admin` / `123456`，可通过 `NS_USER` / `NS_PWD` 环境变量覆盖。
-9. **版本对齐**：后端源码版本为 `9.1.0`，但 `northstar-monitor-next/package.json` 仍为 `9.0.0`，如需统一请同步更新。
-10. **子模块状态**：`northstar-monitor-next` 当前工作树有未提交改动；`northstar-external` 在 `.gitmodules` 中登记但尚未检出。
+9. **版本对齐**：后端源码版本与 `northstar-monitor-next/package.json` 均为 `9.1.0`，已对齐。
+10. **子模块状态**：`northstar-monitor-next` 在父仓库中未初始化（目录为独立克隆，工作树干净）；`northstar-external` 在 `.gitmodules` 中登记但未注册进索引、目录不存在。
