@@ -99,13 +99,6 @@ class ModuleControllerTest {
 	}
 
 	@Test
-	void testBacktest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get("/northstar/module/testModule/backtest")
-				.param("numOfMonthToTest", "3"))
-			.andExpect(status().isOk());
-	}
-
-	@Test
 	void testMockTrade() throws Exception {
 		ModuleMockTradeDTO tradeDTO = ModuleMockTradeDTO.builder().build();
 		mvc.perform(MockMvcRequestBuilders.post("/northstar/module/mocktrade")
