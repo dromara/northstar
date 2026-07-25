@@ -6,7 +6,7 @@ import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.core.CancelOrderReq;
 import org.dromara.northstar.common.model.core.SubmitOrderReq;
 import org.dromara.northstar.data.IModuleRepository;
-import org.dromara.northstar.gateway.IContractManager;
+import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 	private final Logger logger;
 
 	public ArbitrageModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription,
-			ModuleAccount moduleAccount, IContractManager contractMgr, IModuleRepository moduleRepo) {
+			ModuleAccount moduleAccount, MarketCenter contractMgr, IModuleRepository moduleRepo) {
 		super(tradeStrategy, moduleDescription, moduleAccount, contractMgr, moduleRepo);
 		logger = getLogger(getClass());
 	}

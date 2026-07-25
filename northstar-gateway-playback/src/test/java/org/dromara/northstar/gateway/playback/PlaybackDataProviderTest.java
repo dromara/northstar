@@ -7,11 +7,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -176,6 +180,97 @@ class PlaybackDataProviderTest {
 
 		// 确保没有之前的大批量旧数据残留
 		assertThat(provider.getBuffer()).isEmpty();
+	}
+
+	@Test
+	void loadPreloadDataShouldLoadInParallelButOfferInChronologicalOrder() throws Exception {
+		// 构造预热区间为 2024-01-01 -> 2024-01-10 的上下文，共 3 个加载窗口（每窗口 3 天）
+		PlaybackContext ctx = createContext(PRE_START_DATE, "20240110");
+		PlaybackDataProvider p = new PlaybackDataProvider(ctx);
+		try {
+			PlaybackDataLoader loader = mock(PlaybackDataLoader.class);
+			setField(p, "dataLoader", loader);
+
+			Set<String> loadThreadNames = ConcurrentHashMap.newKeySet();
+			// 模拟并发加载：越早的窗口响应越慢，若按完成顺序写入缓冲区必然乱序
+			Mockito.doAnswer(invocation -> {
+				long startTime = invocation.getArgument(0);
+				LocalDateTime windowStart = CommonUtils.millsToLocalDateTime(startTime);
+				loadThreadNames.add(Thread.currentThread().getName());
+				long daysFromPreloadStart = Duration.between(LocalDateTime.of(2024, 1, 1, 0, 0), windowStart).toDays();
+				Thread.sleep(Math.max(0, 300 - daysFromPreloadStart * 50));
+				return List.of(
+						makeBarFrame(windowStart, windowStart.plusMinutes(1)),
+						makeBarFrame(windowStart.plusMinutes(1), windowStart.plusMinutes(2)));
+			}).when(loader).loadData(anyLong(), anyLong());
+
+			ArrayBlockingQueue<DataFrame<Bar>> buffer = p.loadPreloadData();
+
+			List<LocalDateTime> starts = new ArrayList<>();
+			DataFrame<Bar> df;
+			while (starts.size() < 6 && (df = buffer.poll(5, TimeUnit.SECONDS)) != null) {
+				starts.add(df.getTime().getStart());
+			}
+
+			assertThat(starts).hasSize(6);
+			// 必须按自然时间顺序进入缓冲区
+			assertThat(starts).isSorted();
+			// 验证确实使用了多线程并发加载
+			assertThat(loadThreadNames.size()).isGreaterThan(1);
+		} finally {
+			shutdownExecutor(p);
+			shutdownExecutor(ctx);
+		}
+	}
+
+	@Test
+	void loadThreadShouldTerminateAfterPassingEndDate() throws Exception {
+		// 所有日期都返回空数据，加载线程应快速推进游标并在超过结束日后自行退出，而不是空转
+		when(mockLoader.loadData(anyLong(), anyLong())).thenReturn(Collections.emptyList());
+
+		provider.startSupply();
+
+		long deadline = System.currentTimeMillis() + 3000;
+		boolean exited = false;
+		while (System.currentTimeMillis() < deadline) {
+			if (!isLoadThreadActive(provider)) {
+				exited = true;
+				break;
+			}
+			Thread.sleep(50);
+		}
+		assertThat(exited).isTrue();
+	}
+
+	private boolean isLoadThreadActive(PlaybackDataProvider p) {
+		try {
+			Field field = PlaybackDataProvider.class.getDeclaredField("isLoadThreadActive");
+			field.setAccessible(true);
+			return ((java.util.concurrent.atomic.AtomicBoolean) field.get(p)).get();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private PlaybackContext createContext(String preStartDate, String startDate) {
+		PlaybackGatewaySettings settings = PlaybackGatewaySettings.builder()
+				.preStartDate(preStartDate)
+				.startDate(startDate)
+				.endDate(END_DATE)
+				.precision(PlaybackPrecision.LITE)
+				.speed(PlaybackSpeed.RUSH)
+				.build();
+		GatewayDescription description = GatewayDescription.builder()
+				.gatewayId("PLAYBACK")
+				.subscribedContracts(List.of(ContractSimpleInfo.builder()
+						.id(CONTRACT_ID)
+						.name("TEST")
+						.unifiedSymbol("TEST@SHFE@FUTURES")
+						.channelType(ChannelType.PLAYBACK)
+						.build()))
+				.settings(settings)
+				.build();
+		return new PlaybackGatewayAdapter(description, feEngine, mktCenter).getContext();
 	}
 
 	private Contract makeTestContract() {

@@ -83,7 +83,6 @@ class StrategyExplorerServiceTest {
     		.startDate("2025-04-01")
     		.endDate("2025-06-30")
     		.contracts(List.of(ContractSimpleInfo.builder().id("ao0000@SHFE@FUTURES@PLAYBACK").unifiedSymbol("ao0000@SHFE@FUTURES").name("ao0000").build()))
-    		.intervals(List.of("10m"))
     		.strategySetting(StrategyMetaInfo.builder()
     				.className(TestStrategy.class.getName())
     				.settings(Collections.emptyList())
@@ -147,8 +146,10 @@ class StrategyExplorerServiceTest {
     @Test
     void testGetModuleTradeDetails() {
         service.createTask(taskDescription);
-        BacktestModuleTradeDetailsVO result = service.getModuleTradeDetails("Test_testTask_ao0000_10m");
+        BacktestModuleTradeDetailsVO result = service.getModuleTradeDetails("策略探索_testTask_ao0000");
         assertNotNull(result);
+        assertNotNull(result.getChartData());
+        assertNotNull(result.getChartData().getData());
     }
 
 

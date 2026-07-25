@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class BacktestModuleTradeDetailsVO {
 
-	private ContractChartDescription chartData;
+	private ModuleChartDescription chartData;
 	
 	private List<ModuleDealRecordVO> dealRecords;
 	

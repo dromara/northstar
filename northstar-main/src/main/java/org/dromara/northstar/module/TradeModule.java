@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Order;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
@@ -30,21 +31,28 @@ public class TradeModule implements IModule {
 	
 	private final ModuleContext ctx;
 	
-	private final Set<String> bindedContractIdSet;
+	private final Set<Contract> contracts;
 	
 	private final Logger logger;
 	
+	private final boolean backtestOnly;
+	
 	public TradeModule(ModuleContext ctx) {
+		this(ctx, false);
+	}
+	
+	public TradeModule(ModuleContext ctx, boolean backtestOnly) {
 		this.ctx = ctx;
+		this.backtestOnly = backtestOnly;
 		logger = ctx.getLogger(getClass());
-		bindedContractIdSet = ctx.getModuleDescription().getBindedContracts().stream().map(csi -> csi.getId()).collect(Collectors.toSet());
+		contracts = ctx.bindedContracts().stream().collect(Collectors.toSet());
 		logger.info("模组 [{}] 创建成功", ctx.getModuleDescription().getName());
 	}
 	
 	@Override
 	public void setEnabled(boolean enabled) {
 		ModuleAccount account = (ModuleAccount)ctx.getModuleAccount();
-		if(enabled && account != null) {
+		if(enabled && !backtestOnly && account != null) {
 			account.getContractAccountMap().values().stream().distinct().forEach(acc -> {
 				TradeGateway gateway = acc.getTradeGateway();
 				if(gateway.getConnection() != ConnectionState.CONNECTED) {
@@ -60,13 +68,13 @@ public class TradeModule implements IModule {
 	public synchronized void onEvent(NorthstarEvent event) {
 		Object data = event.getData();
 		try {
-			if(data instanceof Tick tick && bindedContractIdSet.contains(tick.contract().contractId())) {
+			if(data instanceof Tick tick && contracts.contains(tick.contract())) {
 				ctx.onTick(tick);
-			} else if (data instanceof Bar bar && bindedContractIdSet.contains(bar.contract().contractId())) {
+			} else if (data instanceof Bar bar && contracts.contains(bar.contract())) {
 				ctx.onBar(bar);
-			} else if (data instanceof Order order && bindedContractIdSet.contains(order.contract().contractId())) {
+			} else if (data instanceof Order order && contracts.contains(order.contract())) {
 				ctx.onOrder(order);
-			} else if (data instanceof Trade trade && bindedContractIdSet.contains(trade.contract().contractId())) {
+			} else if (data instanceof Trade trade && contracts.contains(trade.contract())) {
 				ctx.onTrade(trade);
 			}
 		} catch (Exception e) {

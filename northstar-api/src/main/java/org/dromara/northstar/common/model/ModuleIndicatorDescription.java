@@ -2,6 +2,7 @@ package org.dromara.northstar.common.model;
 
 import java.util.List;
 
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.LineStyle;
 
 import lombok.AllArgsConstructor;
@@ -22,6 +23,8 @@ public class ModuleIndicatorDescription {
 	private ContractSimpleInfo contract;
 	/* 指标名称 */
 	private String name;
+	/* 指标周期 */
+	private Interval timeFrame;
 	/* 指标线样式 */
 	@Builder.Default
 	private LineStyle style = LineStyle.LINES;
