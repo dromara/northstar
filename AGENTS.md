@@ -1,16 +1,16 @@
 # Northstar Pro - AGENTS.md
 
-> 本文件包含 AI 编程代理处理 Northstar Pro 项目所需的关键信息。信息基于项目实际文件整理，如发现与源码不一致，请以源码为准。
+> 本文件面向 AI 编程代理，包含处理 Northstar Pro 项目所需的关键信息。信息基于对项目实际文件的核对整理；如发现与源码不一致，请以源码为准。
 
 ## 项目概述
 
 **Northstar Pro（盈富量化交易平台）** 是一个基于 Java 和 Spring Boot 开发的量化交易平台，提供模块化的策略开发、回测、模拟交易和实盘部署框架。
 
 - **当前源码版本**: `9.1.0`（定义在根 `pom.xml` 的 `<northstar-version>` 属性）
-- **当前分支**: `dev/v9.1`
-- **语言**: Java 25（源码 `pom.xml` 当前声明 `<java.version>25</java.version>`）
+- **当前分支**: `master`
+- **语言**: Java 25（根 `pom.xml` 声明 `<java.version>25</java.version>`）
 - **构建工具**: Maven 3.x
-- **框架**: Spring Boot 3.5.11
+- **框架**: Spring Boot 3.5.11（`spring-boot-starter-parent`）
 - **Group ID**: `org.dromara.northstar.pro`
 - **Artifact ID**: `northstar`
 - **仓库**: `https://gitee.com/dromara/northstar`
@@ -18,10 +18,10 @@
 
 ### 版本与分支说明
 
-- 源码已升级到 Java 25 / Spring Boot 3.5.11，当前分支为 `dev/v9.1`，源码版本为 `9.1.0`。
-- 工作目录中存在的 `.flattened-pom.xml` 会在构建时重新生成，未纳入 Git 跟踪，应以源码 `pom.xml` 为准。
+- 源码目标为 Java 25 / Spring Boot 3.5.11，源码版本为 `9.1.0`，构建前请确认本地 JDK 版本与 POM 一致。
+- 各模块下的 `.flattened-pom.xml` 由 Flatten Maven Plugin 在构建时生成，未纳入 Git 跟踪，请勿以其为准。
 - `northstar-monitor-next/package.json` 版本号为 `9.1.0`，与后端源码版本一致。
-- `.gitmodules` 登记了两个子模块：`northstar-monitor-next` 和 `northstar-external`。其中 `northstar-monitor-next` 在父仓库中尚未初始化（`git submodule status` 显示 `-` 前缀），其目录内容系独立克隆，工作树干净；`northstar-external` 未注册进 git 索引，目录不存在。
+- `.gitmodules` 登记了两个子模块：`northstar-monitor-next` 和 `northstar-external`。其中 `northstar-monitor-next` 在父仓库中尚未初始化（`git submodule status` 显示 `-` 前缀），其目录内容系独立克隆；`northstar-external` 未注册进 git 索引，目录不存在。
 
 ## 项目结构
 
@@ -53,17 +53,13 @@ northstar/
 
 ### 后端
 
-- **Spring Boot 3.5.11** - 应用框架
-- **Spring Data JPA** - 数据持久化
-- **Spring Web** - REST API 层
-- **Spring Scheduling** - 任务调度
+- **Spring Boot 3.5.11** - 应用框架（Web / Data JPA / Scheduling / Cache）
 - **Spring Retry 2.0.5** - 重试机制
-- **Spring Boot Cache** - 缓存支持
 - **H2 Database 2.2.224** - 嵌入式数据库（生产环境文件模式，测试内存模式）
 - **Protocol Buffers 4.28.3** / protobuf-java-format 1.4 - 数据序列化
 - **Disruptor 3.4.4** - 高性能事件处理
 - **Netty 4.1.104.Final**
-- **Lombok 1.18.46** - 减少样板代码
+- **Lombok 1.18.46** - 减少样板代码（编译期注解处理）
 - **Fastjson2 2.0.56** / **Jackson 2.16.1** - JSON 处理
 - **Guava 33.0.0-jre** / **Apache Commons**（Lang3 3.17.0、IO 2.15.1、Math3 3.6.1、Codec 1.16.0）- 工具库
 - **Hutool-crypto 5.7.22** - 加密
@@ -74,18 +70,17 @@ northstar/
 
 ### AI Copilot 模块
 
-- **OkHttp3 SSE** / **jtokkit 1.1.0** - Token 管理
+- **OkHttp3 SSE** / **jtokkit** - Token 管理与流式对话
 - 支持多种 LLM 平台：OpenAI、Moonshot、DeepSeek、Ollama、Baichuan 等
 - 向量存储（Pinecone）、SearXNG 网页搜索、函数调用框架、异常处理链
 
 ### 前端
 
-- **Vue 3.4.27** + **Vite 5.2.12** + **TypeScript 5.4.5**
-- **Vue Router 4.3.2** + **Pinia 2.1.7** + **Vue I18n 9.13.1**
-- **Element Plus 2.8.4** + **TailwindCSS 3.4.4**
-- **Klinecharts 9.8.12** + **ECharts 5.5.0**
-- **Monaco Editor 0.55.1**
-- **Cypress 15.11.0** - E2E 测试
+- **Vue 3** + **Vite 5** + **TypeScript**
+- **Vue Router** + **Pinia** + **Vue I18n**
+- **Element Plus** + **TailwindCSS**
+- **Klinecharts** + **ECharts** + **Monaco Editor**
+- **Cypress** - E2E 测试
 - **protobuf-ts** - TypeScript protobuf 生成
 - 包管理器：**pnpm >= 9**（`package.json` 通过 `only-allow pnpm` 强制）
 
@@ -96,6 +91,7 @@ northstar/
 | 文件 | 说明 |
 |---|---|
 | `pom.xml` | 根 Maven POM，定义版本、模块、依赖管理 |
+| `northstar-main/pom.xml` | 主应用 POM，定义可执行 jar 名称、前端静态资源拷贝、产物输出目录 |
 | `northstar-main/src/main/resources/application.yml` | 主应用配置（Profile、SSL、数据库、日志、虚拟线程、数据服务） |
 | `northstar-main/src/main/resources/logback-spring.xml` | 日志配置 |
 | `northstar-monitor-next/package.json` | 前端依赖与脚本 |
@@ -133,7 +129,7 @@ mvn jacoco:report
 mvn clean verify
 ```
 
-构建完成后，`northstar-main` 的可执行 jar 会输出到 `northstar-dist/`，默认名称为 `northstar-9.1.0.jar`；`smart` profile 输出为 `northstar-9.1.0-smart.jar`。
+构建完成后，`northstar-main` 的可执行 jar 会输出到 `northstar-dist/`，默认名称为 `northstar-9.1.0.jar`（由 `finalName` 决定）；`smart` profile 输出为 `northstar-9.1.0-smart.jar`。
 
 ### 前端
 
@@ -147,7 +143,7 @@ pnpm typecheck # tsc + vue-tsc
 pnpm e2e       # Cypress E2E 测试
 ```
 
-前端 `dist/` 会在 `northstar-main` 的 Maven `generate-resources` 阶段被复制到 `src/main/resources/static/`。因此完整构建时需要先执行 `pnpm build`。
+前端 `dist/` 会在 `northstar-main` 的 Maven `generate-resources` 阶段被复制到 `src/main/resources/static/`（见 `northstar-main/pom.xml`）。因此完整构建时需要先执行 `pnpm build`。
 
 ## 代码组织
 
@@ -157,7 +153,6 @@ pnpm e2e       # Cypress E2E 测试
 - `org.dromara.northstar.common.constant/` - 公共常量（`Constants.java`）
 - `org.dromara.northstar.strategy/` - 策略框架（`TradeStrategy`、`AbstractStrategy`、`IModuleContext`、`IAccount`、`IModuleAccount`）
 - `org.dromara.northstar.indicator/` - 指标框架（`Indicator`、`AbstractIndicator`）及指标实现；`Configuration`、`Num` 位于 `indicator/model/` 子包
-- `org.dromara.northstar.ai/`、`datasource/`、`kline/`、`meta/` - 其他顶层包
 - `org.dromara.northstar.gateway/` - 网关抽象层（`Gateway`、`MarketGateway`、`TradeGateway`、`IMarketCenter`）
 - `org.dromara.northstar.data/` - 数据仓库接口（`IGatewayRepository`、`IModuleRepository`、`IMarketDataRepository`、`IAccountRepository`）
 
@@ -309,7 +304,7 @@ server:
 - 使用 SLF4J + Logback
 - 日志文件输出到 `logs/` 目录
 - 主日志：`logs/Northstar_%d{yyyy-MM-dd}.log`，保留 30 天
-- 调试日志：`logs/DEBUG/BroadcastHandler_...`、`MarketCenter_...`、`KlineData_...`，保留 3 天
+- 调试日志：`logs/DEBUG/` 下分主题输出，保留 3 天
 
 ### 外部数据服务
 
@@ -326,8 +321,8 @@ server:
 - `UserController`：登录、登出、校验接口
 - `UserInfo`：保存用户账号密码及登录失败次数
 - 默认账号密码定义在 `northstar-api/src/main/java/org/dromara/northstar/common/constant/Constants.java`：
-  - 用户 ID：`admin`
-  - 密码：`123456`
+  - 用户 ID：`admin`（`DEFAULT_USERID`）
+  - 密码：`123456`（`DEFAULT_PASSWORD`）
 - 可通过环境变量覆盖：
   - `NS_USER`
   - `NS_PWD`
@@ -379,7 +374,7 @@ server:
 ### 测试覆盖率
 
 - 工具：JaCoCo 0.8.13
-- 最低行覆盖率：**30%**
+- 最低行覆盖率：**30%**（`mvn clean verify` 时校验）
 - 排除项：
   - `northstar-api`: protobuf 生成代码、指标、策略、`gateway/contract/**`
   - `northstar-gateway-sim`: `org/dromara/northstar/gateway/sim/market/*`
@@ -432,7 +427,7 @@ nohup java -Xlog:gc*:gc.log -Xms2g -Xmx2g \
 - 控制器与服务类中**字段注入（`@Autowired`）和构造器注入并存**；控制器以字段注入为主
 - 不可变字段使用 `final`
 - 代码注释主要使用中文
-- 编码：UTF-8
+- 编码：UTF-8（`maven.compiler.encoding` / `file.encoding` 均已配置）
 
 ### 版本管理
 
@@ -443,13 +438,13 @@ nohup java -Xlog:gc*:gc.log -Xms2g -Xmx2g \
 
 ## 重要注意事项
 
-1. **JDK 25 升级已完成**：源码 POM 已目标 Java 25 / Spring Boot 3.5.11。构建前请确认本地 JDK 与 POM 配置一致。
+1. **JDK 25 要求**：源码 POM 目标为 Java 25 / Spring Boot 3.5.11。构建前请确认本地 JDK 与 POM 配置一致。
 2. **Protobuf 生成类不可手动修改**：生成类位于 `xyz.redtorch.pb` 包中，更新请使用 `update-protobuf-obj.ps1`。
 3. **H2 用于生产数据存储**：生产环境使用 H2 文件模式，历史行情数据主要依赖外部 marketplace 服务。
 4. **虚拟线程**：默认在非 `dev` profile 下启用。
-5. **`.flattened-pom.xml` 不一致**：工作目录中的 `.flattened-pom.xml` 文件未纳入 Git，且可能与源码 POM 不符，请勿以其为准。
+5. **`.flattened-pom.xml` 不可信**：工作目录中的 `.flattened-pom.xml` 文件未纳入 Git，且可能与源码 POM 不符，请勿以其为准。
 6. **H2 Console 在生产环境启用**：路径 `/h2-console`，仅通过 CSRF 拦截器保护。
 7. **前端构建顺序**：打包后端前必须先在前端目录执行 `pnpm build` 生成 `dist/`。
 8. **测试环境默认账号**：`admin` / `123456`，可通过 `NS_USER` / `NS_PWD` 环境变量覆盖。
 9. **版本对齐**：后端源码版本与 `northstar-monitor-next/package.json` 均为 `9.1.0`，已对齐。
-10. **子模块状态**：`northstar-monitor-next` 在父仓库中未初始化（目录为独立克隆，工作树干净）；`northstar-external` 在 `.gitmodules` 中登记但未注册进索引、目录不存在。
+10. **子模块状态**：`northstar-monitor-next` 在父仓库中未初始化（目录为独立克隆）；`northstar-external` 在 `.gitmodules` 中登记但未注册进索引、目录不存在。
