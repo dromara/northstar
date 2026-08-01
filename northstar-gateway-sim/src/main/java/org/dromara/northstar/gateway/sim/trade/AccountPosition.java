@@ -156,11 +156,12 @@ public class AccountPosition implements TickDataAware, TransactionAware{
 	}
 
 	/**
-	 * 获取未平仓原始成交
+	 * 获取未平仓原始成交快照（按成交时间升序，旧成交在队首）
+	 * 返回加锁拷贝以避免调用方遍历可变队列带来的并发风险；{@link Trade} 为不可变对象，可安全共享
 	 * @return
 	 */
-	public List<Trade> getOpeningTrades(){
-		return trades;
+	public synchronized List<Trade> getOpeningTrades(){
+		return List.copyOf(trades);
 	}
 
 	/**

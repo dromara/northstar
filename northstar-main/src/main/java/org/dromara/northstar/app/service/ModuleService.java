@@ -37,6 +37,7 @@ import org.dromara.northstar.common.model.ModuleMockTradeDTO;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeVO;
 import org.dromara.northstar.common.model.ModuleVO;
+import org.dromara.northstar.common.model.OpenTradeVO;
 import org.dromara.northstar.common.model.PositionVO;
 import org.dromara.northstar.common.model.StrategyMetaInfo;
 import org.dromara.northstar.common.model.core.Bar;
@@ -414,24 +415,33 @@ public class ModuleService implements CommandLineRunner {
 		double commission = account.commission();
 		double realizedPL = account.realizedProfit();
 		
-		List<PositionVO> positions = account.getPositions()
+		List<PositionVO> positions = account.getModulePositions()
 				.stream()
-				.filter(p -> p.position() > 0)
-				.map(p -> PositionVO.builder()
-						.contractId(p.contract().contractId())
-						.name(p.contract().name())
-						.symbol(p.contract().symbol())
-						.dir(p.positionDirection())
-						.total(p.position())
-						.available(p.position() - p.frozen())
-						.openPrice(BigDecimal.valueOf(p.openPrice()).setScale(p.contract().pricePrecision(), RoundingMode.HALF_UP).toPlainString())
-						.lastPrice(p.lastTick() != null 
-							? BigDecimal.valueOf(p.lastTick().lastPrice()).setScale(p.contract().pricePrecision(), RoundingMode.HALF_UP).toPlainString() 
-							: "0")
-						.profit(p.positionProfit())
-						.gatewayId(p.gatewayId())
-						.closingDir(OrderUtils.getClosingDirection(p.positionDirection()))
-						.build())
+				.filter(ap -> ap.position() > 0)
+				.map(ap -> {
+					var p = ap.convertToPosition();
+					return PositionVO.builder()
+							.contractId(p.contract().contractId())
+							.name(p.contract().name())
+							.symbol(p.contract().symbol())
+							.dir(p.positionDirection())
+							.total(p.position())
+							.available(p.position() - p.frozen())
+							.openPrice(BigDecimal.valueOf(p.openPrice()).setScale(p.contract().pricePrecision(), RoundingMode.HALF_UP).toPlainString())
+							.lastPrice(p.lastTick() != null 
+								? BigDecimal.valueOf(p.lastTick().lastPrice()).setScale(p.contract().pricePrecision(), RoundingMode.HALF_UP).toPlainString() 
+								: "0")
+							.profit(p.positionProfit())
+							.gatewayId(p.gatewayId())
+							.closingDir(OrderUtils.getClosingDirection(p.positionDirection()))
+							.openTrades(ap.getOpeningTrades().stream()
+								.map(t -> OpenTradeVO.builder()
+										.timestamp(t.tradeTimestamp())
+										.price(BigDecimal.valueOf(t.price()).setScale(p.contract().pricePrecision(), RoundingMode.HALF_UP).toPlainString())
+										.build())
+								.toList())
+							.build();
+				})
 				.toList();
 		double unrealizedProfit = positions.stream().mapToDouble(PositionVO::getProfit).sum();
 		double netPL = realizedPL + unrealizedProfit - commission;

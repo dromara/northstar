@@ -544,4 +544,113 @@ class AccountPositionTest {
 		// Commission = 3.0E-4 * 51000 * 1 * 2 = 30.6
 		assertThat(pos.getAccCommission()).isCloseTo(30.6, org.assertj.core.data.Offset.offset(0.001));
 	}
+
+	private Trade openTrade(double price, double volume, long timestamp) {
+		return Trade.builder()
+				.gatewayId("TEST_GATEWAY")
+				.contract(contract)
+				.direction(DirectionEnum.D_Buy)
+				.offsetFlag(OffsetFlagEnum.OF_Open)
+				.price(price)
+				.volume(volume)
+				.tradeTimestamp(timestamp)
+				.build();
+	}
+
+	private Trade closeTrade(double price, double volume, long timestamp) {
+		return Trade.builder()
+				.gatewayId("TEST_GATEWAY")
+				.contract(contract)
+				.direction(DirectionEnum.D_Sell)
+				.offsetFlag(OffsetFlagEnum.OF_Close)
+				.price(price)
+				.volume(volume)
+				.tradeTimestamp(timestamp)
+				.build();
+	}
+
+	@Test
+	void testGetOpeningTradesEmptyWithoutPosition() {
+		assertThat(longPosition.getOpeningTrades()).isEmpty();
+	}
+
+	@Test
+	void testGetOpeningTradesOrderedOldestFirst() {
+		longPosition.onTrade(openTrade(10000, 1, 1722470400000L));
+		longPosition.onTrade(openTrade(10200, 1, 1722470460000L));
+
+		// 固化约定：未平仓成交按成交时间升序返回，旧成交在队首
+		List<Trade> trades = longPosition.getOpeningTrades();
+		assertThat(trades).hasSize(2);
+		assertThat(trades.get(0).price()).isEqualTo(10000);
+		assertThat(trades.get(0).tradeTimestamp()).isEqualTo(1722470400000L);
+		assertThat(trades.get(1).price()).isEqualTo(10200);
+		assertThat(trades.get(1).tradeTimestamp()).isEqualTo(1722470460000L);
+	}
+
+	@Test
+	void testGetOpeningTradesReturnsSnapshot() {
+		longPosition.onTrade(openTrade(10000, 1, 1722470400000L));
+
+		List<Trade> snapshot = longPosition.getOpeningTrades();
+		longPosition.onTrade(openTrade(10200, 1, 1722470460000L));
+
+		// 固化约定：返回的是快照拷贝，后续的加减仓不影响已返回的列表
+		assertThat(snapshot).hasSize(1);
+		assertThat(longPosition.getOpeningTrades()).hasSize(2);
+	}
+
+	@Test
+	void testGetOpeningTradesRetainedAfterPartialClose() {
+		longPosition.onTrade(openTrade(10000, 3, 1722470400000L));
+		longPosition.onTrade(closeTrade(10100, 1, 1722470520000L));
+
+		// 固化约定：部分平仓后余量成交保留原开仓价格与时间戳
+		assertThat(longPosition.position()).isEqualTo(2);
+		List<Trade> trades = longPosition.getOpeningTrades();
+		assertThat(trades).hasSize(1);
+		assertThat(trades.get(0).volume()).isEqualTo(2);
+		assertThat(trades.get(0).price()).isEqualTo(10000);
+		assertThat(trades.get(0).tradeTimestamp()).isEqualTo(1722470400000L);
+	}
+
+	@Test
+	void testGetOpeningTradesAdvancesAfterHeadTradeFullyClosed() {
+		longPosition.onTrade(openTrade(10000, 2, 1722470400000L));
+		longPosition.onTrade(openTrade(10200, 3, 1722470460000L));
+
+		// 平 3 手：第一笔全平，第二笔平掉 1 手
+		longPosition.onTrade(closeTrade(10100, 3, 1722470520000L));
+
+		// 固化约定：队首全平后，剩余的未平仓成交按原顺序保留
+		assertThat(longPosition.position()).isEqualTo(2);
+		List<Trade> trades = longPosition.getOpeningTrades();
+		assertThat(trades).hasSize(1);
+		assertThat(trades.get(0).volume()).isEqualTo(2);
+		assertThat(trades.get(0).price()).isEqualTo(10200);
+		assertThat(trades.get(0).tradeTimestamp()).isEqualTo(1722470460000L);
+	}
+
+	@Test
+	void testGetOpeningTradesEmptyAfterFullyClosed() {
+		longPosition.onTrade(openTrade(10000, 2, 1722470400000L));
+		longPosition.onTrade(closeTrade(10100, 2, 1722470520000L));
+
+		assertThat(longPosition.position()).isEqualTo(0);
+		assertThat(longPosition.getOpeningTrades()).isEmpty();
+	}
+
+	@Test
+	void testGetOpeningTradesPreservedWhenLoadedFromRepo() {
+		AccountPosition pos = new AccountPosition("TEST_GATEWAY", contract, PositionDirectionEnum.PD_Long, repo,
+				List.of(openTrade(10000, 1, 1722470400000L), openTrade(10200, 2, 1722470460000L)));
+
+		// 固化约定：模组重启恢复持仓后，每笔未平仓成交的价格与时间戳不丢失
+		List<Trade> trades = pos.getOpeningTrades();
+		assertThat(trades).hasSize(2);
+		assertThat(trades.get(0).price()).isEqualTo(10000);
+		assertThat(trades.get(0).tradeTimestamp()).isEqualTo(1722470400000L);
+		assertThat(trades.get(1).price()).isEqualTo(10200);
+		assertThat(trades.get(1).tradeTimestamp()).isEqualTo(1722470460000L);
+	}
 }

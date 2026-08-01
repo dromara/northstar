@@ -1,5 +1,7 @@
 package org.dromara.northstar.common.model;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,4 +27,6 @@ public class PositionVO {
     private DirectionEnum closingDir;
     private String gatewayId;
     private int quantityPrecision;
+    /* 未平仓开仓成交列表（按成交时间升序），持仓可能由多笔成交组成，前端按每笔实际成交绘制持仓线 */
+    private List<OpenTradeVO> openTrades;
 }
