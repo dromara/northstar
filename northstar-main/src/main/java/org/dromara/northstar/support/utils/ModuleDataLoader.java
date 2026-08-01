@@ -1,6 +1,5 @@
 package org.dromara.northstar.support.utils;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -20,10 +19,16 @@ import lombok.extern.slf4j.Slf4j;
  * 模组数据加载器
  * 用于简化数据加载逻辑
  * 
- * 实现按周并发请求历史K线数据，并在加载时严格按K线时间顺序调用 KlineGenerator.updateBar。
+ * 按周切分时间窗口，以流水线方式（边加载边消费）按时间顺序加载历史K线数据，
+ * 并在加载时严格按K线时间顺序调用 KlineGenerator.updateBar。
+ * 
+ * 为避免一次性缓存全部历史数据导致 OOM，任意时刻最多只缓存两个周窗口的数据
+ * （一个正在消费，一个正在后台预取）。
  */
 @Slf4j
 public class ModuleDataLoader {
+
+	private static final long WEEK_MILLIS = 7L * 24 * 60 * 60 * 1000;
 
 	private final IContract icontract;
 	
@@ -35,7 +40,7 @@ public class ModuleDataLoader {
 	}
 	
 	/**
-	 * 加载指定周数的历史分钟K线数据，并顺序推送到 KlineGenerator。
+	 * 加载指定周数的历史分钟K线数据（精确到当前时间为止），并顺序推送到 KlineGenerator。
 	 * 
 	 * @param weeks 需要加载的周数；小于等于 0 时不加载
 	 */
@@ -49,26 +54,19 @@ public class ModuleDataLoader {
 		}
 		
 		Contract contract = icontract.contract();
-		LocalDate endDate = LocalDate.now();
-		LocalDate startDate = endDate.minusWeeks(weeks);
+		long endTime = System.currentTimeMillis();
+		long startTime = endTime - weeks * WEEK_MILLIS;
 		
-		List<LocalDate[]> windows = splitWeeklyWindows(startDate, endDate);
+		List<long[]> windows = splitWeeklyWindows(startTime, endTime);
 		log.info("合约 [{}] 开始加载近 [{}] 周历史数据，共切分为 [{}] 个周窗口", icontract.name(), weeks, windows.size());
 		
 		try (ExecutorService exec = CommonUtils.newThreadPerTaskExecutor(ModuleDataLoader.class)) {
-			List<CompletableFuture<List<Bar>>> futures = new ArrayList<>(windows.size());
-			for (LocalDate[] window : windows) {
-				LocalDate windowStart = window[0];
-				LocalDate windowEnd = window[1];
-				CompletableFuture<List<Bar>> future = CompletableFuture.supplyAsync(
-						() -> dataSource.getData(contract, Interval.M1, windowStart, windowEnd).reversed(),
-						exec);
-				futures.add(future);
-			}
-			
-			for (CompletableFuture<List<Bar>> future : futures) {
-				List<Bar> bars = future.join();
-				for (Bar bar : bars) {
+			// 预取第一个窗口，随后每消费完一个窗口立即释放其内存，并预取下一个窗口
+			CompletableFuture<List<Bar>> prefetch = fetchAsync(dataSource, contract, windows.get(0), windows.size() == 1, exec);
+			for (int i = 0; i < windows.size(); i++) {
+				CompletableFuture<List<Bar>> current = prefetch;
+				prefetch = i + 1 < windows.size() ? fetchAsync(dataSource, contract, windows.get(i + 1), i + 2 == windows.size(), exec) : null;
+				for (Bar bar : current.join()) {
 					klineGenerator.updateBar(bar);
 				}
 			}
@@ -76,17 +74,26 @@ public class ModuleDataLoader {
 	}
 	
 	/**
-	 * 将日期区间切分为按周划分的小区间（左闭右开）。
+	 * 异步加载一个时间窗口的数据。
+	 * 
+	 * 最后一个窗口的结束时间在请求发起时才取当前时间，
+	 * 避免加载耗时较长时，尾部新产生的数据缺失。
 	 */
-	private List<LocalDate[]> splitWeeklyWindows(LocalDate startDate, LocalDate endDate) {
-		List<LocalDate[]> windows = new ArrayList<>();
-		LocalDate cursor = startDate;
-		while (cursor.isBefore(endDate)) {
-			LocalDate next = cursor.plusWeeks(1);
-			if (next.isAfter(endDate)) {
-				next = endDate;
-			}
-			windows.add(new LocalDate[] { cursor, next });
+	private CompletableFuture<List<Bar>> fetchAsync(IDataSource dataSource, Contract contract, long[] window, boolean isLastWindow, ExecutorService exec) {
+		return CompletableFuture.supplyAsync(() -> {
+			long end = isLastWindow ? Math.max(System.currentTimeMillis(), window[1]) : window[1];
+			return dataSource.getData(contract, Interval.M1, window[0], end).reversed();
+		}, exec);
+	}
+	
+	/**
+	 * 将时间区间切分为按周划分的小区间（左闭右开，单位：毫秒时间戳）。
+	 */
+	private List<long[]> splitWeeklyWindows(long startTime, long endTime) {
+		List<long[]> windows = new ArrayList<>();
+		for (long cursor = startTime; cursor < endTime;) {
+			long next = Math.min(cursor + WEEK_MILLIS, endTime);
+			windows.add(new long[] { cursor, next });
 			cursor = next;
 		}
 		return windows;
