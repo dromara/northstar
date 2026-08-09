@@ -6,8 +6,8 @@
 
 **Northstar Pro（盈富量化交易平台）** 是一个基于 Java 和 Spring Boot 开发的量化交易平台，提供模块化的策略开发、回测、模拟交易和实盘部署框架。
 
-- **当前源码版本**: `9.1.0`（定义在根 `pom.xml` 的 `<northstar-version>` 属性）
-- **当前分支**: `master`
+- **当前源码版本**: `9.1.1`（定义在根 `pom.xml` 的 `<northstar-version>` 属性）
+- **当前分支**: `feature/copilot`
 - **语言**: Java 25（根 `pom.xml` 声明 `<java.version>25</java.version>`）
 - **构建工具**: Maven 3.x
 - **框架**: Spring Boot 3.5.11（`spring-boot-starter-parent`）
@@ -18,9 +18,9 @@
 
 ### 版本与分支说明
 
-- 源码目标为 Java 25 / Spring Boot 3.5.11，源码版本为 `9.1.0`，构建前请确认本地 JDK 版本与 POM 一致。
+- 源码目标为 Java 25 / Spring Boot 3.5.11，源码版本为 `9.1.1`，构建前请确认本地 JDK 版本与 POM 一致。
 - 各模块下的 `.flattened-pom.xml` 由 Flatten Maven Plugin 在构建时生成，未纳入 Git 跟踪，请勿以其为准。
-- `northstar-monitor-next/package.json` 版本号为 `9.1.0`，与后端源码版本一致。
+- `northstar-monitor-next/package.json` 版本号为 `9.1.1`，与后端源码版本一致。
 - `.gitmodules` 登记了两个子模块：`northstar-monitor-next` 和 `northstar-external`。其中 `northstar-monitor-next` 在父仓库中尚未初始化（`git submodule status` 显示 `-` 前缀），其目录内容系独立克隆；`northstar-external` 未注册进 git 索引，目录不存在。
 
 ## 项目结构
@@ -72,6 +72,7 @@ northstar/
 
 - **OkHttp3 SSE** / **jtokkit** - Token 管理与流式对话
 - 支持多种 LLM 平台：OpenAI、Moonshot、DeepSeek、Ollama、Baichuan 等
+- 代码组织：`annotation` / `config` / `constant` / `convert` / `exception` / `interceptor` / `listener` / `network` / `platform` / `service` / `tools` / `utils` / `vector` / `websearch`
 - 向量存储（Pinecone）、SearXNG 网页搜索、函数调用框架、异常处理链
 
 ### 前端
@@ -83,6 +84,7 @@ northstar/
 - **Cypress** - E2E 测试
 - **protobuf-ts** - TypeScript protobuf 生成
 - 包管理器：**pnpm >= 9**（`package.json` 通过 `only-allow pnpm` 强制）
+- Node 版本要求：`^18.18.0 || ^20.9.0 || >=21.1.0`
 
 前端项目有独立的 `northstar-monitor-next/AGENTS.md`，前端开发请优先参考该文件。
 
@@ -95,7 +97,7 @@ northstar/
 | `northstar-main/src/main/resources/application.yml` | 主应用配置（Profile、SSL、数据库、日志、虚拟线程、数据服务） |
 | `northstar-main/src/main/resources/logback-spring.xml` | 日志配置 |
 | `northstar-monitor-next/package.json` | 前端依赖与脚本 |
-| `northstar-monitor-next/vite.config.ts` | Vite 构建配置 |
+| `northstar-monitor-next/vite.config.ts` | Vite 构建配置（端口由 `.env` 中 `VITE_PORT` 决定，默认 8848） |
 | `lombok.config` | Lombok 配置（`lombok.addLombokGeneratedAnnotation=true`） |
 | `.gitmodules` | Git 子模块配置 |
 | `env.sh` / `env.ps1` | Linux / Windows 环境初始化脚本（安装 JDK 25） |
@@ -129,7 +131,7 @@ mvn jacoco:report
 mvn clean verify
 ```
 
-构建完成后，`northstar-main` 的可执行 jar 会输出到 `northstar-dist/`，默认名称为 `northstar-9.1.0.jar`（由 `finalName` 决定）；`smart` profile 输出为 `northstar-9.1.0-smart.jar`。
+构建完成后，`northstar-main` 的可执行 jar 会输出到 `northstar-dist/`，默认名称为 `northstar-9.1.1.jar`（由 `finalName` 决定）；`smart` profile 输出为 `northstar-9.1.1-smart.jar`。
 
 ### 前端
 
@@ -140,7 +142,7 @@ pnpm dev       # 开发服务（默认端口 8848）
 pnpm build     # 生产构建，输出到 dist/
 pnpm lint      # eslint + prettier + stylelint
 pnpm typecheck # tsc + vue-tsc
-pnpm e2e       # Cypress E2E 测试
+pnpm e2e       # Cypress E2E 测试（chrome / firefox / edge）
 ```
 
 前端 `dist/` 会在 `northstar-main` 的 Maven `generate-resources` 阶段被复制到 `src/main/resources/static/`（见 `northstar-main/pom.xml`）。因此完整构建时需要先执行 `pnpm build`。
@@ -304,7 +306,7 @@ server:
 - 使用 SLF4J + Logback
 - 日志文件输出到 `logs/` 目录
 - 主日志：`logs/Northstar_%d{yyyy-MM-dd}.log`，保留 30 天
-- 调试日志：`logs/DEBUG/` 下分主题输出，保留 3 天
+- 调试日志：`logs/DEBUG/` 下分主题输出（BroadcastHandler、MarketCenter、KlineData），保留 3 天
 
 ### 外部数据服务
 
@@ -326,7 +328,7 @@ server:
 - 可通过环境变量覆盖：
   - `NS_USER`
   - `NS_PWD`
-- 登录失败 3 次后锁定账户；同时 `LoginIPLockService` 对 IP 进行限制：5 次失败冻结 1 小时，冻结期间再次失败则封禁 1 天。
+- 登录失败 3 次后锁定账户；同时 `LoginIPLockService` 对 IP 进行限制：5 次失败（`MAX_FAILURES`）冻结 1 小时（`FREEZE_DURATION_MS`），冻结期间再次失败则封禁 1 天（`BAN_DURATION_MS`）。
 
 ### CSRF / Session 流程
 
@@ -343,7 +345,7 @@ server:
 - `MaliciousIPCollector` / `MaliciousRequestFilter`：统计 404 请求 IP，单日超过 10 次则拦截
 - `CommonControllerAdvice`：全局异常处理，将 404 请求 IP 记录到 `MaliciousIPCollector`
 - Session Cookie 配置：`SameSite=strict`、`secure=true`
-- CORS：在 `AppConfig` 中配置，允许任意来源，暴露 `token` 响应头
+- CORS：在 `AppConfig` 中以 `CorsFilter` Bean 配置，`allowedOriginPattern("*")` 允许任意来源、`allowCredentials(true)`，暴露 `token` 响应头
 
 ### JWT
 
@@ -432,19 +434,19 @@ nohup java -Xlog:gc*:gc.log -Xms2g -Xmx2g \
 ### 版本管理
 
 - 使用 Maven Flatten Plugin 1.7.3 管理版本
-- 版本定义在父 POM：`<northstar-version>9.1.0</northstar-version>`
+- 版本定义在父 POM：`<northstar-version>9.1.1</northstar-version>`
 - 通过 `<revision>${northstar-version}</revision>` 占位符供各模块继承
 - 构建时生成 `.flattened-pom.xml`
 
 ## 重要注意事项
 
 1. **JDK 25 要求**：源码 POM 目标为 Java 25 / Spring Boot 3.5.11。构建前请确认本地 JDK 与 POM 配置一致。
-2. **Protobuf 生成类不可手动修改**：生成类位于 `xyz.redtorch.pb` 包中，更新请使用 `update-protobuf-obj.ps1`。
+2. **Protobuf 生成类不可手动修改**：生成类位于 `xyz.redtorch.pb` 包中，更新请使用 `update-protobuf-obj.ps1`（前端侧使用 `pnpm update-proto`）。
 3. **H2 用于生产数据存储**：生产环境使用 H2 文件模式，历史行情数据主要依赖外部 marketplace 服务。
 4. **虚拟线程**：默认在非 `dev` profile 下启用。
 5. **`.flattened-pom.xml` 不可信**：工作目录中的 `.flattened-pom.xml` 文件未纳入 Git，且可能与源码 POM 不符，请勿以其为准。
 6. **H2 Console 在生产环境启用**：路径 `/h2-console`，仅通过 CSRF 拦截器保护。
 7. **前端构建顺序**：打包后端前必须先在前端目录执行 `pnpm build` 生成 `dist/`。
 8. **测试环境默认账号**：`admin` / `123456`，可通过 `NS_USER` / `NS_PWD` 环境变量覆盖。
-9. **版本对齐**：后端源码版本与 `northstar-monitor-next/package.json` 均为 `9.1.0`，已对齐。
+9. **版本对齐**：后端源码版本与 `northstar-monitor-next/package.json` 均为 `9.1.1`，已对齐。
 10. **子模块状态**：`northstar-monitor-next` 在父仓库中未初始化（目录为独立克隆）；`northstar-external` 在 `.gitmodules` 中登记但未注册进索引、目录不存在。
