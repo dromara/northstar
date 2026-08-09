@@ -101,7 +101,7 @@ abstract class AbstractLlmChatClientTest {
 		String content = chatClient.prompt()
 				.system("你是一个量化交易助手，回答务必简洁")
 				.user("上期所(SHFE)每手手续费是多少元？它的中文全称是什么？")
-				.tools(ToolLoader.load("org.dromara.northstar.copilot").toArray())
+				.tools(ToolLoader.load("org.dromara.northstar.copilot"))
 				.call()
 				.content();
 

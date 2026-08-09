@@ -367,7 +367,7 @@ server:
   - `northstar-gateway-sim`: 6
   - `northstar-gateway-playback`: 4
   - `northstar-strategy-example`: 0
-  - `northstar-copilot`: 6
+  - `northstar-copilot`: 7
 
 ### 集成测试
 

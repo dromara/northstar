@@ -14,7 +14,7 @@ import org.springframework.util.Assert;
  * <pre>{@code
  * String content = chatClient.prompt()
  *         .user("上期所每手手续费是多少？")
- *         .tools(ToolLoader.load("org.dromara.northstar.copilot").toArray())  // 动态加载工具
+ *         .tools(ToolLoader.load("org.dromara.northstar.copilot"))  // 动态加载工具
  *         .call()
  *         .content();
  * }</pre>
