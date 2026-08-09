@@ -72,7 +72,7 @@ northstar/
 
 - **Spring AI 2.0.0**（`spring-ai-bom`，与 Spring Boot 4.x 配套）- 大模型接入框架
 - 统一经 Spring AI OpenAI ChatModel 接入 OpenAI 兼容平台：Kimi、DeepSeek、MiniMax、GLM、OpenAI
-- 代码组织：`org.dromara.northstar.copilot.llm` - `LlmProvider`（平台枚举，封装 baseUrl/默认模型/环境变量）与 `LlmChatClientFactory`（构建 `ChatClient`/`ChatModel`）
+- 代码组织：`org.dromara.northstar.copilot.llm` - `LlmProvider`（平台枚举，封装 baseUrl/默认模型/环境变量）与 `LlmChatClientFactory`（构建 `ChatClient`/`ChatModel`）；`org.dromara.northstar.copilot.tool` - `CopilotTool`（工具类标记注解）与 `ToolLoader`（基于 reflections 的运行时工具扫描动态加载）
 - 各平台 API Key 经环境变量配置（`KIMI_API_KEY` / `DEEPSEEK_API_KEY` / `MINIMAX_API_KEY` / `GLM_API_KEY` / `OPENAI_API_KEY`），用法见 `northstar-copilot/README.md`
 - 注意：该模块在根 `pom.xml` 的 `<modules>` 中暂被注释，不参与聚合构建，需用 `mvn -f northstar-copilot/pom.xml ...` 单独构建
 - **OkHttp3 SSE** / **jtokkit** - Token 管理与流式对话
