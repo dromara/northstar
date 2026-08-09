@@ -13,7 +13,20 @@
 	<name>northstar-copilot</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<spring-ai-version>2.0.0</spring-ai-version>
 	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<!-- Spring AI BOM：与 Spring Boot 4.x 配套 -->
+			<dependency>
+				<groupId>org.springframework.ai</groupId>
+				<artifactId>spring-ai-bom</artifactId>
+				<version>${spring-ai-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.dromara.northstar.pro</groupId>
@@ -87,6 +100,20 @@
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
+		</dependency>
+		<!-- Spring AI：Kimi / DeepSeek / MiniMax / GLM / OpenAI 均提供 OpenAI 兼容接口，统一经 OpenAI ChatModel 接入 -->
+		<dependency>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-openai</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-client-chat</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

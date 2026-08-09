@@ -10,7 +10,7 @@
 - **当前分支**: `feature/copilot`
 - **语言**: Java 25（根 `pom.xml` 声明 `<java.version>25</java.version>`）
 - **构建工具**: Maven 3.x
-- **框架**: Spring Boot 3.5.11（`spring-boot-starter-parent`）
+- **框架**: Spring Boot 4.0.7（`spring-boot-starter-parent`）
 - **Group ID**: `org.dromara.northstar.pro`
 - **Artifact ID**: `northstar`
 - **仓库**: `https://gitee.com/dromara/northstar`
@@ -18,7 +18,7 @@
 
 ### 版本与分支说明
 
-- 源码目标为 Java 25 / Spring Boot 3.5.11，源码版本为 `9.1.1`，构建前请确认本地 JDK 版本与 POM 一致。
+- 源码目标为 Java 25 / Spring Boot 4.0.7，源码版本为 `9.1.1`，构建前请确认本地 JDK 版本与 POM 一致。
 - 各模块下的 `.flattened-pom.xml` 由 Flatten Maven Plugin 在构建时生成，未纳入 Git 跟踪，请勿以其为准。
 - `northstar-monitor-next/package.json` 版本号为 `9.1.1`，与后端源码版本一致。
 - `.gitmodules` 登记了两个子模块：`northstar-monitor-next` 和 `northstar-external`。其中 `northstar-monitor-next` 在父仓库中尚未初始化（`git submodule status` 显示 `-` 前缀），其目录内容系独立克隆；`northstar-external` 未注册进 git 索引，目录不存在。
@@ -53,7 +53,7 @@ northstar/
 
 ### 后端
 
-- **Spring Boot 3.5.11** - 应用框架（Web / Data JPA / Scheduling / Cache）
+- **Spring Boot 4.0.7** - 应用框架（Web / Data JPA / Scheduling / Cache）
 - **Spring Retry 2.0.5** - 重试机制
 - **H2 Database 2.2.224** - 嵌入式数据库（生产环境文件模式，测试内存模式）
 - **Protocol Buffers 4.28.3** / protobuf-java-format 1.4 - 数据序列化
@@ -70,10 +70,12 @@ northstar/
 
 ### AI Copilot 模块
 
+- **Spring AI 2.0.0**（`spring-ai-bom`，与 Spring Boot 4.x 配套）- 大模型接入框架
+- 统一经 Spring AI OpenAI ChatModel 接入 OpenAI 兼容平台：Kimi、DeepSeek、MiniMax、GLM、OpenAI
+- 代码组织：`org.dromara.northstar.copilot.llm` - `LlmProvider`（平台枚举，封装 baseUrl/默认模型/环境变量）与 `LlmChatClientFactory`（构建 `ChatClient`/`ChatModel`）
+- 各平台 API Key 经环境变量配置（`KIMI_API_KEY` / `DEEPSEEK_API_KEY` / `MINIMAX_API_KEY` / `GLM_API_KEY` / `OPENAI_API_KEY`），用法见 `northstar-copilot/README.md`
+- 注意：该模块在根 `pom.xml` 的 `<modules>` 中暂被注释，不参与聚合构建，需用 `mvn -f northstar-copilot/pom.xml ...` 单独构建
 - **OkHttp3 SSE** / **jtokkit** - Token 管理与流式对话
-- 支持多种 LLM 平台：OpenAI、Moonshot、DeepSeek、Ollama、Baichuan 等
-- 代码组织：`annotation` / `config` / `constant` / `convert` / `exception` / `interceptor` / `listener` / `network` / `platform` / `service` / `tools` / `utils` / `vector` / `websearch`
-- 向量存储（Pinecone）、SearXNG 网页搜索、函数调用框架、异常处理链
 
 ### 前端
 
@@ -359,13 +361,13 @@ server:
 - 框架：JUnit 5（Jupiter）、Mockito、AssertJ、Spring Boot Test
 - 命名：`*Test.java`
 - 插件：Maven Surefire 3.5.6
-- 当前项目共有 **83** 个 `*Test.java` 文件，分布如下：
+- 当前项目共有 **89** 个 `*Test.java` 文件，分布如下：
   - `northstar-api`: 40
   - `northstar-main`: 33
   - `northstar-gateway-sim`: 6
   - `northstar-gateway-playback`: 4
   - `northstar-strategy-example`: 0
-  - `northstar-copilot`: 0
+  - `northstar-copilot`: 6
 
 ### 集成测试
 
@@ -440,7 +442,7 @@ nohup java -Xlog:gc*:gc.log -Xms2g -Xmx2g \
 
 ## 重要注意事项
 
-1. **JDK 25 要求**：源码 POM 目标为 Java 25 / Spring Boot 3.5.11。构建前请确认本地 JDK 与 POM 配置一致。
+1. **JDK 25 要求**：源码 POM 目标为 Java 25 / Spring Boot 4.0.7。构建前请确认本地 JDK 与 POM 配置一致。
 2. **Protobuf 生成类不可手动修改**：生成类位于 `xyz.redtorch.pb` 包中，更新请使用 `update-protobuf-obj.ps1`（前端侧使用 `pnpm update-proto`）。
 3. **H2 用于生产数据存储**：生产环境使用 H2 文件模式，历史行情数据主要依赖外部 marketplace 服务。
 4. **虚拟线程**：默认在非 `dev` profile 下启用。
