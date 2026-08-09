@@ -3,7 +3,7 @@
   <parent>
     <artifactId>spring-boot-starter-parent</artifactId>
     <groupId>org.springframework.boot</groupId>
-    <version>3.5.11</version>
+    <version>4.0.7</version>
   </parent>
   <groupId>org.dromara.northstar.pro</groupId>
   <artifactId>northstar</artifactId>
@@ -32,19 +32,16 @@
     <protobuf-java-format-version>1.4</protobuf-java-format-version>
     <disruptor-version>3.4.4</disruptor-version>
     <hutool-version>5.7.22</hutool-version>
-    <jackson-version>2.16.1</jackson-version>
     <byte-buddy-version>1.17.5</byte-buddy-version>
     <netty-version>4.1.104.Final</netty-version>
-    <h2-version>2.2.224</h2-version>
     <tensorflow-version>0.5.0</tensorflow-version>
-    <retrofit2.version>2.11.0</retrofit2.version>
   </properties>
   <modules>
     <module>northstar-api</module>
     <module>northstar-gateway-sim</module>
     <module>northstar-gateway-playback</module>
     <module>northstar-strategy-example</module>
-    <module>northstar-copilot</module>
+<!--    <module>northstar-copilot</module>-->
     <module>northstar-main</module>
   </modules>
   <dependencyManagement>
@@ -83,12 +80,6 @@
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
         <version>${commons-lang3-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.h2database</groupId>
-        <artifactId>h2</artifactId>
-        <version>${h2-version}</version>
-        <scope>runtime</scope>
       </dependency>
       <dependency>
         <groupId>org.projectlombok</groupId>
@@ -157,44 +148,9 @@
         <version>4.12.0</version>
       </dependency>
       <dependency>
-        <groupId>javax.xml.bind</groupId>
-        <artifactId>jaxb-api</artifactId>
-        <version>2.3.1</version>
-      </dependency>
-      <dependency>
-        <groupId>com.squareup.retrofit2</groupId>
-        <artifactId>retrofit</artifactId>
-        <version>${retrofit2.version}</version>
-      </dependency>
-      <dependency>
-		<groupId>com.squareup.retrofit2</groupId>
-		<artifactId>converter-jackson</artifactId>
-		<version>${retrofit2.version}</version>
-	  </dependency>
-	  <dependency>
-		<groupId>com.squareup.retrofit2</groupId>
-		<artifactId>adapter-rxjava3</artifactId>
-		<version>${retrofit2.version}</version>
-	  </dependency>
-	  <dependency>
-		<groupId>com.squareup.retrofit2</groupId>
-		<artifactId>converter-scalars</artifactId>
-		<version>${retrofit2.version}</version>
-	  </dependency>
-      <dependency>
         <groupId>net.sf.ehcache</groupId>
         <artifactId>ehcache</artifactId>
         <version>2.10.9.2</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-core</artifactId>
-        <version>${jackson-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>${jackson-version}</version>
       </dependency>
       <dependency>
         <groupId>commons-io</groupId>

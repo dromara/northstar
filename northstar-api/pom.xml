@@ -22,7 +22,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
+			<artifactId>jackson-annotations</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -69,21 +69,10 @@
 			<artifactId>protobuf-java-format</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>com.squareup.retrofit2</groupId>
-		    <artifactId>retrofit</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-restclient</artifactId>
+			<scope>test</scope>
 		</dependency>
-		<dependency>
-		    <groupId>com.squareup.retrofit2</groupId>
-		    <artifactId>converter-jackson</artifactId>
-		</dependency>
-		<dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>adapter-rxjava3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>converter-scalars</artifactId>
-        </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>

@@ -26,6 +26,16 @@ logging:
     path: logs/
   
 spring:
+  jackson:
+    # 对齐 Jackson 2 时代的关键默认行为，避免破坏性变化
+    mapper:
+      sort-properties-alphabetically: false
+    deserialization:
+      fail-on-null-for-primitives: false
+    datatype:
+      enum:
+        read-enums-using-to-string: false
+        write-enums-using-to-string: false
   messages:
     basename: i18n/messages
   h2:
@@ -39,7 +49,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    database-platform: org.hibernate.dialect.H2Dialect
   profiles:
     active: ${env:prod}
   threads:

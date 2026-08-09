@@ -23,13 +23,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -72,7 +72,7 @@ class PlaybackControllerTest {
 		String result = mvc
 				.perform(MockMvcRequestBuilders.get("/northstar/playback/history/BTCUSDT@BINANCE@SWAP@PLAYBACK/1wk"))
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-		ObjectMapper mapper = new ObjectMapper();
+		JsonMapper mapper = new JsonMapper();
 		List<BarVO> bars = mapper.readValue(result, new TypeReference<List<BarVO>>() {
 		});
 
@@ -84,7 +84,7 @@ class PlaybackControllerTest {
 		String result = mvc
 				.perform(MockMvcRequestBuilders.get("/northstar/playback/history/BTCUSDT@BINANCE@SWAP@PLAYBACK/1d"))
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-		ObjectMapper mapper = new ObjectMapper();
+		JsonMapper mapper = new JsonMapper();
 		List<BarVO> bars = mapper.readValue(result, new TypeReference<List<BarVO>>() {
 		});
 
@@ -101,7 +101,7 @@ class PlaybackControllerTest {
 		String result = mvc
 				.perform(MockMvcRequestBuilders.get("/northstar/playback/history/BTCUSDT@BINANCE@SWAP@PLAYBACK/15m"))
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-		ObjectMapper mapper = new ObjectMapper();
+		JsonMapper mapper = new JsonMapper();
 		List<BarVO> bars = mapper.readValue(result, new TypeReference<List<BarVO>>() {
 		});
 

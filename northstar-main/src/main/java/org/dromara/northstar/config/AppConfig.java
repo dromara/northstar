@@ -30,7 +30,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.info.BuildProperties;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.MessageSource;
@@ -39,7 +40,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -48,6 +49,8 @@ import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -77,6 +80,14 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean {
 	@Autowired
 	private AuthCheckerInterceptor authChecker;
 	
+	/**
+	 * Jackson 3 默认可访问性收紧，导致 Lombok @Builder 生成的包私有全参构造器无法用于反序列化，此处放宽以兼容
+	 */
+	@Bean
+	JsonMapperBuilderCustomizer jsonMapperBuilderCustomizer() {
+		return builder -> builder.changeDefaultVisibility(vc -> vc.withCreatorVisibility(JsonAutoDetect.Visibility.ANY));
+	}
+	
 	@Bean
     public LocaleResolver localeResolver() {
         return new AcceptHeaderLocaleResolver();
@@ -100,7 +111,7 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean {
 		Iterator<HttpMessageConverter<?>> itCvt = converters.iterator();
 		while (itCvt.hasNext()) {
 			HttpMessageConverter<?> cvt = itCvt.next();
-			if (cvt instanceof MappingJackson2HttpMessageConverter) {
+			if (cvt instanceof JacksonJsonHttpMessageConverter) {
 				jacksonConverters.add(cvt);
 				itCvt.remove();
 			}
@@ -181,7 +192,7 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean {
     @Bean
     @ConditionalOnExpression("systemEnvironment['IDEA_INITIAL_DIRECTORY'] == null")
     CommandLineRunner printVersionInfo(BuildProperties buildProperties) {
-    	return args -> log.info("Version: {}, Build Time: {}", buildProperties.getVersion(), buildProperties.getTime().atOffset(ZoneOffset.ofHours(8)));
+    	return _ -> log.info("Version: {}, Build Time: {}", buildProperties.getVersion(), buildProperties.getTime().atOffset(ZoneOffset.ofHours(8)));
 	}
     
     @Bean

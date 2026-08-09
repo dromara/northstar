@@ -25,13 +25,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=unittest")
 @AutoConfigureMockMvc
@@ -77,7 +77,7 @@ class MarketDataControllerTest {
 		String result = mvc.perform(MockMvcRequestBuilders.get("/northstar/marketdata/range/BTCUSDT@BINANCE@SWAP@PLAYBACK/15m?fromTime="+from+"&toTime="+to))
 		.andExpect(status().isOk())
 		.andReturn().getResponse().getContentAsString();
-		ObjectMapper mapper = new ObjectMapper();
+		JsonMapper mapper = new JsonMapper();
 		List<BarVO> bars = mapper.readValue(result, new TypeReference<List<BarVO>>(){});
 		
 		assertThat(bars).isNotEmpty();
@@ -91,7 +91,7 @@ class MarketDataControllerTest {
 		String result = mvc.perform(MockMvcRequestBuilders.get("/northstar/marketdata/range/BTCUSDT@BINANCE@SWAP@PLAYBACK/1wk" + timeRange))
 		.andExpect(status().isOk())
 		.andReturn().getResponse().getContentAsString();
-		ObjectMapper mapper = new ObjectMapper();
+		JsonMapper mapper = new JsonMapper();
 		List<BarVO> bars = mapper.readValue(result, new TypeReference<List<BarVO>>(){});
 		
 		assertThat(bars).isNotEmpty();
@@ -105,7 +105,7 @@ class MarketDataControllerTest {
 		String result = mvc.perform(MockMvcRequestBuilders.get("/northstar/marketdata/range/BTCUSDT@BINANCE@SWAP@PLAYBACK/1d" + timeRange))
 		.andExpect(status().isOk())
 		.andReturn().getResponse().getContentAsString();
-		ObjectMapper mapper = new ObjectMapper();
+		JsonMapper mapper = new JsonMapper();
 		List<BarVO> bars = mapper.readValue(result, new TypeReference<List<BarVO>>(){});
 		
 		assertThat(bars).isNotEmpty();
@@ -124,7 +124,7 @@ class MarketDataControllerTest {
 		String result = mvc.perform(MockMvcRequestBuilders.get("/northstar/marketdata/range/BTCUSDT@BINANCE@SWAP@PLAYBACK/1m" + timeRange))
 		.andExpect(status().isOk())
 		.andReturn().getResponse().getContentAsString();
-		ObjectMapper mapper = new ObjectMapper();
+		JsonMapper mapper = new JsonMapper();
 		List<BarVO> bars = mapper.readValue(result, new TypeReference<List<BarVO>>(){});
 		
 		assertThat(bars).isNotEmpty();
@@ -143,7 +143,7 @@ class MarketDataControllerTest {
 		String result = mvc.perform(MockMvcRequestBuilders.get("/northstar/marketdata/range/BTCUSDT@BINANCE@SWAP@PLAYBACK/15m" + timeRange))
 		.andExpect(status().isOk())
 		.andReturn().getResponse().getContentAsString();
-		ObjectMapper mapper = new ObjectMapper();
+		JsonMapper mapper = new JsonMapper();
 		List<BarVO> bars = mapper.readValue(result, new TypeReference<List<BarVO>>(){});
 		
 		assertThat(bars).isNotEmpty();
