@@ -7,6 +7,7 @@ import org.dromara.northstar.copilot.platform.openai.audio.OpenAiAudioService;
 import org.dromara.northstar.copilot.platform.openai.chat.OpenAiChatService;
 import org.dromara.northstar.copilot.platform.openai.embedding.OpenAiEmbeddingService;
 import org.dromara.northstar.copilot.platform.openai.realtime.OpenAiRealtimeService;
+import org.dromara.northstar.copilot.platform.orcarouter.chat.OrcaRouterChatService;
 import org.dromara.northstar.copilot.service.Configuration;
 import org.dromara.northstar.copilot.service.IAudioService;
 import org.dromara.northstar.copilot.service.IChatService;
@@ -51,6 +52,8 @@ public class AiService {
                 return new MoonshotChatService(configuration);
             case OLLAMA:
                 return new OllamaAiChatService(configuration);
+            case ORCA_ROUTER:
+                return new OrcaRouterChatService(configuration);
             default:
                 throw new IllegalArgumentException("Unknown platform: " + platform);
         }

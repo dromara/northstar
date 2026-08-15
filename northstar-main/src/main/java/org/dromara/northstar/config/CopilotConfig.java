@@ -4,8 +4,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.dromara.northstar.copilot.config.DeepSeekConfig;
 import org.dromara.northstar.copilot.config.MoonshotConfig;
+import org.dromara.northstar.copilot.config.OrcaRouterConfig;
 import org.dromara.northstar.copilot.platform.deepseek.chat.DeepSeekChatService;
 import org.dromara.northstar.copilot.platform.moonshot.chat.MoonshotChatService;
+import org.dromara.northstar.copilot.platform.orcarouter.chat.OrcaRouterChatService;
 import org.dromara.northstar.copilot.service.IChatService;
 import org.dromara.northstar.copilot.utils.SharedInfoUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,5 +53,17 @@ public class CopilotConfig {
 		cfg.setOkHttpClient(client);
 		cfg.setDeepSeekConfig(dsCfg);
 		return new DeepSeekChatService(cfg);
+	}
+
+	@Bean
+	@ConditionalOnProperty("copilot.orcarouter.apiKey")
+	IChatService orcaRouterService(@Value("${copilot.orcarouter.apiKey}") String apiKey, OkHttpClient client) {
+		log.info("创建OrcaRouter聊天服务");
+		OrcaRouterConfig orcaCfg = new OrcaRouterConfig();
+		orcaCfg.setApiKey(apiKey);
+		org.dromara.northstar.copilot.service.Configuration cfg = new org.dromara.northstar.copilot.service.Configuration();
+		cfg.setOkHttpClient(client);
+		cfg.setOrcaRouterConfig(orcaCfg);
+		return new OrcaRouterChatService(cfg);
 	}
 }

@@ -47,7 +47,7 @@
 
 **AI助手**  
 ● 可对接主流的大模型平台API  
-● 已有Deepseek及Kimi的对接案例  
+● 已有Deepseek、Kimi及[OrcaRouter](https://www.orcarouter.ai)的对接案例  
 
 **日志分析**  
 ● 隔离平台日志与模组日志  

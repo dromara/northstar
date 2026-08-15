@@ -33,6 +33,7 @@ public class Configuration {
     private OllamaConfig ollamaConfig;
     private MinimaxConfig minimaxConfig;
     private BaichuanConfig baichuanConfig;
+    private OrcaRouterConfig orcaRouterConfig;
 
     private PineconeConfig pineconeConfig;
 

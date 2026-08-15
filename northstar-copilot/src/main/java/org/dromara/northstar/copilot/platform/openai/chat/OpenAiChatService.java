@@ -46,7 +46,14 @@ public class OpenAiChatService implements IHelperFactory, IChatService {
     private final EventSource.Factory factory;
 
     public OpenAiChatService(Configuration configuration) {
-        this.openAiConfig = configuration.getOpenAiConfig();
+        this(configuration.getOpenAiConfig(), configuration);
+    }
+
+    /**
+     * 子类可传入自定义的 OpenAI 兼容配置（如 OrcaRouter）。
+     */
+    protected OpenAiChatService(OpenAiConfig openAiConfig, Configuration configuration) {
+        this.openAiConfig = openAiConfig;
         this.okHttpClient = configuration.getOkHttpClient();
         this.factory = configuration.createRequestFactory();
     }
