@@ -125,6 +125,23 @@ class PlaybackContextTest {
 	}
 
 	@Test
+	void shouldResetDataProviderWhenReset() throws InterruptedException {
+		initContext(null);
+
+		// 模拟暂停后缓冲区仍残留旧数据的场景，重置必须同步复位数据供应器，
+		// 否则再次开始回放时会从旧的加载游标续播，导致时间指针回不到初始时刻
+		LocalDateTime frameStart = LocalDate.parse(START_DATE, DateTimeConstant.D_FORMAT_INT_FORMATTER).atTime(10, 0);
+		DataFrame<Bar> frame = makeBarFrame(frameStart, frameStart.plusMinutes(1));
+		PlaybackDataProvider mockProvider = injectMockProviderForPlayback(List.of(frame));
+
+		context.reset();
+
+		LocalDateTime initialDateTime = LocalDate.parse(START_DATE, DateTimeConstant.D_FORMAT_INT_FORMATTER).atStartOfDay();
+		verify(mockProvider).pauseSupply();
+		verify(mockProvider).setRunningTime(initialDateTime);
+	}
+
+	@Test
 	void shouldFinishPreloadingAndReachPreloadedState() throws InterruptedException {
 		initContext(PRE_START_DATE);
 

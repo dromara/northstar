@@ -442,6 +442,10 @@ public class PlaybackContext {
 		
 		LocalDateTime initialDateTime = LocalDateTime.of(preloadDate(), LocalTime.of(0, 0));
 		State state =  preloadDate().equals(startDate()) ? State.PRELOADED : State.INITIAL;
+		isRunning.set(false);
+		dataProvider.pauseSupply();
+		// 复位数据缓冲区与加载游标，避免暂停前的旧数据残留导致重置后从旧时间点续播
+		dataProvider.setRunningTime(initialDateTime);
 		playbackStatus.setRunningDateTime(initialDateTime);
 		playbackStatus.setState(state);
 		log.info("回放状态重置：{}", playbackStatus);
