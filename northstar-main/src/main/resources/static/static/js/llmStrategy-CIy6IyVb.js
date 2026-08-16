@@ -1,0 +1,1 @@
+import{a_ as t,a$ as a}from"./index-BsVtmq9-.js";import{l as e}from"./llmStrategy-i23mdL0A.js";const r=t("llmStrategyStore",{state:()=>({strategyList:[],loading:!1}),actions:{async fetchAll(){this.loading=!0;try{this.strategyList=await e.findAll()}finally{this.loading=!1}}}});function o(){return r(a)}export{o as u};
