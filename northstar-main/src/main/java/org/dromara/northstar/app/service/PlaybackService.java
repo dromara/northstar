@@ -167,7 +167,7 @@ public class PlaybackService {
 		dataService.getRangeBars(contractId, interval, startTime, endTime).forEach(merger::onBar);
 		
 		// 对于以收盘时间为K线时间的合约，当查询周期大于1分钟时，可能需要额外的数据进行精确计算
-		if(interval != Interval.M1 && !contract.usingStartTimeInBarTime()) {			
+		if(interval != Interval.M1 && !mergedBars.isEmpty() && !contract.usingStartTimeInBarTime()) {			
 			Interval refineLoadInterval = interval.getMinutes() < Interval.D1.getMinutes() ? Interval.M1 : Interval.H1;
 			long refineLoadStart = mergedBars.getLast().actionTimestamp() + TimeUnit.MINUTES.toMillis(1);
 			if(refineLoadStart < endTime) {				
