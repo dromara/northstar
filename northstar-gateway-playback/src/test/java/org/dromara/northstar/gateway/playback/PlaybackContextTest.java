@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
@@ -28,6 +29,7 @@ import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.event.FastEventEngine;
+import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.exception.OperationException;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.GatewayDescription;
@@ -373,6 +375,35 @@ class PlaybackContextTest {
 
 		// start() 自身调用一次 startSupply，检测到供应耗尽且仍有数据后应再次重启
 		verify(mockProvider, timeout(3000).atLeast(2)).startSupply();
+	}
+
+	@Test
+	void shouldNotEmitDuplicateBarEventsDuringPreload() throws InterruptedException {
+		initContext(PRE_START_DATE);
+
+		LocalDateTime preloadEnd = LocalDateTime.of(2024, 1, 2, 0, 0);
+		DataFrame<Bar> preloadFrame = makeBarFrame(preloadEnd.minusMinutes(1), preloadEnd);
+		injectMockProviderForPreload(preloadFrame);
+
+		CountDownLatch latch = new CountDownLatch(1);
+		context.setOnStatusChangeCallback(status -> {
+			if (status.getState() == PlaybackStatus.State.PRELOADED) {
+				latch.countDown();
+			}
+		});
+
+		context.preload();
+
+		assertThat(latch.await(3, TimeUnit.SECONDS)).isTrue();
+
+		// 同一根一分钟K线只应产生一次BAR事件（修复预热时原始BAR与M1合成BAR重复分发的问题）
+		// 注意：不同周期的合成BAR可能共享同一时间戳（如收盘时刻各周期同时收盘），属于正常现象，这里只统计M1
+		ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+		verify(feEngine, atLeastOnce()).emitEvent(eq(NorthstarEventType.BAR), captor.capture());
+		List<Bar> m1Bars = captor.getAllValues().stream().map(Bar.class::cast)
+				.filter(bar -> bar.interval() == Interval.M1).toList();
+		assertThat(m1Bars).isNotEmpty();
+		assertThat(m1Bars.stream().map(Bar::actionTimestamp).distinct().count()).isEqualTo(m1Bars.size());
 	}
 
 	private void initContext(String preStartDate) {

@@ -184,7 +184,7 @@ public class PlaybackContext {
 				feEngine.emitEvent(NorthstarEventType.TICK, tick);
 			});
 			
-			feEngine.emitEvent(NorthstarEventType.BAR, bar);
+			// 无需单独广播原始BAR事件，K线合成器的M1合成器会将该BAR原样输出（避免模组收到相同时间戳的重复BAR）
 			klineGeneratorMap.get(bar.contract()).updateBar(bar);
 		});
 	};

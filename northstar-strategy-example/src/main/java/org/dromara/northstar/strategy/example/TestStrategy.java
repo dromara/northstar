@@ -11,6 +11,7 @@ import org.dromara.northstar.common.model.TimeSeriesValue;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.common.utils.TradeHelper;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.model.Configuration;
@@ -58,8 +59,12 @@ public class TestStrategy extends AbstractStrategy	// 为了简化代码，引�
 	
 	@Override
 	public void onMergedBar(Bar bar) {
-		logger.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]",
-				bar.contract().unifiedSymbol(), bar.openPrice(), bar.highPrice(), bar.lowPrice(), bar.closePrice());
+		if(bar.unstable()) {
+			return;
+		}
+		logger.info("{} K线数据：时 [{}] 级别 [{}] 开 [{}], 高 [{}], 低 [{}], 收 [{}]",
+				bar.contract().unifiedSymbol(), CommonUtils.millsToLocalDateTime(bar.actionTimestamp()), bar.interval(),
+				bar.openPrice(), bar.highPrice(), bar.lowPrice(), bar.closePrice());
 		// 缓存M1周期K线，用于生成全周期可见的自定义指标
 		if(bar.interval() == Interval.M1) {
 			barBuff.update(bar, bar.unstable());
