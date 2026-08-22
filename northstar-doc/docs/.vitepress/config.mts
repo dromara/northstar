@@ -53,7 +53,7 @@ export default defineConfig({
         text: '附录',
         items: [
           { text: '常见问题（FAQ）', link: '/appendix/faq' },
-          { text: '选项速查表', link: '/appendix/reference' }
+          { text: '选项速查表', link: '/appendix/reference' },
         ]
       }
     ],

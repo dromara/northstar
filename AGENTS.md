@@ -35,6 +35,7 @@ northstar/
 ├── northstar-copilot/               # AI 助手模块
 ├── northstar-main/                  # 主 Spring Boot 应用模块
 ├── northstar-monitor-next/          # 前端项目（Vue3 + Vite），以 Git 子模块引入，另有独立 AGENTS.md
+├── northstar-doc/                   # 用户使用文档（VitePress 静态站点，pnpm dev/build/preview）
 └── northstar-dist/                  # 构建产物目录，非 Maven 模块
 ```
 
@@ -368,8 +369,9 @@ server:
 ### 集成测试
 
 - 命名：`*IT.java`
-- 插件：Maven Failsafe 3.5.6
-- 当前工作树中**未发现** `*IT.java` 文件，但 Failsafe 已配置支持
+- 插件：Maven Failsafe 3.5.6（绑定 integration-test + verify）
+- 现有 5 个 RESTful API e2e 测试位于 `northstar-main/src/test/java/org/dromara/northstar/app/restful/it/`
+- 运行：`mvn failsafe:integration-test` 或随 `mvn clean verify` 执行
 
 ### 测试覆盖率
 
