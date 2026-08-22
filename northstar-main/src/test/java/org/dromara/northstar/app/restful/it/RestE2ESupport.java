@@ -22,9 +22,9 @@ import org.dromara.northstar.strategy.IMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -63,7 +63,7 @@ abstract class RestE2ESupport {
 	@Autowired
 	protected GatewayManager gatewayMgr;
 
-	@MockBean
+	@MockitoBean
 	protected IMessageSender sender;
 
 	/** 登录凭证：会话 + CSRF Token */
