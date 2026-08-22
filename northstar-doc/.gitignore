@@ -1,0 +1,5 @@
+node_modules/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+tools/screenshots/node_modules/
+tools/screenshots/out/

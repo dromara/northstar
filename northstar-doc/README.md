@@ -50,8 +50,22 @@ northstar-doc/
 │   ├── index.md            # 首页
 │   ├── .vitepress/
 │   │   └── config.mts      # 站点配置（导航/侧边栏/搜索）
+│   ├── public/images/      # 界面截图（由 tools/screenshots 生成）
 │   ├── guide/              # 入门
 │   ├── features/           # 五大核心功能
 │   └── appendix/           # FAQ 与速查表
+├── tools/screenshots/      # 截图工具（Playwright，对接演示站自动截图）
 └── README.md
 ```
+
+## 界面截图更新
+
+文档中的界面截图通过 `tools/screenshots/` 下的 Playwright 脚本从演示站（`https://northstar.quantit.tech:8443`）自动截取，输出到 `docs/public/images/`：
+
+```bash
+cd tools/screenshots
+pnpm install
+node capture.mjs    # 主截图脚本（使用本机 Edge 浏览器）
+```
+
+> 脚本全程只读操作（不保存任何表单）。演示站界面更新后重跑脚本即可刷新截图。

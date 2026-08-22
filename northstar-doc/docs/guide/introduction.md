@@ -42,6 +42,10 @@
 本发行版内置 **PLAYBACK** 与 **SIM** 两个渠道，开箱即可进行回放、回测与模拟交易。CTP 等实盘渠道通过将网关 jar 放置于程序同级目录（启动脚本 `startup.sh` 通过 `-Dloader.path` 加载）后注册使用。
 :::
 
+网关管理页以卡片形式展示全部网关（下图为演示环境：两个 SIM 交易账户 + CTP 行情网关 + PLAYBACK 回放网关）：
+
+![网关管理页](/images/introduction-gateway-mgmt.png)
+
 ## 模组用途
 
 模组有三种用途，对应量化策略生命周期的三个阶段：
