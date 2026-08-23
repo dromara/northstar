@@ -93,7 +93,7 @@ export default defineConfig({
 
     footer: {
       message: 'Northstar 盈富量化交易平台',
-      copyright: 'Copyright © 2024 广州市盈富量化信息技术有限公司 | 粤ICP备2022103551号-2'
+      copyright: 'Copyright © 2024 广州市盈富量化信息技术有限公司 | <a href="https://beian.miit.gov.cn" target="_blank" rel="noopener noreferrer">粤ICP备2022103551号-2</a>'
     }
   }
 })
