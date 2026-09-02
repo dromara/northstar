@@ -184,7 +184,7 @@ public class PlaybackContext {
 				feEngine.emitEvent(NorthstarEventType.TICK, tick);
 			});
 			
-			feEngine.emitEvent(NorthstarEventType.BAR, bar);
+			// 无需单独广播原始BAR事件，K线合成器的M1合成器会将该BAR原样输出（避免模组收到相同时间戳的重复BAR）
 			klineGeneratorMap.get(bar.contract()).updateBar(bar);
 		});
 	};
@@ -442,6 +442,10 @@ public class PlaybackContext {
 		
 		LocalDateTime initialDateTime = LocalDateTime.of(preloadDate(), LocalTime.of(0, 0));
 		State state =  preloadDate().equals(startDate()) ? State.PRELOADED : State.INITIAL;
+		isRunning.set(false);
+		dataProvider.pauseSupply();
+		// 复位数据缓冲区与加载游标，避免暂停前的旧数据残留导致重置后从旧时间点续播
+		dataProvider.setRunningTime(initialDateTime);
 		playbackStatus.setRunningDateTime(initialDateTime);
 		playbackStatus.setState(state);
 		log.info("回放状态重置：{}", playbackStatus);

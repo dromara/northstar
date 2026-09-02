@@ -1,0 +1,32 @@
+// 补拍5：无横幅的回放控制面板
+import { chromium } from 'playwright';
+import { fileURLToPath } from 'node:url';
+const BASE = 'https://northstar.quantit.tech:8443';
+const OUT = fileURLToPath(new URL('../../docs/public/images/', import.meta.url));
+const browser = await chromium.launch({ channel: 'msedge' });
+const page = await (await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width: 1600, height: 900 }, deviceScaleFactor: 2 })).newPage();
+page.setDefaultTimeout(12000);
+await page.goto(`${BASE}/#/login`, { waitUntil: 'networkidle' });
+await page.locator('button:has-text("登")').first().click();
+await page.waitForURL('**/welcome**');
+await page.waitForTimeout(3000);
+await page.goto(`${BASE}/#/gateway/all`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(2000);
+for (const btn of await page.locator('.el-alert__closebtn').all()) await btn.click().catch(() => {});
+await page.waitForTimeout(500);
+const card = page.locator('.list-card-item_detail:has-text("网关渠道: PLAYBACK")').first();
+await card.locator('.el-dropdown').first().click();
+await page.waitForTimeout(800);
+await page.locator('.el-dropdown-menu:visible .el-dropdown-menu__item:has-text("回放")').first().click();
+await page.waitForTimeout(1500);
+// 把面板拖到画面中央偏下，避免遮挡
+const dialog = page.locator('.el-dialog:visible').first();
+const box = await dialog.boundingBox();
+await page.mouse.move(box.x + box.width / 2, box.y + 20);
+await page.mouse.down();
+await page.mouse.move(box.x + box.width / 2 - 300, box.y + 320, { steps: 10 });
+await page.mouse.up();
+await page.waitForTimeout(600);
+await page.screenshot({ path: `${OUT}playback-controller.png` });
+console.log('✅ playback-controller');
+await browser.close();

@@ -180,6 +180,9 @@ public class BarMerger implements BarDataAware, TickDataAware {
 					.highPrice(Math.max(accB.highPrice(), b.highPrice()))
 					.lowPrice(Math.min(accB.lowPrice(), b.lowPrice()))
 					.closePrice(b.closePrice())
+					.preClosePrice(firstBar.preClosePrice())
+					.preOpenInterest(firstBar.preOpenInterest())
+					.preSettlePrice(firstBar.preSettlePrice())
 					.volume(b.volume())
 					.volumeDelta(accB.volumeDelta() + b.volumeDelta())
 					.openInterest(b.openInterest())
@@ -187,6 +190,7 @@ public class BarMerger implements BarDataAware, TickDataAware {
 					.turnover(b.turnover())
 					.turnoverDelta(accB.turnoverDelta() + b.turnoverDelta())
 					.interval(barInterval)
+					.unstable(false)
 					.build();
 		});
 	}
@@ -236,6 +240,7 @@ public class BarMerger implements BarDataAware, TickDataAware {
 						.preClosePrice(tick.preClosePrice())
 						.preOpenInterest(tick.preOpenInterest())
 						.preSettlePrice(tick.preSettlePrice())
+						.unstable(true)
 						.build();
 			}
 			

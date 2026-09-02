@@ -19,6 +19,6 @@ public enum ClosingPolicy {
 	 * 优先平掉历史持仓，对冲锁仓今天的持仓
 	 * 注意：这里只有锁仓逻辑，没有解锁逻辑
 	 */
-	CLOSE_NONTODAY_HEGDE_TODAY;
+	CLOSE_PASSED_HEGDE_TODAY;
 
 }

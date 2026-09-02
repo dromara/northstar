@@ -257,7 +257,7 @@ public class TimeFrameScopedRegistry {
 			Set<Long> timeSet = new HashSet<>();
 			for(TimeSeriesValue tv : indicator.getValues()) {
 				if(timeSet.contains(tv.getTimestamp())) {
-					throw new IllegalStateException(String.format("合约%s指标%s数据有重复，时间：%s", indicator.getContract().getName(), indicator.getName(), CommonUtils.millsToLocalDateTime(tv.getTimestamp())));
+					throw new IllegalStateException(String.format("合约【%s】指标【%s】数据有重复，时间：%s", indicator.getContract().getName(), indicator.getName(), CommonUtils.millsToLocalDateTime(tv.getTimestamp())));
 				}
 				timeSet.add(tv.getTimestamp());
 			}
