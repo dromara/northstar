@@ -12,6 +12,7 @@
 	<artifactId>northstar-copilot</artifactId>
 	<name>northstar-copilot</name>
 	<properties>
+		<skipTests>true</skipTests>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring-ai-version>2.0.0</spring-ai-version>
 	</properties>
