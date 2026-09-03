@@ -13,7 +13,7 @@
   <description>盈富量化交易平台</description>
   <url>https://gitee.com/dromara/northstar</url>
   <properties>
-    <northstar-version>9.1.3</northstar-version>
+    <northstar-version>9.2.0</northstar-version>
     <java.version>25</java.version>
     <argLine>-Dfile.encoding=UTF-8</argLine>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -41,7 +41,7 @@
     <module>northstar-gateway-sim</module>
     <module>northstar-gateway-playback</module>
     <module>northstar-strategy-example</module>
-<!--    <module>northstar-copilot</module>-->
+	<module>northstar-copilot</module>
     <module>northstar-main</module>
   </modules>
   <dependencyManagement>
