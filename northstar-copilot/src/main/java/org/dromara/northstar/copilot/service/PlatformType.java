@@ -20,6 +20,7 @@ public enum PlatformType {
     OLLAMA("ollama"),
     MINIMAX("minimax"),
     BAICHUAN("baichuan"),
+    ORCA_ROUTER("orcarouter"),
     ;
     private final String platform;
 
