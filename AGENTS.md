@@ -358,9 +358,9 @@ server:
 - 框架：JUnit 5（Jupiter）、Mockito、AssertJ、Spring Boot Test
 - 命名：`*Test.java`
 - 插件：Maven Surefire 3.5.6
-- 当前项目共有 **84** 个 `*Test.java` 文件，分布如下：
+- 当前项目共有 **86** 个 `*Test.java` 文件，分布如下：
   - `northstar-api`: 40
-  - `northstar-main`: 34（含 `TradePlanE2ETest`：画线交易计划的 Controller 层 e2e 测试，通过向事件引擎投递指定价格的 Tick 模拟行情，替代原 Cypress 版本中依赖随机行情的用例）
+  - `northstar-main`: 36（含 `TradePlanE2ETest`：画线交易计划的 Controller 层 e2e 测试，通过向事件引擎投递指定价格的 Tick 模拟行情，替代原 Cypress 版本中依赖随机行情的用例；以及 `PlannedTradeHandlerTest` / `LineTraderTest`：画线交易计划的纯 mock 单元测试）
   - `northstar-gateway-sim`: 6
   - `northstar-gateway-playback`: 4
   - `northstar-strategy-example`: 0

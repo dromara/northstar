@@ -18,6 +18,7 @@ import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.exception.OperationException;
 import org.dromara.northstar.common.model.LineTraderDTO;
 import org.dromara.northstar.common.model.LineTraderDTO.State;
+import org.dromara.northstar.common.model.core.Order;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.CommonUtils;
@@ -43,6 +44,7 @@ public class PlannedTradeHandler extends AbstractEventHandler implements Generic
 	
 	private static final Set<NorthstarEventType> TARGET_TYPE = EnumSet.of(
 			NorthstarEventType.TICK, 
+			NorthstarEventType.ORDER,
 			NorthstarEventType.TRADE
 	);
 	
@@ -106,6 +108,9 @@ public class PlannedTradeHandler extends AbstractEventHandler implements Generic
 	protected synchronized void doHandle(NorthstarEvent e) {
 		if(e.getData() instanceof Trade t) {
 			traderMap.values().forEach(trader -> trader.onTrade(t));
+		}
+		if(e.getData() instanceof Order o) {
+			traderMap.values().forEach(trader -> trader.onOrder(o));
 		}
 		if(e.getData() instanceof Tick t) {
 			try {				
