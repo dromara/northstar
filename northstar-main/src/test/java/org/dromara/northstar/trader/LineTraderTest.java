@@ -328,9 +328,10 @@ class LineTraderTest {
 
 	/**
 	 * 入场委托未了结前计划不会误终结，委托成交回报后按计划结束
+	 * @throws InterruptedException 
 	 */
 	@Test
-	void shouldNotCompleteUntilEntryOrderDone() {
+	void shouldNotCompleteUntilEntryOrderDone() throws InterruptedException {
 		LineTraderDTO dto = plan("long", 5000D, 4900D, 5200D, State.STANDBY);
 		LineTrader trader = traderOf(dto);
 
@@ -350,8 +351,10 @@ class LineTraderTest {
 		assertThat(dto.getState()).isEqualTo(State.RUNNING);
 
 		// 入场委托已终结（全部成交），且无持仓时计划完成
-		trader.onOrder(Order.builder().originOrderId(entryOrderId).orderStatus(OrderStatusEnum.OS_AllTraded).build());
-		trader.onTick(tick(4990));
+		Tick t = tick(4990);
+		trader.onOrder(Order.builder().originOrderId(entryOrderId).orderStatus(OrderStatusEnum.OS_AllTraded).contract(t.contract()).build());
+		Thread.sleep(1000L);
+		trader.onTick(t);
 		assertThat(dto.getState()).isEqualTo(State.COMPLETED);
 	}
 

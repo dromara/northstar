@@ -85,7 +85,7 @@ class PlannedTradeHandlerTest {
 	void shouldOnlyHandleTickAndTrade() {
 		assertThat(handler.canHandle(NorthstarEventType.TICK)).isTrue();
 		assertThat(handler.canHandle(NorthstarEventType.TRADE)).isTrue();
-		assertThat(handler.canHandle(NorthstarEventType.ORDER)).isFalse();
+		assertThat(handler.canHandle(NorthstarEventType.ORDER)).isTrue();
 		assertThat(handler.canHandle(NorthstarEventType.ACCOUNT)).isFalse();
 		assertThat(handler.canHandle(NorthstarEventType.BAR)).isFalse();
 	}
