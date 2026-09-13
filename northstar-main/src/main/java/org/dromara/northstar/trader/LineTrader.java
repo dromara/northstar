@@ -48,11 +48,14 @@ public class LineTrader implements TickDataAware, TransactionAware {
 	@Builder.Default
 	private Optional<String> orderId = Optional.empty();
 	
+	private long orderCompletedTime;
+	
 	@Override
 	public void onOrder(Order order) {
 		orderId.ifPresent(id -> {
 			if(order.originOrderId().equals(id) && OrderUtils.isValidOrder(order) && OrderUtils.isDoneOrder(order)) {
 				orderId = Optional.empty();
+				orderCompletedTime = System.currentTimeMillis();
 			}
 		});
 	}
@@ -116,7 +119,7 @@ public class LineTrader implements TickDataAware, TransactionAware {
 					}
 				}
 			}
-		} else if(orderId.isEmpty()) {
+		} else if(orderId.isEmpty() && System.currentTimeMillis() - orderCompletedTime > 1000) {
 			dto.setState(State.COMPLETED);
 			stateChangeCallback.accept(dto);
 		}
