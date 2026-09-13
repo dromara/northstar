@@ -1,7 +1,7 @@
 server:
   ssl:
     key-store-type: JKS
-	# 请替换成自己的证书，此仅作代码示例
+    # 请替换成自己的证书，此仅作代码示例
     key-store: classpath:keystore/demo.jks
     key-store-password: s20ku0o017
     enabled-protocols: TLSv1.2,TLSv1.3
