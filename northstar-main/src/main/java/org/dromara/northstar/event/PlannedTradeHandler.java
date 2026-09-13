@@ -16,6 +16,7 @@ import org.dromara.northstar.common.event.GenericEventHandler;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.exception.OperationException;
+import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.LineTraderDTO;
 import org.dromara.northstar.common.model.LineTraderDTO.State;
 import org.dromara.northstar.common.model.core.Order;
@@ -63,21 +64,31 @@ public class PlannedTradeHandler extends AbstractEventHandler implements Generic
 	}
 	
 	public synchronized void addTrader(LineTraderDTO lineTraderDTO) {
+		validateRunningTraderUpdate(lineTraderDTO);
 		Double op = lineTraderDTO.getOrderPrice();
 		Double sp = lineTraderDTO.getStopLossPrice();
 		Double tp = lineTraderDTO.getTakeProfitPrice();
 		String dir = lineTraderDTO.getPositionDir();
-		if(Objects.nonNull(op) && ("long".equals(dir) && (tp < op || sp > op) || "short".equals(dir) && (sp < op || tp > op))) {
+		// 仅对未入场的计划校验止盈止损与入场价的合理性，防止一创建就触发成交；
+		// 运行中的计划已入场，止盈止损与入场价的相对关系不再有意义（如移动止损可越过入场价）
+		if(Objects.nonNull(op) && lineTraderDTO.getState() == State.STANDBY
+				&& ("long".equals(dir) && (tp < op || sp > op) || "short".equals(dir) && (sp < op || tp > op))) {
 			throw new OperationException("error.incorrect_line_trader");
 		}
-		LineTrader trader = LineTrader.builder()
-				.dto(lineTraderDTO)
-				.accountManager(accMgr)
-				.marketCenter(mktCenter)
-				.stateChangeCallback(stateChangeCallback)
-				.build();
-		traderMap.put(lineTraderDTO.getId(), trader);
-		emitterHolder.send(SseEmitter.event().name("LINE_TRADERS").data(traderMap.values().stream().map(LineTrader::getDto).toList()));
+		// 更新已有计划时复用原 trader，保留其内部委托状态（如未成交的入场委托），避免计划被误清理
+		LineTrader trader = traderMap.get(lineTraderDTO.getId());
+		if(Objects.nonNull(trader)) {
+			trader.setData(lineTraderDTO);
+		} else {
+			trader = LineTrader.builder()
+					.data(lineTraderDTO)
+					.accountManager(accMgr)
+					.marketCenter(mktCenter)
+					.stateChangeCallback(stateChangeCallback)
+					.build();
+			traderMap.put(lineTraderDTO.getId(), trader);
+		}
+		emitterHolder.send(SseEmitter.event().name("LINE_TRADERS").data(traderMap.values().stream().map(LineTrader::getData).toList()));
 		
 		if(trader.hasPosition() && lineTraderDTO.getOrderPrice() == null) {
 			lineTraderDTO.setState(State.RUNNING);
@@ -85,8 +96,37 @@ public class PlannedTradeHandler extends AbstractEventHandler implements Generic
 		}
 	}
 	
+	// 运行中的交易计划仅允许调整止盈止损价：原委托价在严格小于一个最小变动价位的误差内保持不变，
+	// 方向、合约、账户、手数等关键字段一并冻结，防止同ID重保存篡改
+	private void validateRunningTraderUpdate(LineTraderDTO lineTraderDTO) {
+		LineTrader existingTrader = traderMap.get(lineTraderDTO.getId());
+		if(Objects.isNull(existingTrader) || existingTrader.getData().getState() != State.RUNNING) {
+			return;
+		}
+		LineTraderDTO original = existingTrader.getData();
+		Double originalPrice = original.getOrderPrice();
+		Double updatedPrice = lineTraderDTO.getOrderPrice();
+		if(!Objects.equals(originalPrice, updatedPrice)) {
+			if(Objects.isNull(originalPrice) || Objects.isNull(updatedPrice)) {
+				throw new OperationException("error.unchangeable_line_trader_order_price");
+			}
+			double priceTick = mktCenter.getContract(Identifier.of(original.getContractId())).contract().priceTick();
+			if(Math.abs(updatedPrice - originalPrice) >= priceTick) {
+				throw new OperationException("error.unchangeable_line_trader_order_price");
+			}
+		}
+		// 校验通过后统一冻结字段，状态由后端管理，防止请求方通过重设状态绕过运行中计划的校验
+		lineTraderDTO.setState(State.RUNNING);
+		lineTraderDTO.setOrderPrice(originalPrice);
+		lineTraderDTO.setPositionDir(original.getPositionDir());
+		lineTraderDTO.setContractId(original.getContractId());
+		lineTraderDTO.setContractName(original.getContractName());
+		lineTraderDTO.setAccountGatewayId(original.getAccountGatewayId());
+		lineTraderDTO.setVolume(original.getVolume());
+	}
+
 	public synchronized List<LineTraderDTO> getTraders(){
-		return traderMap.values().stream().map(LineTrader::getDto).toList();
+		return traderMap.values().stream().map(LineTrader::getData).toList();
 	}
 	
 	public boolean has(String id) {
@@ -95,7 +135,7 @@ public class PlannedTradeHandler extends AbstractEventHandler implements Generic
 	
 	public synchronized LineTrader removeTrader(String id) {
 		LineTrader removal = traderMap.remove(id);
-		emitterHolder.send(SseEmitter.event().name("LINE_TRADERS").data(traderMap.values().stream().map(LineTrader::getDto).toList()));
+		emitterHolder.send(SseEmitter.event().name("LINE_TRADERS").data(traderMap.values().stream().map(LineTrader::getData).toList()));
 		return removal;
 	}
 
@@ -124,7 +164,7 @@ public class PlannedTradeHandler extends AbstractEventHandler implements Generic
 		Iterator<LineTrader> itTrader = traderMap.values().iterator();
 		while(itTrader.hasNext()) {
 			LineTrader trader = itTrader.next();
-			if(trader.getDto().getState() == State.COMPLETED) {
+			if(trader.getData().getState() == State.COMPLETED) {
 				itTrader.remove();
 			}
 		}
