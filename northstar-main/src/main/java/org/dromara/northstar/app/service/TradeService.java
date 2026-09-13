@@ -83,7 +83,7 @@ public class TradeService {
 	public void removeLineTrader(String id) {
 		LineTrader lineTrader = plannedTradeHandler.removeTrader(id);
 		if(lineTrader != null) {			
-			log.info("{} {} 移除画线交易计划", lineTrader.getDto().getAccountGatewayId(), lineTrader.getDto().getContractId());
+			log.info("{} {} 移除画线交易计划", lineTrader.getData().getAccountGatewayId(), lineTrader.getData().getContractId());
 		}
 	}
 	

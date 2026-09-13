@@ -397,7 +397,7 @@ class LineTraderTest {
 
 	private LineTrader traderOf(LineTraderDTO dto) {
 		return LineTrader.builder()
-				.dto(dto)
+				.data(dto)
 				.accountManager(accMgr)
 				.marketCenter(mktCenter)
 				.stateChangeCallback(callback)
