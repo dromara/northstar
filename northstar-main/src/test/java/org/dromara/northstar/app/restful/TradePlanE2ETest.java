@@ -40,8 +40,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.alibaba.fastjson2.JSON;
@@ -66,6 +66,7 @@ import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
  * 5. 单独止损线：对已持仓位进行止损监控，变更止损价后按新价位自动平仓
  * 6. 单独止盈线：对已持仓位进行止盈监控，变更止盈价后按新价位自动平仓
  * 7. 手动删除交易计划
+ * 8. 运行中的计划严格限制委托价变更：允许小于1个priceTick的误差，但保留原委托价；且支持移动止损（止损价可越过入场价）
  */
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=unittest")
 @AutoConfigureMockMvc
@@ -80,6 +81,7 @@ class TradePlanE2ETest {
 	private static final String PLAN_ID2 = "e2e-line-trader-2";
 	private static final String PLAN_ID_SL = "e2e-line-trader-sl";
 	private static final String PLAN_ID_TP = "e2e-line-trader-tp";
+	private static final String PLAN_ID_PRICE = "e2e-line-trader-price";
 
 	private static final double BASE_PRICE = 5000;
 	private static final long AWAIT_TIMEOUT_MS = 15000;
@@ -99,7 +101,7 @@ class TradePlanE2ETest {
 	@Autowired
 	GatewayManager gatewayMgr;
 
-	@MockBean
+	@MockitoBean
 	IMessageSender sender;
 
 	Contract contract;
@@ -152,9 +154,9 @@ class TradePlanE2ETest {
 
 		// 再次重新保存同ID计划（等价于拖动止损线），将止损价调整至现价上方，
 		// 计划应继续监控并触发自动止损平仓，完成后从列表移除
-		plan.setOrderPrice(null);
-		plan.setStopLossPrice(4990D);
-		savePlan(plan);
+		LineTraderDTO updatedPlan = copyPlan(plan);
+		updatedPlan.setStopLossPrice(4990D);
+		savePlan(updatedPlan);
 		mockTick(4985);		// 4985 <= 4990 触发多头止损
 		awaitPlanRemoved(PLAN_ID);
 
@@ -190,6 +192,55 @@ class TradePlanE2ETest {
 		// 清理：删除计划，避免影响后续用例
 		deletePlan(PLAN_ID2);
 		assertThat(findPlan(PLAN_ID2)).as("计划应已删除").isNull();
+	}
+
+	/**
+	 * 运行中的计划不能修改原委托价，仅允许严格小于一个priceTick的拖动误差
+	 */
+	@Test
+	void testRunningPlanOrderPriceChangeValidation() throws Exception {
+		mockTick(BASE_PRICE);
+		LineTraderDTO plan = comboPlan(PLAN_ID_PRICE, 4990, 5010, 4950, State.STANDBY);
+		savePlan(plan);
+
+		// 向下穿越入场价，使计划触发入场并进入运行中
+		mockTick(BASE_PRICE);
+		mockTick(4985);
+		awaitPlanState(PLAN_ID_PRICE, State.RUNNING);
+		awaitCondition(() -> longPosition() == 1, "等待入场委托成交与持仓推送");
+
+		// 恰好偏移一个priceTick，接口应拒绝且原计划不被覆盖
+		LineTraderDTO rejectedPlan = copyPlan(plan);
+		rejectedPlan.setOrderPrice(4991D);
+		savePlanExpectingStatus(rejectedPlan, 406);
+		LineTraderDTO persisted = findPlan(PLAN_ID_PRICE);
+		assertThat(persisted.getOrderPrice()).isEqualTo(4990D);
+		assertThat(persisted.getStopLossPrice()).isEqualTo(4950D);
+		assertThat(persisted.getTakeProfitPrice()).isEqualTo(5010D);
+
+		// 小于一个priceTick的误差允许提交，但后端仍保留原委托价；止盈止损价可正常更新
+		LineTraderDTO toleratedPlan = copyPlan(plan);
+		toleratedPlan.setOrderPrice(4990.4D);
+		toleratedPlan.setStopLossPrice(4940D);
+		toleratedPlan.setTakeProfitPrice(5020D);
+		savePlan(toleratedPlan);
+		persisted = findPlan(PLAN_ID_PRICE);
+		assertThat(persisted.getState()).isEqualTo(State.RUNNING);
+		assertThat(persisted.getOrderPrice()).isEqualTo(4990D);
+		assertThat(persisted.getStopLossPrice()).isEqualTo(4940D);
+		assertThat(persisted.getTakeProfitPrice()).isEqualTo(5020D);
+
+		// 运行中的计划允许移动止损：止损价可调整至入场价上方，不受初始建仓校验约束
+		LineTraderDTO trailingPlan = copyPlan(plan);
+		trailingPlan.setStopLossPrice(4995D);
+		savePlan(trailingPlan);
+		persisted = findPlan(PLAN_ID_PRICE);
+		assertThat(persisted.getState()).isEqualTo(State.RUNNING);
+		assertThat(persisted.getOrderPrice()).isEqualTo(4990D);
+		assertThat(persisted.getStopLossPrice()).isEqualTo(4995D);
+
+		deletePlan(PLAN_ID_PRICE);
+		closeLeftoverPosition();
 	}
 
 	/**
@@ -326,10 +377,14 @@ class TradePlanE2ETest {
 	/* ==================== Controller 接口操作 ==================== */
 
 	private void savePlan(LineTraderDTO plan) throws Exception {
+		savePlanExpectingStatus(plan, 200);
+	}
+
+	private void savePlanExpectingStatus(LineTraderDTO plan, int expectedStatus) throws Exception {
 		mvc.perform(post("/northstar/trade/plan")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(JSON.toJSONString(plan)))
-			.andExpect(status().isOk());
+			.andExpect(status().is(expectedStatus));
 	}
 
 	private List<LineTraderDTO> queryPlans() throws Exception {
@@ -468,6 +523,11 @@ class TradePlanE2ETest {
 	}
 
 	/* ==================== 交易计划构造 ==================== */
+
+	/** 复制交易计划，模拟前端重新提交的独立请求对象，避免测试直接污染服务端持有的DTO */
+	private LineTraderDTO copyPlan(LineTraderDTO plan) {
+		return JSON.parseObject(JSON.toJSONString(plan), LineTraderDTO.class);
+	}
 
 	/** 构造组合交易计划（入场价 + 止盈价 + 止损价） */
 	private LineTraderDTO comboPlan(String id, double entryPrice, double takeProfit, double stopLoss, State state) {

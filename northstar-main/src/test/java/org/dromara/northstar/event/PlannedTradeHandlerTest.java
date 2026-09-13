@@ -113,6 +113,193 @@ class PlannedTradeHandlerTest {
 	}
 
 	/**
+	 * 运行中的计划允许只修改止盈价与止损价，且状态不会被请求体重置
+	 */
+	@Test
+	void shouldAllowUpdatingExitPricesOfRunningPlan() {
+		LineTraderDTO original = plan("long", 5000D, 4900D, 5100D);
+		handler.addTrader(original);
+		original.setState(State.RUNNING);
+		LineTraderDTO updated = updateOf(original, 5000D, 4800D, 5150D);
+
+		handler.addTrader(updated);
+
+		assertThat(updated.getState()).isEqualTo(State.RUNNING);
+		assertThat(updated.getOrderPrice()).isEqualTo(5000D);
+		assertThat(updated.getStopLossPrice()).isEqualTo(4800D);
+		assertThat(updated.getTakeProfitPrice()).isEqualTo(5150D);
+		assertThat(handler.getTraders()).containsExactly(updated);
+	}
+
+	/**
+	 * 运行中的计划不允许修改超过一个最小变动价位的委托价
+	 */
+	@Test
+	void shouldRejectOrderPriceChangeOverOnePriceTickOfRunningPlan() {
+		LineTraderDTO original = plan("long", 5000D, 4900D, 5100D);
+		handler.addTrader(original);
+		original.setState(State.RUNNING);
+		LineTraderDTO updated = updateOf(original, 5002D, 4800D, 5150D);
+
+		assertThatThrownBy(() -> handler.addTrader(updated)).isInstanceOf(OperationException.class);
+		assertThat(handler.getTraders()).containsExactly(original);
+		// 校验失败不污染请求对象
+		assertThat(updated.getState()).isEqualTo(State.STANDBY);
+		assertThat(updated.getOrderPrice()).isEqualTo(5002D);
+	}
+
+	/**
+	 * 运行中的计划不允许修改恰好一个最小变动价位的委托价
+	 */
+	@Test
+	void shouldRejectOrderPriceChangeExactlyOnePriceTickOfRunningPlan() {
+		LineTraderDTO original = plan("long", 5000D, 4900D, 5100D);
+		handler.addTrader(original);
+		original.setState(State.RUNNING);
+		LineTraderDTO updated = updateOf(original, 5001D, 4800D, 5150D);
+
+		assertThatThrownBy(() -> handler.addTrader(updated)).isInstanceOf(OperationException.class);
+		assertThat(handler.getTraders()).containsExactly(original);
+	}
+
+	/**
+	 * 运行中的计划允许小于一个最小变动价位的委托价误差，但仍保留原委托价
+	 */
+	@Test
+	void shouldKeepOriginalOrderPriceWhenDeviationIsBelowOnePriceTick() {
+		LineTraderDTO original = plan("long", 5000D, 4900D, 5100D);
+		handler.addTrader(original);
+		original.setState(State.RUNNING);
+		LineTraderDTO updated = updateOf(original, 5000.4D, 4800D, 5150D);
+
+		handler.addTrader(updated);
+
+		assertThat(updated.getOrderPrice()).isEqualTo(5000D);
+		assertThat(handler.getTraders()).containsExactly(updated);
+	}
+
+	/**
+	 * 运行中的组合计划不允许移除原委托价
+	 */
+	@Test
+	void shouldRejectRemovingOrderPriceOfRunningPlan() {
+		LineTraderDTO original = plan("long", 5000D, 4900D, 5100D);
+		handler.addTrader(original);
+		original.setState(State.RUNNING);
+		LineTraderDTO updated = updateOf(original, null, 4800D, 5150D);
+
+		assertThatThrownBy(() -> handler.addTrader(updated)).isInstanceOf(OperationException.class);
+		assertThat(handler.getTraders()).containsExactly(original);
+	}
+
+	/**
+	 * 就绪中的计划仍可修改委托价
+	 */
+	@Test
+	void shouldAllowUpdatingOrderPriceOfStandbyPlan() {
+		LineTraderDTO original = plan("long", 5000D, 4900D, 5100D);
+		handler.addTrader(original);
+		LineTraderDTO updated = updateOf(original, 5002D, 4800D, 5150D);
+
+		handler.addTrader(updated);
+
+		assertThat(updated.getState()).isEqualTo(State.STANDBY);
+		assertThat(updated.getOrderPrice()).isEqualTo(5002D);
+		assertThat(handler.getTraders()).containsExactly(updated);
+	}
+
+	/**
+	 * 运行中的纯止盈止损计划不允许补加委托价
+	 */
+	@Test
+	void shouldRejectAddingOrderPriceToRunningExitOnlyPlan() {
+		LineTraderDTO original = plan("long", null, 4900D, 5100D);
+		handler.addTrader(original);
+		original.setState(State.RUNNING);
+		LineTraderDTO updated = updateOf(original, 5000D, 4800D, 5150D);
+
+		assertThatThrownBy(() -> handler.addTrader(updated)).isInstanceOf(OperationException.class);
+		assertThat(handler.getTraders()).containsExactly(original);
+		assertThat(updated.getOrderPrice()).isEqualTo(5000D);
+	}
+
+	/**
+	 * 运行中的空头计划同样不允许修改超过一个最小变动价位的委托价
+	 */
+	@Test
+	void shouldRejectOrderPriceChangeOfRunningShortPlan() {
+		LineTraderDTO original = plan("short", 5000D, 5100D, 4900D);
+		handler.addTrader(original);
+		original.setState(State.RUNNING);
+		LineTraderDTO updated = updateOf(original, 4998D, 5100D, 4900D);
+
+		assertThatThrownBy(() -> handler.addTrader(updated)).isInstanceOf(OperationException.class);
+		assertThat(handler.getTraders()).containsExactly(original);
+	}
+
+	/**
+	 * 运行中的计划允许将止损价调整到入场价上方（移动止损），不受初始建仓校验约束
+	 */
+	@Test
+	void shouldAllowTrailingStopAboveEntryPriceOfRunningPlan() {
+		LineTraderDTO original = plan("long", 5000D, 4900D, 5100D);
+		handler.addTrader(original);
+		original.setState(State.RUNNING);
+		LineTraderDTO updated = updateOf(original, 5000D, 5100D, 5200D);
+
+		handler.addTrader(updated);
+
+		assertThat(updated.getState()).isEqualTo(State.RUNNING);
+		assertThat(updated.getStopLossPrice()).isEqualTo(5100D);
+		assertThat(updated.getTakeProfitPrice()).isEqualTo(5200D);
+		assertThat(handler.getTraders()).containsExactly(updated);
+	}
+
+	/**
+	 * 运行中的计划除止盈止损价外的关键字段被冻结，防止同ID重保存篡改
+	 */
+	@Test
+	void shouldFreezeNonPriceFieldsOfRunningPlan() {
+		LineTraderDTO original = plan("long", 5000D, 4900D, 5100D);
+		handler.addTrader(original);
+		original.setState(State.RUNNING);
+		LineTraderDTO updated = updateOf(original, 5000D, 4800D, 5150D);
+		updated.setPositionDir("short");
+		updated.setContractId("other@SHFE@FUTURES@SIM");
+		updated.setAccountGatewayId("otherAcc");
+		updated.setVolume(99);
+
+		handler.addTrader(updated);
+
+		assertThat(updated.getPositionDir()).isEqualTo("long");
+		assertThat(updated.getContractId()).isEqualTo(CONTRACT_ID);
+		assertThat(updated.getAccountGatewayId()).isEqualTo(GATEWAY_ID);
+		assertThat(updated.getVolume()).isEqualTo(1);
+		assertThat(updated.getStopLossPrice()).isEqualTo(4800D);
+		assertThat(updated.getTakeProfitPrice()).isEqualTo(5150D);
+		assertThat(handler.getTraders()).containsExactly(updated);
+	}
+
+	/**
+	 * 运行中的计划更新止盈止损时保留未成交的入场委托状态，不会被误清理
+	 */
+	@Test
+	void shouldPreservePendingEntryOrderWhenUpdatingRunningPlan() {
+		LineTraderDTO original = plan("long", 5000D, 4900D, 5100D);
+		handler.addTrader(original);
+		handler.onEvent(new NorthstarEvent(NorthstarEventType.TICK, tick(5010)));
+		handler.onEvent(new NorthstarEvent(NorthstarEventType.TICK, tick(4990)));	// 触发入场，委托未成交
+		verify(account).submitOrder(any());
+		LineTraderDTO updated = updateOf(original, 5000D, 4800D, 5150D);
+
+		handler.addTrader(updated);
+		handler.onEvent(new NorthstarEvent(NorthstarEventType.TICK, tick(5005)));	// 暂无持仓但入场委托仍在途
+
+		assertThat(updated.getState()).isEqualTo(State.RUNNING);
+		assertThat(handler.getTraders()).containsExactly(updated);
+	}
+
+	/**
 	 * 能正常添加并查询交易计划
 	 */
 	@Test
@@ -153,7 +340,7 @@ class PlannedTradeHandlerTest {
 		LineTrader removal = handler.removeTrader(dto.getId());
 
 		assertThat(removal).isNotNull();
-		assertThat(removal.getDto()).isEqualTo(dto);
+		assertThat(removal.getData()).isEqualTo(dto);
 		assertThat(handler.has(dto.getId())).isFalse();
 		assertThat(handler.getTraders()).isEmpty();
 		verify(emitterHolder, times(2)).send(any());	// 添加与移除各广播一次列表
@@ -252,6 +439,12 @@ class PlannedTradeHandlerTest {
 				.volume(1)
 				.state(State.STANDBY)
 				.build();
+	}
+
+	private LineTraderDTO updateOf(LineTraderDTO original, Double orderPrice, Double stopLoss, Double takeProfit) {
+		LineTraderDTO updated = plan(original.getPositionDir(), orderPrice, stopLoss, takeProfit);
+		updated.setId(original.getId());
+		return updated;
 	}
 
 	private Tick tick(double price) {

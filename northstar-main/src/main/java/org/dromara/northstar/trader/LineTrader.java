@@ -25,6 +25,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -34,8 +35,9 @@ import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 @Builder
 public class LineTrader implements TickDataAware, TransactionAware {
 
+	@Setter 
 	@Getter
-	private LineTraderDTO dto;
+	private LineTraderDTO data;
 
 	private AccountManager accountManager;
 
@@ -67,17 +69,17 @@ public class LineTrader implements TickDataAware, TransactionAware {
 	
 	@Override
 	public void onTick(Tick tick) {
-		if (!tick.contract().contractId().equals(dto.getContractId()) || dto.getState() == State.COMPLETED) {
+		if (!tick.contract().contractId().equals(data.getContractId()) || data.getState() == State.COMPLETED) {
 			return;
 		}
 
 		// 处理未入场的交易计划
-		if (dto.getOrderPrice() != null && dto.getState() == State.STANDBY) {
-			if (lastTick != null && crossPrice(tick, dto.getOrderPrice()) 
-					&& ("long".equals(dto.getPositionDir()) && tick.lastPrice() > dto.getStopLossPrice() && tick.lastPrice() < dto.getTakeProfitPrice()
-					|| "short".equals(dto.getPositionDir()) && tick.lastPrice() < dto.getStopLossPrice() && tick.lastPrice() > dto.getTakeProfitPrice())) {
+		if (data.getOrderPrice() != null && data.getState() == State.STANDBY) {
+			if (lastTick != null && crossPrice(tick, data.getOrderPrice()) 
+					&& ("long".equals(data.getPositionDir()) && tick.lastPrice() > data.getStopLossPrice() && tick.lastPrice() < data.getTakeProfitPrice()
+					|| "short".equals(data.getPositionDir()) && tick.lastPrice() < data.getStopLossPrice() && tick.lastPrice() > data.getTakeProfitPrice())) {
 				log.info("画线交易计划触发【入场】操作：{} {} 计划入场价：{} 现价：{} -> {}", 
-						tick.contract().name(), dto.getPositionDir(), dto.getOrderPrice(), lastTick.lastPrice(), tick.lastPrice());
+						tick.contract().name(), data.getPositionDir(), data.getOrderPrice(), lastTick.lastPrice(), tick.lastPrice());
 				doEntryTrade(tick);
 			}
 			lastTick = tick;
@@ -85,43 +87,43 @@ public class LineTrader implements TickDataAware, TransactionAware {
 		}
 
 		if(hasPosition()) {			
-			if(dto.getOrderPrice() == null && dto.getState() == State.STANDBY) {
-				dto.setState(State.RUNNING);
-				stateChangeCallback.accept(dto);
+			if(data.getOrderPrice() == null && data.getState() == State.STANDBY) {
+				data.setState(State.RUNNING);
+				stateChangeCallback.accept(data);
 			}
 			// 处理止盈止损
-			switch (dto.getPositionDir()) {
+			switch (data.getPositionDir()) {
 				case "long" -> {
 					// 处理止盈
-					if (dto.getTakeProfitPrice() != null && tick.lastPrice() >= dto.getTakeProfitPrice()) {
-						log.info("画线交易计划触发【多头止盈】操作：{} 止盈：{} 现价：{}", tick.contract().name(), dto.getTakeProfitPrice(), tick.lastPrice());
+					if (data.getTakeProfitPrice() != null && tick.lastPrice() >= data.getTakeProfitPrice()) {
+						log.info("画线交易计划触发【多头止盈】操作：{} 止盈：{} 现价：{}", tick.contract().name(), data.getTakeProfitPrice(), tick.lastPrice());
 						doExitTrade(tick);
 					}
 					
 					// 处理止损
-					if (dto.getStopLossPrice() != null && tick.lastPrice() <= dto.getStopLossPrice()) {
-						log.info("画线交易计划触发【多头止损】操作：{} 止损：{} 现价：{}", tick.contract().name(), dto.getStopLossPrice(), tick.lastPrice());
+					if (data.getStopLossPrice() != null && tick.lastPrice() <= data.getStopLossPrice()) {
+						log.info("画线交易计划触发【多头止损】操作：{} 止损：{} 现价：{}", tick.contract().name(), data.getStopLossPrice(), tick.lastPrice());
 						doExitTrade(tick);
 					}
 					
 				}
 				case "short" -> {
 					// 处理止盈
-					if (dto.getTakeProfitPrice() != null && tick.lastPrice() <= dto.getTakeProfitPrice()) {
-						log.info("画线交易计划触发【空头止盈】操作：{} 止盈：{} 现价：{}", tick.contract().name(), dto.getTakeProfitPrice(), tick.lastPrice());
+					if (data.getTakeProfitPrice() != null && tick.lastPrice() <= data.getTakeProfitPrice()) {
+						log.info("画线交易计划触发【空头止盈】操作：{} 止盈：{} 现价：{}", tick.contract().name(), data.getTakeProfitPrice(), tick.lastPrice());
 						doExitTrade(tick);
 					}
 					
 					// 处理止损
-					if (dto.getStopLossPrice() != null && tick.lastPrice() >= dto.getStopLossPrice()) {
-						log.info("画线交易计划触发【空头止损】操作：{} 止损：{} 现价：{}", tick.contract().name(), dto.getStopLossPrice(), tick.lastPrice());
+					if (data.getStopLossPrice() != null && tick.lastPrice() >= data.getStopLossPrice()) {
+						log.info("画线交易计划触发【空头止损】操作：{} 止损：{} 现价：{}", tick.contract().name(), data.getStopLossPrice(), tick.lastPrice());
 						doExitTrade(tick);
 					}
 				}
 			}
 		} else if(orderId.isEmpty() && System.currentTimeMillis() - orderCompletedTime > 1000) {
-			dto.setState(State.COMPLETED);
-			stateChangeCallback.accept(dto);
+			data.setState(State.COMPLETED);
+			stateChangeCallback.accept(data);
 		}
 
 		lastTick = tick;
@@ -129,59 +131,59 @@ public class LineTrader implements TickDataAware, TransactionAware {
 	
 	// 入场操作
 	private void doEntryTrade(Tick tick) {
-		Contract c = marketCenter.getContract(Identifier.of(dto.getContractId())).contract();
-		DirectionEnum direction = switch(dto.getPositionDir()) {
+		Contract c = marketCenter.getContract(Identifier.of(data.getContractId())).contract();
+		DirectionEnum direction = switch(data.getPositionDir()) {
 		case "long" -> DirectionEnum.D_Buy;
 		case "short" ->  DirectionEnum.D_Sell;
-		default -> throw new IllegalArgumentException("未知方向：" + dto.getPositionDir());
+		default -> throw new IllegalArgumentException("未知方向：" + data.getPositionDir());
 		};
 		
 		SubmitOrderReq orderReq = SubmitOrderReq.builder()
-				.gatewayId(dto.getAccountGatewayId())
+				.gatewayId(data.getAccountGatewayId())
 				.originOrderId(String.valueOf(System.currentTimeMillis()))
 				.contract(c)
 				.direction(direction)
 				.offsetFlag(OffsetFlagEnum.OF_Open)
-				.volume(dto.getVolume())
-				.price(rounding(dto.getOrderPrice(), c))	// 自动加上超价
+				.volume(data.getVolume())
+				.price(rounding(data.getOrderPrice(), c))	// 自动加上超价
 				.build();
 		log.info("{} {} {} 画线交易执行开仓操作：方向{}, {}, {}", tick.actionDay(), tick.actionTime(), c.name(), orderReq.direction(),
 				orderReq.price(), orderReq.volume());
-		IAccount account = accountManager.get(Identifier.of(dto.getAccountGatewayId()));
+		IAccount account = accountManager.get(Identifier.of(data.getAccountGatewayId()));
 		account.submitOrder(orderReq);
 		orderId = Optional.of(orderReq.originOrderId());
-		dto.setState(State.RUNNING);
-		stateChangeCallback.accept(dto);
+		data.setState(State.RUNNING);
+		stateChangeCallback.accept(data);
 	}
 
 	// 离场操作
 	private void doExitTrade(Tick tick) {
-		Contract c = marketCenter.getContract(Identifier.of(dto.getContractId())).contract();
-		IAccount account = accountManager.get(Identifier.of(dto.getAccountGatewayId()));
+		Contract c = marketCenter.getContract(Identifier.of(data.getContractId())).contract();
+		IAccount account = accountManager.get(Identifier.of(data.getAccountGatewayId()));
 		
 		DirectionEnum direction = null;
 		AtomicDouble volume = new AtomicDouble();
 		AtomicReference<Position> positionRef = new AtomicReference<>();
-		switch(dto.getPositionDir()) {
+		switch(data.getPositionDir()) {
 		case "long" -> {
 			direction = DirectionEnum.D_Sell;
 			account.getPosition(PositionDirectionEnum.PD_Long, c).ifPresent(p -> {
-				volume.set(Math.min(dto.getVolume(), p.position() - p.frozen()));
+				volume.set(Math.min(data.getVolume(), p.position() - p.frozen()));
 				positionRef.set(p);
 			});
 		}
 		case "short" ->  {
 			direction = DirectionEnum.D_Buy;
 			account.getPosition(PositionDirectionEnum.PD_Short, c).ifPresent(p -> {
-				volume.set(Math.min(dto.getVolume(), p.position() - p.frozen()));
+				volume.set(Math.min(data.getVolume(), p.position() - p.frozen()));
 				positionRef.set(p);
 			});
 		}
-		default -> throw new IllegalArgumentException("未知方向：" + dto.getPositionDir());
+		default -> throw new IllegalArgumentException("未知方向：" + data.getPositionDir());
 		};
 		
 		SubmitOrderReq orderReq = SubmitOrderReq.builder()
-				.gatewayId(dto.getAccountGatewayId())
+				.gatewayId(data.getAccountGatewayId())
 				.originOrderId(UUID.randomUUID().toString())
 				.contract(c)
 				.direction(direction)
@@ -192,18 +194,18 @@ public class LineTrader implements TickDataAware, TransactionAware {
 				orderReq.volume());
 		account.submitOrder(orderReq);
 		
-		dto.setState(State.COMPLETED);
+		data.setState(State.COMPLETED);
 		
-		stateChangeCallback.accept(dto);
+		stateChangeCallback.accept(data);
 	}
 	
 	public boolean hasPosition() {
-		Contract c = marketCenter.getContract(Identifier.of(dto.getContractId())).contract();
-		IAccount account = accountManager.get(Identifier.of(dto.getAccountGatewayId()));
-		PositionDirectionEnum direction = switch(dto.getPositionDir()) {
+		Contract c = marketCenter.getContract(Identifier.of(data.getContractId())).contract();
+		IAccount account = accountManager.get(Identifier.of(data.getAccountGatewayId()));
+		PositionDirectionEnum direction = switch(data.getPositionDir()) {
 			case "long" -> PositionDirectionEnum.PD_Long;
 			case "short" ->  PositionDirectionEnum.PD_Short;
-			default -> throw new IllegalArgumentException("未知方向：" + dto.getPositionDir());
+			default -> throw new IllegalArgumentException("未知方向：" + data.getPositionDir());
 		};
 		Optional<Position> position =  account.getPosition(direction, c);
 		return position.isPresent() && position.get().position() > 0;
