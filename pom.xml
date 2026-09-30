@@ -44,7 +44,6 @@
     <module>northstar-gateway-sim</module>
     <module>northstar-gateway-playback</module>
     <module>northstar-strategy-example</module>
-    <module>northstar-copilot</module>
     <module>northstar-main</module>
   </modules>
   <dependencyManagement>
