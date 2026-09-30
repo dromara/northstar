@@ -37,6 +37,7 @@
     <netty-version>4.1.104.Final</netty-version>
     <h2-version>2.2.224</h2-version>
     <tensorflow-version>0.5.0</tensorflow-version>
+    <djl-version>0.38.0</djl-version>
     <retrofit2.version>2.11.0</retrofit2.version>
   </properties>
   <modules>
@@ -44,6 +45,7 @@
     <module>northstar-gateway-sim</module>
     <module>northstar-gateway-playback</module>
     <module>northstar-strategy-example</module>
+    <module>northstar-rl</module>
     <module>northstar-main</module>
   </modules>
   <dependencyManagement>
@@ -79,6 +81,11 @@
         <version>${northstar-version}</version>
       </dependency>
       <dependency>
+        <groupId>org.dromara.northstar.pro</groupId>
+        <artifactId>northstar-rl</artifactId>
+        <version>${northstar-version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
         <version>${commons-lang3-version}</version>
@@ -108,6 +115,13 @@
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>${guava-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ai.djl</groupId>
+        <artifactId>bom</artifactId>
+        <version>${djl-version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.tensorflow</groupId>

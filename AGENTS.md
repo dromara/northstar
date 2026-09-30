@@ -32,6 +32,7 @@ northstar/
 ├── northstar-gateway-sim/           # 模拟网关模块（模拟行情/交易）
 ├── northstar-gateway-playback/      # 回放网关模块（回测）
 ├── northstar-strategy-example/      # 策略示例模块
+├── northstar-rl/                    # 强化学习模块（DJL/PyTorch 推理 + Python 离线训练），另有独立 README.md
 ├── northstar-copilot/               # AI 助手模块
 ├── northstar-main/                  # 主 Spring Boot 应用模块
 ├── northstar-monitor-next/          # 前端项目（Vue3 + Vite），以 Git 子模块引入，另有独立 AGENTS.md
@@ -48,6 +49,7 @@ northstar/
 | `northstar-gateway-sim` | `org.dromara.northstar.gateway.sim` |
 | `northstar-gateway-playback` | `org.dromara.northstar.gateway.playback` |
 | `northstar-strategy-example` | `org.dromara.northstar.strategy.example` |
+| `northstar-rl` | `org.dromara.northstar.rl` |
 | `northstar-copilot` | `org.dromara.northstar.copilot` |
 
 ## 技术栈
@@ -68,6 +70,7 @@ northstar/
 - **java-jwt 4.4.0** - 仅用于解码数据服务订阅令牌
 - **Ehcache 3.10.8**（jakarta classifier）
 - **可选 `smart` profile**: TensorFlow Java 0.5.0（`tensorflow-core-platform`）
+- **DJL 0.38.0**（`northstar-rl` 模块）：DJL API + PyTorch 引擎 + `pytorch-native-cpu` 2.7.1（classifier 按平台选择，默认 `win-x86_64`），版本由根 POM 的 DJL BOM 管理
 
 ### AI Copilot 模块
 
@@ -358,12 +361,13 @@ server:
 - 框架：JUnit 5（Jupiter）、Mockito、AssertJ、Spring Boot Test
 - 命名：`*Test.java`
 - 插件：Maven Surefire 3.5.6
-- 当前项目共有 **86** 个 `*Test.java` 文件，分布如下：
+- 当前项目共有 **91** 个 `*Test.java` 文件，分布如下：
   - `northstar-api`: 40
   - `northstar-main`: 36（含 `TradePlanE2ETest`：画线交易计划的 Controller 层 e2e 测试，通过向事件引擎投递指定价格的 Tick 模拟行情，替代原 Cypress 版本中依赖随机行情的用例；以及 `PlannedTradeHandlerTest` / `LineTraderTest`：画线交易计划的纯 mock 单元测试）
   - `northstar-gateway-sim`: 6
   - `northstar-gateway-playback`: 4
   - `northstar-strategy-example`: 0
+  - `northstar-rl`: 5（含 `DqnInferenceExampleTest`：真实加载 `models/cartpole/model.pt` 的推理示例，默认跳过，需 `-Drl.inference.test=true` 显式开启）
   - `northstar-copilot`: 0
 
 ### 集成测试

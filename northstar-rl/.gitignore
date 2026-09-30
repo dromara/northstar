@@ -1,0 +1,11 @@
+target/
+.flattened-pom.xml
+
+# Python 训练侧
+.venv/
+__pycache__/
+
+# 训练中间产物（model 目录内，不入库）
+models/**/replay.csv
+models/**/checkpoint.pt
+models/**/model_best.pt

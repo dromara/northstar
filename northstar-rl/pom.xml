@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.dromara.northstar.pro</groupId>
+		<artifactId>northstar</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<artifactId>northstar-rl</artifactId>
+	<name>northstar-rl</name>
+	<description>Northstar盈富量化平台强化学习模块（DJL/PyTorch 推理 + Python 离线训练）</description>
+	<url>https://gitee.com/dromara/northstar</url>
+
+	<properties>
+		<maven.deploy.skip>true</maven.deploy.skip>
+		<!-- exec:java 默认主类，可用 -Dexec.mainClass=... 覆盖 -->
+		<exec.mainClass>org.dromara.northstar.rl.example.DqnInference</exec.mainClass>
+		<!-- PyTorch 原生库平台 classifier：win-x86_64 / linux-x86_64 / osx-x86_64 / osx-aarch64 -->
+		<pytorch.native.classifier>win-x86_64</pytorch.native.classifier>
+	</properties>
+
+	<dependencies>
+		<!-- DJL 核心 API -->
+		<dependency>
+			<groupId>ai.djl</groupId>
+			<artifactId>api</artifactId>
+		</dependency>
+		<!-- PyTorch 引擎（仅引擎代码，运行时加载原生库） -->
+		<dependency>
+			<groupId>ai.djl.pytorch</groupId>
+			<artifactId>pytorch-engine</artifactId>
+		</dependency>
+		<!-- PyTorch 原生库（CPU 版），classifier 按运行平台选择 -->
+		<dependency>
+			<groupId>ai.djl.pytorch</groupId>
+			<artifactId>pytorch-native-cpu</artifactId>
+			<classifier>${pytorch.native.classifier}</classifier>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>${exec.mainClass}</mainClass>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
