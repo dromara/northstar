@@ -1,9 +1,6 @@
 package org.dromara.northstar.app.auth;
 
-import java.util.UUID;
-
 import org.dromara.northstar.common.constant.Constants;
-import org.dromara.northstar.common.utils.InternalLoopCallUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -30,8 +27,7 @@ public class AuthCheckerInterceptor implements HandlerInterceptor{
 		}
 		String sessCSRF = (String) session.getAttribute(Constants.SESS_CSRF);
 		String reqCSRF = req.getHeader(Constants.CSRF_HEADER);
-		if(StringUtils.hasText(sessCSRF) && StringUtils.hasText(reqCSRF) 
-				&& (sessCSRF.equals(reqCSRF) || InternalLoopCallUtils.consume(UUID.fromString(reqCSRF)))) {
+		if(StringUtils.hasText(sessCSRF) && StringUtils.hasText(reqCSRF) && (sessCSRF.equals(reqCSRF))) {
 			return true;
 		}
 		

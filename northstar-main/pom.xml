@@ -18,7 +18,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.dromara.northstar.pro</groupId>
-			<artifactId>northstar-copilot</artifactId>
+			<artifactId>northstar-rl</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.dromara.northstar.pro</groupId>

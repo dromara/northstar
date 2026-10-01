@@ -57,7 +57,7 @@
       </dependency>
       <dependency>
         <groupId>org.dromara.northstar.pro</groupId>
-        <artifactId>northstar-copilot</artifactId>
+        <artifactId>northstar-rl</artifactId>
         <version>${northstar-version}</version>
       </dependency>
       <dependency>

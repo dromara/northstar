@@ -33,7 +33,6 @@ northstar/
 ├── northstar-gateway-playback/      # 回放网关模块（回测）
 ├── northstar-strategy-example/      # 策略示例模块
 ├── northstar-rl/                    # 强化学习模块（DJL/PyTorch 推理 + Python 离线训练），另有独立 README.md
-├── northstar-copilot/               # AI 助手模块
 ├── northstar-main/                  # 主 Spring Boot 应用模块
 ├── northstar-monitor-next/          # 前端项目（Vue3 + Vite），以 Git 子模块引入，另有独立 AGENTS.md
 ├── northstar-doc/                   # 用户使用文档（VitePress 静态站点，pnpm dev/build/preview）
@@ -50,7 +49,6 @@ northstar/
 | `northstar-gateway-playback` | `org.dromara.northstar.gateway.playback` |
 | `northstar-strategy-example` | `org.dromara.northstar.strategy.example` |
 | `northstar-rl` | `org.dromara.northstar.rl` |
-| `northstar-copilot` | `org.dromara.northstar.copilot` |
 
 ## 技术栈
 
@@ -71,12 +69,6 @@ northstar/
 - **Ehcache 3.10.8**（jakarta classifier）
 - **可选 `smart` profile**: TensorFlow Java 0.5.0（`tensorflow-core-platform`）
 - **DJL 0.38.0**（`northstar-rl` 模块）：DJL API + PyTorch 引擎 + `pytorch-native-cpu` 2.7.1（classifier 按平台选择，默认 `win-x86_64`），版本由根 POM 的 DJL BOM 管理
-
-### AI Copilot 模块
-
-- **OkHttp3 SSE** / **jtokkit** - Token 管理与流式对话
-- 支持多种 LLM 平台：OpenAI、Moonshot、DeepSeek、Ollama、Baichuan 等
-- 向量存储（Pinecone）、SearXNG 网页搜索、函数调用框架、异常处理链
 
 ### 前端
 
@@ -197,7 +189,6 @@ public class NorthstarApplication { ... }
 | `PlaybackController` | 回测回放控制 |
 | `StrategyExplorerController` | 策略开发工具 |
 | `CustomIndicatorController` | 自定义指标管理 |
-| `CopilotChatController` | AI 助手对话接口 |
 | `UserController` | 用户认证和管理 |
 | `SseStreamController` | 服务器推送实时数据 |
 | `MultichartsController` | 多图表数据接口 |
@@ -218,7 +209,6 @@ public class NorthstarApplication { ... }
 - `MarketDataService` - 行情数据服务
 - `PlaybackService` - 回放服务
 - `StrategyExplorerService` - 策略探索
-- `CopilotChatService` - AI 对话
 - `ContractConfigService` - 合约配置
 - `CustomIndicatorService` - 自定义指标
 - `LoggingService` - 日志服务
@@ -339,7 +329,7 @@ server:
 1. `POST /northstar/user/login` 校验凭据
 2. 成功后，随机 UUID 作为 CSRF Token 存入 HTTP Session（键 `SESS_CSRF`）
 3. 后续 `/northstar/**` 请求须携带请求头 `CSRF_token` 并匹配 Session 值
-4. `InternalLoopCallUtils` 生成一次性 UUID 用于内部循环调用（如 Copilot 函数调用），3 分钟后过期
+4. `InternalLoopCallUtils` 生成一次性 UUID 用于内部循环调用，3 分钟后过期
 5. `GET /northstar/user/validate` 检查 Session 有效性
 
 ### 其他安全措施
@@ -368,7 +358,6 @@ server:
   - `northstar-gateway-playback`: 4
   - `northstar-strategy-example`: 0
   - `northstar-rl`: 5（含 `DqnInferenceExampleTest`：真实加载 `models/cartpole/model.pt` 的推理示例，默认跳过，需 `-Drl.inference.test=true` 显式开启）
-  - `northstar-copilot`: 0
 
 ### 集成测试
 
