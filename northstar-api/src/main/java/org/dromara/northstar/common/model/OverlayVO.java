@@ -4,11 +4,15 @@ import java.util.List;
 
 import com.alibaba.fastjson2.JSONObject;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Builder
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class OverlayVO {
 
 	private int currentStep;

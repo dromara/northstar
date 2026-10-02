@@ -353,7 +353,8 @@ class LineTraderTest {
 		// 入场委托已终结（全部成交），且无持仓时计划完成
 		Tick t = tick(4990);
 		trader.onOrder(Order.builder().originOrderId(entryOrderId).orderStatus(OrderStatusEnum.OS_AllTraded).contract(t.contract()).build());
-		Thread.sleep(1000L);
+		// 完成条件为毫秒差严格大于1000，留出调度余量避免边界竞争
+		Thread.sleep(1100L);
 		trader.onTick(t);
 		assertThat(dto.getState()).isEqualTo(State.COMPLETED);
 	}

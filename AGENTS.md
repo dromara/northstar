@@ -6,11 +6,11 @@
 
 **Northstar Pro（盈富量化交易平台）** 是一个基于 Java 和 Spring Boot 开发的量化交易平台，提供模块化的策略开发、回测、模拟交易和实盘部署框架。
 
-- **当前源码版本**: `9.1.0`（定义在根 `pom.xml` 的 `<northstar-version>` 属性）
+- **当前源码版本**: `9.1.6`（定义在根 `pom.xml` 的 `<northstar-version>` 属性）
 - **当前分支**: `master`
 - **语言**: Java 25（根 `pom.xml` 声明 `<java.version>25</java.version>`）
 - **构建工具**: Maven 3.x
-- **框架**: Spring Boot 3.5.11（`spring-boot-starter-parent`）
+- **框架**: Spring Boot 4.1.1（`spring-boot-starter-parent`，基于 Spring Framework 7）
 - **Group ID**: `org.dromara.northstar.pro`
 - **Artifact ID**: `northstar`
 - **仓库**: `https://gitee.com/dromara/northstar`
@@ -18,9 +18,9 @@
 
 ### 版本与分支说明
 
-- 源码目标为 Java 25 / Spring Boot 3.5.11，源码版本为 `9.1.0`，构建前请确认本地 JDK 版本与 POM 一致。
+- 源码目标为 Java 25 / Spring Boot 4.1.1，源码版本为 `9.1.6`，构建前请确认本地 JDK 版本与 POM 一致。
 - 各模块下的 `.flattened-pom.xml` 由 Flatten Maven Plugin 在构建时生成，未纳入 Git 跟踪，请勿以其为准。
-- `northstar-monitor-next/package.json` 版本号为 `9.1.0`，与后端源码版本一致。
+- `northstar-monitor-next/package.json` 版本号为 `9.1.6`，与后端源码版本一致。
 - `.gitmodules` 登记了两个子模块：`northstar-monitor-next` 和 `northstar-external`。其中 `northstar-monitor-next` 在父仓库中尚未初始化（`git submodule status` 显示 `-` 前缀），其目录内容系独立克隆；`northstar-external` 未注册进 git 索引，目录不存在。
 
 ## 项目结构
@@ -54,19 +54,19 @@ northstar/
 
 ### 后端
 
-- **Spring Boot 3.5.11** - 应用框架（Web / Data JPA / Scheduling / Cache）
-- **Spring Retry 2.0.5** - 重试机制
-- **H2 Database 2.2.224** - 嵌入式数据库（生产环境文件模式，测试内存模式）
+- **Spring Boot 4.1.1** - 应用框架（Web / Data JPA / Scheduling / Cache），基于 Spring Framework 7
+- **Spring Retry 2.0.13** - 重试机制（Spring Boot 4 起不再托管该依赖，版本在根 POM 显式钉版）
+- **H2 Database 2.4.240**（随 Boot 托管）- 嵌入式数据库（生产环境文件模式，测试内存模式）
 - **Protocol Buffers 4.28.3** / protobuf-java-format 1.4 - 数据序列化
 - **Disruptor 3.4.4** - 高性能事件处理
-- **Netty 4.1.104.Final**
+- **Netty 4.2.17.Final**（随 Boot 托管）
 - **Lombok 1.18.46** - 减少样板代码（编译期注解处理）
-- **Fastjson2 2.0.56** / **Jackson 2.16.1** - JSON 处理
+- **Fastjson2 2.0.56** - JSON 处理主力；**Jackson 双版本并存**：Boot 4 内部使用 Jackson 3（`tools.jackson`），项目代码/retrofit 使用 Jackson 2（`com.fasterxml.jackson:jackson-bom` 2.22.3 导入式管理）
 - **Guava 33.0.0-jre** / **Apache Commons**（Lang3 3.17.0、IO 2.15.1、Math3 3.6.1、Codec 1.16.0）- 工具库
 - **Hutool-crypto 5.7.22** - 加密
 - **OkHttp3 4.12.0** / **Retrofit2 2.11.0** - HTTP 客户端
 - **java-jwt 4.4.0** - 仅用于解码数据服务订阅令牌
-- **Ehcache 3.10.8**（jakarta classifier）
+- **RestTemplateBuilder**：Boot 4 移至 `spring-boot-restclient` 模块（`org.springframework.boot.restclient` 包），`spring-boot-starter-web` 不再传递引入
 - **可选 `smart` profile**: TensorFlow Java 0.5.0（`tensorflow-core-platform`）
 - **DJL 0.38.0**（`northstar-rl` 模块）：DJL API + PyTorch 引擎 + `pytorch-native-cpu` 2.7.1（classifier 按平台选择，默认 `win-x86_64`），版本由根 POM 的 DJL BOM 管理
 
@@ -125,7 +125,7 @@ mvn jacoco:report
 mvn clean verify
 ```
 
-构建完成后，`northstar-main` 的可执行 jar 会输出到 `northstar-dist/`，默认名称为 `northstar-9.1.0.jar`（由 `finalName` 决定）；`smart` profile 输出为 `northstar-9.1.0-smart.jar`。
+构建完成后，`northstar-main` 的可执行 jar 会输出到 `northstar-dist/`，默认名称为 `northstar-9.1.6.jar`（由 `finalName` 决定）；`smart` profile 输出为 `northstar-9.1.6-smart.jar`。
 
 ### 前端
 
@@ -351,6 +351,10 @@ server:
 - 框架：JUnit 5（Jupiter）、Mockito、AssertJ、Spring Boot Test
 - 命名：`*Test.java`
 - 插件：Maven Surefire 3.5.6
+- **Spring Boot 4.1 测试注解已迁移**（经典包名已移除）：
+  - `@MockitoBean` → `org.springframework.test.context.bean.override.mockito.MockitoBean`（spring-test）
+  - `@DataJpaTest` → `org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest`（依赖 `spring-boot-data-jpa-test`，northstar-main 已声明）
+  - `@AutoConfigureMockMvc` → `org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc`（依赖 `spring-boot-webmvc-test`，northstar-main 已声明）
 - 当前项目共有 **91** 个 `*Test.java` 文件，分布如下：
   - `northstar-api`: 40
   - `northstar-main`: 36（含 `TradePlanE2ETest`：画线交易计划的 Controller 层 e2e 测试，通过向事件引擎投递指定价格的 Tick 模拟行情，替代原 Cypress 版本中依赖随机行情的用例；以及 `PlannedTradeHandlerTest` / `LineTraderTest`：画线交易计划的纯 mock 单元测试）
@@ -427,13 +431,13 @@ nohup java -Xlog:gc*:gc.log -Xms2g -Xmx2g \
 ### 版本管理
 
 - 使用 Maven Flatten Plugin 1.7.3 管理版本
-- 版本定义在父 POM：`<northstar-version>9.1.0</northstar-version>`
+- 版本定义在父 POM：`<northstar-version>9.1.6</northstar-version>`
 - 通过 `<revision>${northstar-version}</revision>` 占位符供各模块继承
 - 构建时生成 `.flattened-pom.xml`
 
 ## 重要注意事项
 
-1. **JDK 25 要求**：源码 POM 目标为 Java 25 / Spring Boot 3.5.11。构建前请确认本地 JDK 与 POM 配置一致。
+1. **JDK 25 要求**：源码 POM 目标为 Java 25 / Spring Boot 4.1.1。构建前请确认本地 JDK 与 POM 配置一致。
 2. **Protobuf 生成类不可手动修改**：生成类位于 `xyz.redtorch.pb` 包中，更新请使用 `update-protobuf-obj.ps1`。
 3. **H2 用于生产数据存储**：生产环境使用 H2 文件模式，历史行情数据主要依赖外部 marketplace 服务。
 4. **虚拟线程**：默认在非 `dev` profile 下启用。
@@ -441,5 +445,5 @@ nohup java -Xlog:gc*:gc.log -Xms2g -Xmx2g \
 6. **H2 Console 在生产环境启用**：路径 `/h2-console`，仅通过 CSRF 拦截器保护。
 7. **前端构建顺序**：打包后端前必须先在前端目录执行 `pnpm build` 生成 `dist/`。
 8. **测试环境默认账号**：`admin` / `123456`，可通过 `NS_USER` / `NS_PWD` 环境变量覆盖。
-9. **版本对齐**：后端源码版本与 `northstar-monitor-next/package.json` 均为 `9.1.0`，已对齐。
+9. **版本对齐**：后端源码版本与 `northstar-monitor-next/package.json` 均为 `9.1.6`，已对齐。
 10. **子模块状态**：`northstar-monitor-next` 在父仓库中未初始化（目录为独立克隆）；`northstar-external` 在 `.gitmodules` 中登记但未注册进索引、目录不存在。

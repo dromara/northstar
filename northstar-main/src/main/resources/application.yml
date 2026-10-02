@@ -29,6 +29,10 @@ logging:
 spring:
   messages:
     basename: i18n/messages
+  jackson:
+    deserialization:
+      # Jackson 3 默认拒绝 null 赋值给原始类型，恢复 Jackson 2 的宽容行为
+      fail-on-null-for-primitives: false
   h2:
     console:
       enabled: true

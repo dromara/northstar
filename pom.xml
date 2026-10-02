@@ -3,7 +3,7 @@
   <parent>
     <artifactId>spring-boot-starter-parent</artifactId>
     <groupId>org.springframework.boot</groupId>
-    <version>3.5.11</version>
+    <version>4.1.1</version>
   </parent>
   <groupId>org.dromara.northstar.pro</groupId>
   <artifactId>northstar</artifactId>
@@ -22,7 +22,6 @@
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <revision>${northstar-version}</revision>
     <lombok-version>1.18.46</lombok-version>
-    <slf4j-version>2.0.9</slf4j-version>
     <commons-lang3-version>3.17.0</commons-lang3-version>
     <commons-codec-version>1.16.0</commons-codec-version>
     <commons-io-version>2.15.1</commons-io-version>
@@ -32,10 +31,8 @@
     <protobuf-java-format-version>1.4</protobuf-java-format-version>
     <disruptor-version>3.4.4</disruptor-version>
     <hutool-version>5.7.22</hutool-version>
-    <jackson-version>2.16.1</jackson-version>
+    <jackson-version>2.22.3</jackson-version>
     <byte-buddy-version>1.17.5</byte-buddy-version>
-    <netty-version>4.1.104.Final</netty-version>
-    <h2-version>2.2.224</h2-version>
     <tensorflow-version>0.5.0</tensorflow-version>
     <djl-version>0.38.0</djl-version>
     <retrofit2.version>2.11.0</retrofit2.version>
@@ -91,20 +88,9 @@
         <version>${commons-lang3-version}</version>
       </dependency>
       <dependency>
-        <groupId>com.h2database</groupId>
-        <artifactId>h2</artifactId>
-        <version>${h2-version}</version>
-        <scope>runtime</scope>
-      </dependency>
-      <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
         <version>${lombok-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>${slf4j-version}</version>
       </dependency>
       <dependency>
         <groupId>commons-codec</groupId>
@@ -136,13 +122,7 @@
       <dependency>
         <groupId>org.springframework.retry</groupId>
         <artifactId>spring-retry</artifactId>
-        <version>2.0.5</version>
-      </dependency>
-      <dependency>
-        <groupId>org.ehcache</groupId>
-        <artifactId>ehcache</artifactId>
-        <version>3.10.8</version>
-        <classifier>jakarta</classifier>
+        <version>2.0.13</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
@@ -170,11 +150,6 @@
         <version>4.12.0</version>
       </dependency>
       <dependency>
-        <groupId>javax.xml.bind</groupId>
-        <artifactId>jaxb-api</artifactId>
-        <version>2.3.1</version>
-      </dependency>
-      <dependency>
         <groupId>com.squareup.retrofit2</groupId>
         <artifactId>retrofit</artifactId>
         <version>${retrofit2.version}</version>
@@ -195,19 +170,11 @@
 		<version>${retrofit2.version}</version>
 	  </dependency>
       <dependency>
-        <groupId>net.sf.ehcache</groupId>
-        <artifactId>ehcache</artifactId>
-        <version>2.10.9.2</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-core</artifactId>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
         <version>${jackson-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>${jackson-version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>commons-io</groupId>
@@ -273,47 +240,6 @@
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-math3</artifactId>
         <version>${commons-math-version}</version>
-      </dependency>
-      <!-- netty -->
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-common</artifactId>
-        <version>${netty-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-buffer</artifactId>
-        <version>${netty-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-transport</artifactId>
-        <version>${netty-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-transport-native-epoll</artifactId>
-        <version>${netty-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-resolver</artifactId>
-        <version>${netty-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-codec</artifactId>
-        <version>${netty-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-codec-http</artifactId>
-        <version>${netty-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-handler</artifactId>
-        <version>${netty-version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

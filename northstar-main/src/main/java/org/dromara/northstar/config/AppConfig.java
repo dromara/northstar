@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.info.BuildProperties;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.MessageSource;
@@ -181,7 +181,7 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean {
     @Bean
     @ConditionalOnExpression("systemEnvironment['IDEA_INITIAL_DIRECTORY'] == null")
     CommandLineRunner printVersionInfo(BuildProperties buildProperties) {
-    	return args -> log.info("Version: {}, Build Time: {}", buildProperties.getVersion(), buildProperties.getTime().atOffset(ZoneOffset.ofHours(8)));
+    	return _ -> log.info("Version: {}, Build Time: {}", buildProperties.getVersion(), buildProperties.getTime().atOffset(ZoneOffset.ofHours(8)));
 	}
     
     @Bean

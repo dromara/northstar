@@ -27,7 +27,7 @@ import org.dromara.northstar.gateway.playback.PlaybackContract;
 import org.dromara.northstar.strategy.example.BeginnerExampleStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
 
 import lombok.extern.slf4j.Slf4j;
@@ -85,8 +85,8 @@ class BacktestModuleFactoryTest {
     	}
     	log.info("数据服务token验证码: {}", partialToken);
         return new RestTemplateBuilder()
-                .setReadTimeout(Duration.ofSeconds(60))
-                .setConnectTimeout(Duration.ofSeconds(10))
+                .readTimeout(Duration.ofSeconds(60))
+                .connectTimeout(Duration.ofSeconds(10))
                 .rootUri("https://marketplace.quantit.tech")
 				.defaultHeader("Authorization", String.format("Bearer %s", token))
 				.defaultHeader("NS_Version", "UnitTest")

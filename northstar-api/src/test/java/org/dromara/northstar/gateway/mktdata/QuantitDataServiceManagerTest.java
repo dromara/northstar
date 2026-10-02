@@ -10,7 +10,7 @@ import org.dromara.northstar.datasource.dto.DataSourceMessage.AggBarDTO;
 import org.dromara.northstar.datasource.dto.DataSourceMessage.ContractDTO;
 import org.dromara.northstar.datasource.dto.DataSourceMessage.HolidayDTO;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
 
 class QuantitDataServiceManagerTest {
