@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Northstar RL 设计 UML 评审</title>
+<style>
+  body { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; margin: 0; background: #f5f6f8; color: #1a202c; }
+  header { background: #1a202c; color: #fff; padding: 18px 32px; }
+  header h1 { margin: 0; font-size: 20px; }
+  header p { margin: 6px 0 0; font-size: 13px; color: #a0aec0; }
+  nav { padding: 12px 32px; background: #fff; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
+  nav a { margin-right: 18px; color: #2b6cb0; text-decoration: none; }
+  section { margin: 24px 32px; padding: 20px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow-x: auto; }
+  h2 { margin: 0 0 4px; font-size: 17px; }
+  .caption { margin: 0 0 14px; font-size: 13px; color: #718096; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Northstar 强化学习交易 — UML 设计评审</h1>
+  <p>依据 northstar-rl/DESIGN.md 生成 · 类图 ×3 + 时序图 ×4 · Canvas 绘制</p>
+</header>
+<nav>
+  <a href="#clsA">类图A 策略与模型定义层</a>
+  <a href="#clsB">类图B 模型契约层</a>
+  <a href="#clsC">类图C 训练运行时层</a>
+  <a href="#sd1">时序图1 训练主循环</a>
+  <a href="#sd2">时序图2 Episode 事件驱动决策</a>
+  <a href="#sd3">时序图3 实盘推理</a>
+  <a href="#sd4">时序图4 fork 血缘校验</a>
+  <a href="#legend">图例</a>
+</nav>
+
+<section id="clsA">
+  <h2>类图 A：策略与模型定义层（northstar-api）</h2>
+  <p class="caption">RLStrategy 定义模型的“形状”与语义钩子；observe / onAction / shouldObserve 训练与实盘共用同一代码路径。</p>
+  <canvas id="cvA"></canvas>
+</section>
+
+<section id="clsB">
+  <h2>类图 B：模型契约层（Hyperparameter 类 / Metadata 类 / VO）</h2>
+  <p class="caption">Hyperparameter 类在定义 model 时声明超参数字段清单（UI 据此动态渲染）；Metadata 类按版本承载超参数取值与血缘信息，存 JSON 文件。</p>
+  <canvas id="cvB"></canvas>
+</section>
+
+<section id="clsC">
+  <h2>类图 C：训练运行时层（northstar-main / northstar-rl）</h2>
+  <p class="caption">RLTrainingService 按轮驱动；TradingEnvironment 组合行情回放与账户沙箱，持有 gym 语义（reset/step/done）。</p>
+  <canvas id="cvC"></canvas>
+</section>
+
+<section id="sd1">
+  <h2>时序图 1：训练主循环（一轮 round）</h2>
+  <p class="caption">轮边界调参：每轮开始重读最新超参数；串行采样多合约 → Python 无状态子进程训练 → 验证时段评估 → SSE 推送。</p>
+  <canvas id="cvS1"></canvas>
+</section>
+
+<section id="sd2">
+  <h2>时序图 2：Episode 事件驱动决策循环（SMDP）</h2>
+  <p class="caption">决策点由策略 shouldObserve() 事件触发；转移记录 dt（间隔 bar 数），训练按 γ^dt 折扣；区分 truncated / terminated。</p>
+  <canvas id="cvS2"></canvas>
+</section>
+
+<section id="sd3">
+  <h2>时序图 3：实盘推理路径</h2>
+  <p class="caption">与训练共用 observe/shouldObserve/onAction 钩子；RL 动作走普通下单链路，不绕过任何既有风控。</p>
+  <canvas id="cvS3"></canvas>
+</section>
+
+<section id="sd4">
+  <h2>时序图 4：fork 再训练与血缘校验</h2>
+  <p class="caption">specHash 防特征语义漂移；checkpointSignature 保证权重继承兼容；校验失败快速失败并给出结构化 diff。</p>
+  <canvas id="cvS4"></canvas>
+</section>
+
+<section id="legend">
+  <h2>图例</h2>
+  <p class="caption">类图关系线型说明。</p>
+  <canvas id="cvL"></canvas>
+</section>
+
+<script>
+"use strict";
+const FONT = '12px "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
+const FONT_B = 'bold 13px "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
+const FONT_S = '11px "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
+const INK = "#2d3748", EDGE = "#4a5568";
+
+function setupCanvas(id, w, h) {
+  const c = document.getElementById(id);
+  const dpr = window.devicePixelRatio || 1;
+  c.width = w * dpr; c.height = h * dpr;
+  c.style.width = w + "px"; c.style.height = h + "px";
+  const ctx = c.getContext("2d");
+  ctx.scale(dpr, dpr);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, w, h);
+  return ctx;
+}
+
+/* ================= 类图渲染 ================= */
+
+function drawClassBox(ctx, reg, b) {
+  const pad = 10, lh = 17;
+  let w = 140;
+  ctx.font = FONT_B; w = Math.max(w, ctx.measureText(b.name).width + 2 * pad);
+  if (b.stereotype) { ctx.font = FONT_S; w = Math.max(w, ctx.measureText("«" + b.stereotype + "»").width + 2 * pad); }
+  ctx.font = FONT;
+  (b.attrs || []).concat(b.methods || []).forEach(t => { w = Math.max(w, ctx.measureText(t).width + 2 * pad); });
+  w = Math.ceil(w);
+  const headH = (b.stereotype ? 15 : 0) + 24;
+  const attrH = (b.attrs && b.attrs.length) ? b.attrs.length * lh + 8 : 0;
+  const methH = (b.methods && b.methods.length) ? b.methods.length * lh + 8 : 0;
+  const h = headH + attrH + methH;
+
+  ctx.fillStyle = b.fill || "#ffffff";
+  ctx.strokeStyle = EDGE; ctx.lineWidth = 1.2;
+  ctx.fillRect(b.x, b.y, w, h);
+  ctx.strokeRect(b.x, b.y, w, h);
+
+  let ty = b.y;
+  ctx.textAlign = "center";
+  if (b.stereotype) { ctx.font = FONT_S; ctx.fillStyle = "#718096"; ctx.fillText("«" + b.stereotype + "»", b.x + w / 2, ty + 12); ty += 15; }
+  ctx.font = FONT_B; ctx.fillStyle = "#1a202c";
+  ctx.fillText(b.name, b.x + w / 2, ty + 17);
+
+  const sep = yy => { ctx.beginPath(); ctx.moveTo(b.x, yy); ctx.lineTo(b.x + w, yy); ctx.stroke(); };
+  const lines = (arr, yy) => {
+    if (!arr || !arr.length) return;
+    sep(yy);
+    ctx.font = FONT; ctx.textAlign = "left"; ctx.fillStyle = INK;
+    arr.forEach((t, i) => ctx.fillText(t, b.x + pad, yy + 8 + i * lh + 10));
+  };
+  lines(b.attrs, b.y + headH);
+  lines(b.methods, b.y + headH + attrH);
+  ctx.textAlign = "left";
+  reg[b.id] = { x: b.x, y: b.y, w, h };
+}
+
+function anchor(r, side) {
+  if (side === "top") return [r.x + r.w / 2, r.y];
+  if (side === "bottom") return [r.x + r.w / 2, r.y + r.h];
+  if (side === "left") return [r.x, r.y + r.h / 2];
+  return [r.x + r.w, r.y + r.h / 2];
+}
+
+function drawTriangle(ctx, x, y, ang) {
+  const s = 14, w = s * 0.55;
+  const bx = x - s * Math.cos(ang), by = y - s * Math.sin(ang);
+  const px = -Math.sin(ang), py = Math.cos(ang);
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(bx + w * px, by + w * py);
+  ctx.lineTo(bx - w * px, by - w * py);
+  ctx.closePath();
+  ctx.fillStyle = "#fff"; ctx.fill(); ctx.stroke();
+}
+
+function drawOpenArrow(ctx, x, y, ang) {
+  const s = 11, a = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(x - s * Math.cos(ang - a), y - s * Math.sin(ang - a));
+  ctx.lineTo(x, y);
+  ctx.lineTo(x - s * Math.cos(ang + a), y - s * Math.sin(ang + a));
+  ctx.stroke();
+}
+
+function drawSolidArrow(ctx, x, y, ang) {
+  const s = 10, w = 6;
+  const bx = x - s * Math.cos(ang), by = y - s * Math.sin(ang);
+  const px = -Math.sin(ang), py = Math.cos(ang);
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(bx + w * px, by + w * py);
+  ctx.lineTo(bx - w * px, by - w * py);
+  ctx.closePath();
+  ctx.fillStyle = EDGE; ctx.fill();
+}
+
+function drawDiamond(ctx, x, y, ang) {
+  const d = 9, w = 5.5;
+  const px = -Math.sin(ang), py = Math.cos(ang);
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + d * Math.cos(ang) + w * px, y + d * Math.sin(ang) + w * py);
+  ctx.lineTo(x + 2 * d * Math.cos(ang), y + 2 * d * Math.sin(ang));
+  ctx.lineTo(x + d * Math.cos(ang) - w * px, y + d * Math.sin(ang) - w * py);
+  ctx.closePath();
+  ctx.fillStyle = EDGE; ctx.fill(); ctx.stroke();
+}
+
+// type: inherit | realize | compose | dep | assoc
+function drawEdge(ctx, reg, e) {
+  const [x1, y1] = anchor(reg[e.from], e.fromSide);
+  let [x2, y2] = anchor(reg[e.to], e.toSide);
+  ctx.strokeStyle = EDGE; ctx.fillStyle = EDGE; ctx.lineWidth = 1.2;
+  ctx.setLineDash(e.type === "dep" || e.type === "realize" ? [5, 4] : []);
+  const pts = [[x1, y1]];
+  if (e.via) pts.push(e.via);
+  // 组合菱形在 from 端，线段起点让位
+  let sx = x1, sy = y1;
+  if (e.type === "compose") {
+    const ang0 = Math.atan2((e.via ? e.via[1] : y2) - y1, (e.via ? e.via[0] : x2) - x1);
+    drawDiamond(ctx, x1, y1, ang0);
+    sx = x1 + 18 * Math.cos(ang0); sy = y1 + 18 * Math.sin(ang0);
+    pts[0] = [sx, sy];
+  }
+  pts.push([x2, y2]);
+  const angEnd = Math.atan2(y2 - pts[pts.length - 2][1], x2 - pts[pts.length - 2][0]);
+  ctx.beginPath();
+  ctx.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  if (e.type === "inherit" || e.type === "realize") drawTriangle(ctx, x2, y2, angEnd);
+  else if (e.type === "dep" || e.type === "assoc") drawOpenArrow(ctx, x2, y2, angEnd);
+  if (e.label) {
+    const mid = pts[Math.floor(pts.length / 2) - 1], mid2 = pts[Math.floor(pts.length / 2)];
+    ctx.font = FONT_S; ctx.fillStyle = "#718096";
+    ctx.fillText(e.label, (mid[0] + mid2[0]) / 2 + 6, (mid[1] + mid2[1]) / 2 - 4);
+  }
+}
+
+function drawNote(ctx, x, y, text, w) {
+  const h = 26, fold = 9;
+  ctx.fillStyle = "#fffbe6"; ctx.strokeStyle = "#c8b26a"; ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x, y); ctx.lineTo(x + w - fold, y); ctx.lineTo(x + w, y + fold);
+  ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x + w - fold, y); ctx.lineTo(x + w - fold, y + fold); ctx.lineTo(x + w, y + fold); ctx.stroke();
+  ctx.font = FONT_S; ctx.fillStyle = "#744d0e"; ctx.textAlign = "left";
+  ctx.fillText(text, x + 8, y + 17);
+}
+
+/* ---------- 类图 A：策略与模型定义层 ---------- */
+(function () {
+  const ctx = setupCanvas("cvA", 1140, 740);
+  const reg = {};
+  const boxes = [
+    { id: "ts", x: 30, y: 30, name: "TradeStrategy", stereotype: "interface",
+      methods: ["+onTick(tick)", "+onMergedBar(bar)", "+onOrder(order) / onTrade(trade)", "+getDynamicParams(): DynamicParams"] },
+    { id: "ctx", x: 440, y: 30, name: "IModuleStrategyContext", stereotype: "interface · 已有",
+      methods: ["+submitOrderReq(orderReq)", "+bindedContracts(): List<Contract>", "+getModuleAccount(): IModuleAccount", "+isEnabled(): boolean"] },
+    { id: "feat", x: 830, y: 30, name: "RLFeatureSpec", stereotype: "record",
+      attrs: ["+name: String", "+normalizer: NormalizerType", "+description: String"] },
+    { id: "rls", x: 30, y: 300, name: "RLStrategy", stereotype: "interface",
+      methods: ["+rlSpec(): RLModelSpec", "+observe(ctx, contract): float[]", "+onAction(action, ctx, contract)", "+shouldObserve(ctx, contract): boolean", "+reward(ctx): double"] },
+    { id: "spec", x: 440, y: 320, name: "RLModelSpec", stereotype: "record",
+      attrs: ["+features: List<RLFeatureSpec>", "+actionEnum: Class<? extends Enum>"] },
+    { id: "norm", x: 830, y: 250, name: "NormalizerType", stereotype: "enumeration",
+      attrs: ["Z_SCORE", "MIN_MAX", "NONE"] },
+    { id: "act", x: 830, y: 420, name: "TradeAction", stereotype: "enumeration · 策略自定义",
+      attrs: ["HOLD", "BUY", "SELL"] },
+    { id: "rwd", x: 440, y: 540, name: "RLRewardContext", stereotype: "record",
+      attrs: ["+prevEquity: double", "+currEquity: double", "+trades: List<Trade>  // 用于扣成本", "+dt: int  // 决策间隔 bar 数", "+episodeEnd: boolean"] },
+    { id: "impl", x: 30, y: 600, name: "RlTrendStrategy（示例）",
+      attrs: ["-agent: RLAgent  // 运行时注入"],
+      methods: ["onMergedBar: shouldObserve→observe→act→onAction"] }
+  ];
+  boxes.forEach(b => drawClassBox(ctx, reg, b));
+  const edges = [
+    { from: "rls", fromSide: "top", to: "ts", toSide: "bottom", type: "inherit" },
+    { from: "impl", fromSide: "top", to: "rls", toSide: "bottom", type: "realize" },
+    { from: "rls", fromSide: "right", to: "spec", toSide: "left", type: "dep", label: "rlSpec()" },
+    { from: "rls", fromSide: "top", to: "ctx", toSide: "bottom", type: "dep", label: "ctx 参数" },
+    { from: "rls", fromSide: "right", to: "rwd", toSide: "left", type: "dep", label: "reward()" },
+    { from: "spec", fromSide: "top", to: "feat", toSide: "bottom", type: "compose" },
+    { from: "spec", fromSide: "right", to: "act", toSide: "left", type: "dep", label: "actionEnum" },
+    { from: "feat", fromSide: "bottom", to: "norm", toSide: "top", type: "assoc" }
+  ];
+  edges.forEach(e => drawEdge(ctx, reg, e));
+  drawNote(ctx, 830, 560, "specHash = features + actions + preprocessing", 260);
+  drawNote(ctx, 830, 596, "稳定序列化取 SHA-256，四处校验快速失败", 260);
+})();
+
+/* ---------- 类图 B：模型契约层 ---------- */
+(function () {
+  const ctx = setupCanvas("cvB", 1120, 560);
+  const reg = {};
+  const boxes = [
+    { id: "hp", x: 30, y: 30, name: "Hyperparameter", stereotype: "abstract · DynamicParams",
+      attrs: ["@Setting lr: double", "@Setting gamma: double", "@Setting ...(按 algo 定义)"],
+      methods: ["+getMetaInfo(): List<ComponentField>"] },
+    { id: "cf", x: 30, y: 330, name: "ComponentField",
+      attrs: ["+label / name / order", "+type: NUMBER 等", "+value: 字段默认值"] },
+    { id: "vo", x: 400, y: 30, name: "RLModelVO",
+      attrs: ["+modelId / name / algo", "+strategyClass", "+network: {hidden, activation}", "+hyperParamFields: List<ComponentField>", "+versionDetails: List<RLVersionMeta>", "+latestVersion"] },
+    { id: "vm", x: 400, y: 340, name: "RLVersionMeta",
+      attrs: ["+version: int", "+hyperParams: Map<String, Double>"] },
+    { id: "mm", x: 780, y: 30, name: "ModelMetadata", stereotype: "模型级 json · 不可变",
+      attrs: ["+strategyClass / algo", "+stateDim / actionDim / actions", "+network / preprocessing", "+specHash", "+latestVersion"] },
+    { id: "vmd", x: 780, y: 330, name: "RLVersionMetadata", stereotype: "版本级 json",
+      attrs: ["+version / parentVersion", "+weightInherited", "+specHash / checkpointSignature", "+training: {rounds, 三个起始日,", "   contracts, hyperParams, acceptedBy}"] }
+  ];
+  boxes.forEach(b => drawClassBox(ctx, reg, b));
+  const edges = [
+    { from: "hp", fromSide: "right", to: "vo", toSide: "left", type: "dep", label: "hyperParamFields 来源" },
+    { from: "hp", fromSide: "bottom", to: "cf", toSide: "top", type: "dep", label: "产出字段清单" },
+    { from: "vo", fromSide: "bottom", to: "vm", toSide: "top", type: "compose" },
+    { from: "mm", fromSide: "bottom", to: "vmd", toSide: "top", type: "compose" },
+    { from: "vo", fromSide: "right", to: "mm", toSide: "left", type: "assoc", label: "对应" }
+  ];
+  edges.forEach(e => drawEdge(ctx, reg, e));
+  drawNote(ctx, 30, 470, "UI 表单字段 = Hyperparameter 定义的清单；表单预填值 = 基准版本 metadata 的取值", 620);
+  drawNote(ctx, 700, 470, "模型形状（类图 mm）终身不可变；改网络结构 = 新建模型而非新版本", 380);
+})();
+
+/* ---------- 类图 C：训练运行时层 ---------- */
+(function () {
+  const ctx = setupCanvas("cvC", 1440, 850);
+  const reg = {};
+  const boxes = [
+    { id: "ctrl", x: 30, y: 30, name: "RLController", stereotype: "REST · /northstar/rl",
+      methods: ["+createTask() / updateParams()", "+pause() / resume() / stop()", "+fork() / findModels()"] },
+    { id: "msvc", x: 30, y: 240, name: "RLModelService",
+      methods: ["+fork(modelId, from): int", "-validateSpecHash()", "-validateCheckpoint()"] },
+    { id: "svc", x: 30, y: 560, name: "RLTrainingService",
+      methods: ["+createTask(dto)", "+updateParams(taskId, params)", "-roundLoop()  // 每轮重读超参"] },
+    { id: "task", x: 30, y: 700, name: "RLTrainingTaskDO", stereotype: "JPA",
+      attrs: ["+taskId / modelId / baseVersion", "+contracts / 三个起始日", "+hyperParams(JSON) / status", "+currentRound / totalRounds"] },
+    { id: "runner", x: 390, y: 40, name: "RLTrainingRunner（一任务一实例）",
+      attrs: ["-envs: Map<Contract, TradingEnvironment>"],
+      methods: ["+runRound(task, hyperParams)", "-sampleEnv(env)  // 串行遍历"] },
+    { id: "env", x: 390, y: 290, name: "TradingEnvironment（单合约）",
+      attrs: ["-replay × sandbox × agent 各一"],
+      methods: ["+reset(timeSlice): float[]", "+step(action): StepResult"] },
+    { id: "store", x: 390, y: 530, name: "ExperienceStore（任务级共享）", stereotype: "interface",
+      methods: ["+append(t: Transition)", "+loadIncremental()", "+clearAfterTrain()  // PPO on-policy"] },
+    { id: "csv", x: 390, y: 710, name: "CsvExperienceStore（DQN）",
+      methods: ["追加持久 replay buffer", "增量读取，避免全量 O(n²) I/O"] },
+    { id: "replay", x: 880, y: 30, name: "MarketReplay（单合约）",
+      methods: ["+loadOnce()  // 启动时并行预载缓存", "+locate(timeSlice, seed)  // 随机切片+预热回溯", "+advanceBar(): AdvanceResult"] },
+    { id: "sandbox", x: 880, y: 240, name: "ModuleSandbox（单模组）",
+      methods: ["+resetAccount()", "+submitOrder()  // 即时成交语义", "+equity(): double"] },
+    { id: "bridge", x: 880, y: 460, name: "PythonProcessBridge",
+      methods: ["+runTrainRound(args): loss", "// 子进程 train_round.py"] },
+    { id: "agent", x: 1180, y: 30, name: "RLAgent", stereotype: "interface",
+      methods: ["+act(state): Action", "+qValues(state): float[]", "+close()"] },
+    { id: "dqn", x: 1180, y: 220, name: "DqnAgent",
+      attrs: ["-model: DJL Model", "-predictor: Predictor"] },
+    { id: "factory", x: 1180, y: 400, name: "RLAgentFactory",
+      methods: ["+fromVersionDir(dir, actionEnum)"] }
+  ];
+  boxes.forEach(b => drawClassBox(ctx, reg, b));
+  const edges = [
+    { from: "ctrl", fromSide: "bottom", to: "msvc", toSide: "top", type: "dep" },
+    { from: "ctrl", fromSide: "right", to: "svc", toSide: "top", type: "dep", via: [340, 90] },
+    { from: "svc", fromSide: "bottom", to: "task", toSide: "top", type: "dep" },
+    { from: "svc", fromSide: "right", to: "runner", toSide: "left", type: "compose" },
+    { from: "runner", fromSide: "bottom", to: "env", toSide: "top", type: "compose", label: "1..n（每合约一个）" },
+    { from: "runner", fromSide: "right", to: "store", toSide: "top", type: "dep", via: [700, 90], label: "创建" },
+    { from: "runner", fromSide: "right", to: "bridge", toSide: "left", type: "dep", label: "每轮调用" },
+    { from: "env", fromSide: "top", to: "replay", toSide: "bottom", type: "compose" },
+    { from: "env", fromSide: "right", to: "sandbox", toSide: "left", type: "compose" },
+    { from: "env", fromSide: "top", to: "agent", toSide: "left", type: "compose", label: "唯一绑定" },
+    { from: "env", fromSide: "bottom", to: "store", toSide: "top", type: "dep", label: "写入（所有合约共享）" },
+    { from: "csv", fromSide: "top", to: "store", toSide: "bottom", type: "realize" },
+    { from: "dqn", fromSide: "top", to: "agent", toSide: "bottom", type: "realize" },
+    { from: "factory", fromSide: "left", to: "agent", toSide: "left", type: "dep", via: [1130, 425] }
+  ];
+  edges.forEach(e => drawEdge(ctx, reg, e));
+  drawNote(ctx, 30, 350, "fork 校验：specHash + checkpointSignature（见时序图 4）", 300);
+  drawNote(ctx, 620, 590, "轮边界调参：每轮开始重读任务最新超参", 250);
+  drawNote(ctx, 880, 560, "数据任务启动时并行预载，缓存于各 Environment 内；reset 零 I/O", 330);
+  drawNote(ctx, 880, 596, "不同合约 = 同一游戏的不同挑战：经验汇入同一经验集，训练同一个 model", 350);
+  drawNote(ctx, 880, 360, "AdvanceResult：WARMUP / OK / EXHAUSTED(=truncated)；训练随机切片（seed 可复现），评估固定时段", 380);
+  drawNote(ctx, 390, 820, "各 RLAgent 实例是同一 model.pt 的只读副本（Predictor 线程安全约束），每轮训练后同步刷新权重", 560);
+})();
+
+/* ================= 时序图渲染 ================= */
+
+function renderSequence(id, spec) {
+  const probe = document.createElement("canvas").getContext("2d");
+  probe.font = FONT;
+  const margin = 36, topBoxY = 22, topBoxH = 28;
+  const pw = spec.participants.map(p => Math.max(96, probe.measureText(p).width + 28));
+  const xs = [];
+  let x = margin;
+  pw.forEach(w => { xs.push(x + w / 2); x += w + 48; });
+  const right = x - 48 + margin;
+
+  // 第一遍：布局 y
+  let y = 96;
+  const laid = [], stack = [];
+  spec.events.forEach(ev => {
+    if (ev.t === "fs") { y += 8; const fr = { t: "fs", kind: ev.kind, label: ev.label, y0: y, depth: stack.length }; stack.push(fr); laid.push(fr); y += 26; }
+    else if (ev.t === "fe") { y += 12; stack.pop().y1 = y; }
+    else if (ev.t === "else") { y += 12; laid.push({ t: "else", y, label: ev.label, fr: stack[stack.length - 1] }); y += 12; }
+    else if (ev.t === "note") { laid.push({ t: "note", y, label: ev.label }); y += 34; }
+    else { ev.y = y; laid.push(ev); y += (ev.t === "self" ? 46 : 40); }
+  });
+  const bottom = y + 26;
+  const ctx = setupCanvas(id, right, bottom);
+
+  // 组合片段
+  laid.filter(e => e.t === "fs").forEach(fr => {
+    const x0 = margin - 18 + fr.depth * 12, x1 = right - 12 - fr.depth * 0;
+    ctx.fillStyle = "rgba(148,163,184,0.07)";
+    ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 1;
+    ctx.fillRect(x0, fr.y0, x1 - x0, fr.y1 - fr.y0);
+    ctx.strokeRect(x0, fr.y0, x1 - x0, fr.y1 - fr.y0);
+    ctx.font = "bold 11px sans-serif";
+    const kw = ctx.measureText(fr.kind).width + 12;
+    ctx.fillStyle = "#e2e8f0";
+    ctx.fillRect(x0, fr.y0, kw, 16);
+    ctx.strokeRect(x0, fr.y0, kw, 16);
+    ctx.fillStyle = INK; ctx.fillText(fr.kind, x0 + 6, fr.y0 + 12);
+    ctx.font = FONT; ctx.fillStyle = "#4a5568";
+    ctx.fillText(fr.label, x0 + kw + 8, fr.y0 + 13);
+  });
+  laid.filter(e => e.t === "else").forEach(el => {
+    const x0 = margin - 18 + el.fr.depth * 12;
+    ctx.setLineDash([4, 4]); ctx.strokeStyle = "#94a3b8";
+    ctx.beginPath(); ctx.moveTo(x0, el.y); ctx.lineTo(right - 12, el.y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font = FONT; ctx.fillStyle = "#4a5568";
+    ctx.fillText("[" + el.label + "]", x0 + 10, el.y - 5);
+  });
+
+  // 生命线与参与者
+  spec.participants.forEach((p, i) => {
+    ctx.setLineDash([5, 4]); ctx.strokeStyle = "#cbd5e0"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(xs[i], topBoxY + topBoxH); ctx.lineTo(xs[i], bottom - 14); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#eef2ff"; ctx.strokeStyle = EDGE; ctx.lineWidth = 1.2;
+    ctx.fillRect(xs[i] - pw[i] / 2, topBoxY, pw[i], topBoxH);
+    ctx.strokeRect(xs[i] - pw[i] / 2, topBoxY, pw[i], topBoxH);
+    ctx.font = FONT; ctx.fillStyle = "#1a202c"; ctx.textAlign = "center";
+    ctx.fillText(p, xs[i], topBoxY + 18);
+    ctx.textAlign = "left";
+  });
+
+  // 事件
+  laid.forEach(ev => {
+    if (ev.t === "note") {
+      ctx.fillStyle = "#fffbe6"; ctx.strokeStyle = "#c8b26a";
+      ctx.fillRect(margin - 18, ev.y - 4, right - 12 - (margin - 18), 24);
+      ctx.strokeRect(margin - 18, ev.y - 4, right - 12 - (margin - 18), 24);
+      ctx.font = FONT_S; ctx.fillStyle = "#744d0e";
+      ctx.fillText("※ " + ev.label, margin - 8, ev.y + 12);
+      return;
+    }
+    if (ev.t === "msg") {
+      const x1 = xs[ev.from], x2 = xs[ev.to], ang = Math.atan2(0, x2 - x1);
+      ctx.strokeStyle = EDGE; ctx.fillStyle = EDGE; ctx.lineWidth = 1.2;
+      ctx.setLineDash(ev.dashed ? [5, 4] : []);
+      ctx.beginPath(); ctx.moveTo(x1, ev.y); ctx.lineTo(x2, ev.y); ctx.stroke();
+      ctx.setLineDash([]);
+      if (ev.dashed) drawOpenArrow(ctx, x2, ev.y, ang); else drawSolidArrow(ctx, x2, ev.y, ang);
+      ctx.font = FONT; ctx.fillStyle = INK; ctx.textAlign = "center";
+      ctx.fillText(ev.label, (x1 + x2) / 2, ev.y - 6);
+      ctx.textAlign = "left";
+      return;
+    }
+    if (ev.t === "self") {
+      const x1 = xs[ev.from];
+      ctx.strokeStyle = EDGE; ctx.fillStyle = EDGE; ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(x1, ev.y); ctx.lineTo(x1 + 34, ev.y);
+      ctx.lineTo(x1 + 34, ev.y + 18); ctx.lineTo(x1, ev.y + 18);
+      ctx.stroke();
+      drawSolidArrow(ctx, x1, ev.y + 18, Math.PI);
+      ctx.font = FONT; ctx.fillStyle = INK;
+      ctx.fillText(ev.label, x1 + 42, ev.y + 13);
+    }
+  });
+}
+
+/* ---------- 时序图 1：训练主循环 ---------- */
+renderSequence("cvS1", {
+  participants: ["前端 UI", "RLController", "RLTrainingService", "RLTrainingRunner", "TradingEnvironment", "Python 子进程", "评估器", "SSE 广播"],
+  events: [
+    { t: "msg", from: 0, to: 1, label: "POST /rl/training" },
+    { t: "msg", from: 1, to: 2, label: "createTask(dto)" },
+    { t: "self", from: 2, label: "校验 specHash，持久化任务" },
+    { t: "note", label: "任意时刻：PUT /rl/training/{id}/params → 写入任务，下一轮生效" },
+    { t: "fs", kind: "loop", label: "每一轮 round（轮边界调参）" },
+    { t: "self", from: 2, label: "重读最新超参数" },
+    { t: "msg", from: 2, to: 3, label: "runRound(task, hyperParams)" },
+    { t: "fs", kind: "loop", label: "每个合约的 TradingEnvironment（串行采样，数据已预载）" },
+    { t: "msg", from: 3, to: 4, label: "采样 episodes（见时序图 2）" },
+    { t: "msg", from: 4, to: 3, label: "transitions → CSV 分片", dashed: true },
+    { t: "fe" },
+    { t: "note", label: "不同合约 = 同一游戏的不同挑战：所有 transition 汇入同一经验集，训练同一个 model" },
+    { t: "msg", from: 3, to: 5, label: "train_round.py --lr --gamma ..." },
+    { t: "self", from: 5, label: "恢复 checkpoint → 增量读 replay → 训练 → 导出 model.pt" },
+    { t: "msg", from: 5, to: 3, label: "stdout: loss", dashed: true },
+    { t: "msg", from: 3, to: 6, label: "验证时段贪心回测" },
+    { t: "msg", from: 6, to: 3, label: "胜率 / 盈亏比 / 笔数 / 收益率", dashed: true },
+    { t: "msg", from: 3, to: 2, label: "RLRoundMetrics", dashed: true },
+    { t: "fs", kind: "alt", label: "胜率>50% 且 盈亏比>2 且 ≥100 笔" },
+    { t: "self", from: 2, label: "版本 metadata 记录 acceptedBy（达标）" },
+    { t: "fe" },
+    { t: "msg", from: 2, to: 7, label: "推送本轮指标" },
+    { t: "msg", from: 7, to: 0, label: "曲线 / 表格 / 进度实时更新", dashed: true },
+    { t: "fe" }
+  ]
+});
+
+/* ---------- 时序图 2：Episode 事件驱动决策 ---------- */
+renderSequence("cvS2", {
+  participants: ["采样 Runner", "TradingEnvironment（单合约）", "MarketReplay", "ModuleSandbox", "RLStrategy", "RLAgent(ε-greedy)", "ExperienceStore（共享）"],
+  events: [
+    { t: "self", from: 0, label: "选择该合约对应的 Environment" },
+    { t: "msg", from: 0, to: 1, label: "reset(timeSlice)" },
+    { t: "msg", from: 1, to: 2, label: "locate(timeSlice)（纯游标，零 I/O）" },
+    { t: "msg", from: 1, to: 3, label: "resetAccount()" },
+    { t: "fs", kind: "loop", label: "预热期（只喂数据不采样）" },
+    { t: "msg", from: 1, to: 2, label: "advanceBar()" },
+    { t: "msg", from: 2, to: 3, label: "bar → 指标/状态更新", dashed: true },
+    { t: "fe" },
+    { t: "msg", from: 1, to: 4, label: "observe(ctx, contract)" },
+    { t: "msg", from: 4, to: 1, label: "初始状态 s₀", dashed: true },
+    { t: "fs", kind: "loop", label: "决策循环（直到回合结束）" },
+    { t: "msg", from: 0, to: 5, label: "act(s)（ε-greedy 装饰）" },
+    { t: "msg", from: 5, to: 0, label: "动作 a", dashed: true },
+    { t: "msg", from: 0, to: 1, label: "step(a)" },
+    { t: "msg", from: 1, to: 4, label: "onAction(a, ctx, contract)" },
+    { t: "msg", from: 4, to: 3, label: "submitOrderReq → 即时成交" },
+    { t: "fs", kind: "loop", label: "推进 bar，直到触发" },
+    { t: "msg", from: 1, to: 2, label: "advanceBar()" },
+    { t: "msg", from: 2, to: 3, label: "浮动盈亏更新", dashed: true },
+    { t: "msg", from: 1, to: 4, label: "shouldObserve(ctx)?" },
+    { t: "msg", from: 4, to: 1, label: "false → 继续推进", dashed: true },
+    { t: "fe" },
+    { t: "note", label: "触发点：shouldObserve()=true / 超时 maxHoldingBars / 数据耗尽 / 强平" },
+    { t: "msg", from: 1, to: 4, label: "observe() → s′；reward(ctx) → R" },
+    { t: "msg", from: 1, to: 6, label: "append(s, a, R, s′, dt, terminated)" },
+    { t: "msg", from: 1, to: 0, label: "StepResult(s′, R, done)", dashed: true },
+    { t: "fe" },
+    { t: "note", label: "回合结束语义：数据耗尽 = truncated（bootstrap）；权益击穿 = terminated（真失败）" }
+  ]
+});
+
+/* ---------- 时序图 3：实盘推理 ---------- */
+renderSequence("cvS3", {
+  participants: ["事件引擎", "TradeModule", "ModuleContext", "RLStrategy", "RLAgent(贪心)", "风控/状态机", "TradeGateway"],
+  events: [
+    { t: "msg", from: 0, to: 1, label: "Bar 事件" },
+    { t: "msg", from: 1, to: 2, label: "onEvent（按绑定合约过滤）" },
+    { t: "msg", from: 2, to: 3, label: "onMergedBar(bar)" },
+    { t: "self", from: 3, label: "shouldObserve(ctx)?" },
+    { t: "fs", kind: "alt", label: "false：无需决策" },
+    { t: "msg", from: 3, to: 2, label: "直接返回（零推理开销）", dashed: true },
+    { t: "else", label: "true：触发决策" },
+    { t: "msg", from: 3, to: 4, label: "act(observe(ctx))" },
+    { t: "msg", from: 4, to: 3, label: "action", dashed: true },
+    { t: "msg", from: 3, to: 2, label: "onAction → submitOrderReq" },
+    { t: "msg", from: 2, to: 5, label: "orderReqFilter + 资金/持仓校验" },
+    { t: "msg", from: 5, to: 6, label: "submitOrder" },
+    { t: "msg", from: 6, to: 2, label: "Order / Trade 回报", dashed: true },
+    { t: "msg", from: 2, to: 3, label: "onOrder / onTrade", dashed: true },
+    { t: "fe" },
+    { t: "note", label: "RL 动作走普通下单链路，不绕过任何既有安全边界" }
+  ]
+});
+
+/* ---------- 时序图 4：fork 血缘校验 ---------- */
+renderSequence("cvS4", {
+  participants: ["前端 UI", "RLController", "RLModelService", "策略当前代码", "父版本 metadata", "新版本目录"],
+  events: [
+    { t: "msg", from: 0, to: 1, label: "POST /rl/models/{id}/fork?from=v2" },
+    { t: "msg", from: 1, to: 2, label: "fork(modelId, v2)" },
+    { t: "msg", from: 2, to: 3, label: "计算当前 specHash" },
+    { t: "msg", from: 2, to: 4, label: "读取 specHash / checkpointSignature" },
+    { t: "fs", kind: "alt", label: "specHash 不一致（特征语义漂移）" },
+    { t: "msg", from: 2, to: 1, label: "409 + 特征 diff" },
+    { t: "msg", from: 1, to: 0, label: "提示：新建模型 或 回退策略代码", dashed: true },
+    { t: "else", label: "checkpoint 不兼容" },
+    { t: "msg", from: 2, to: 1, label: "409（仅允许 inheritWeights=false 从零训练）" },
+    { t: "else", label: "校验通过" },
+    { t: "msg", from: 2, to: 5, label: "复制 checkpoint.pt（weightInherited=true）" },
+    { t: "msg", from: 2, to: 5, label: "写版本 metadata（parentVersion / specHash）" },
+    { t: "msg", from: 2, to: 0, label: "返回 v{n}，可创建训练任务", dashed: true },
+    { t: "fe" }
+  ]
+});
+
+/* ---------- 图例 ---------- */
+(function () {
+  const ctx = setupCanvas("cvL", 760, 150);
+  const reg = {
+    a1: { x: 30, y: 20, w: 10, h: 10 }, a2: { x: 180, y: 20, w: 10, h: 10 },
+    b1: { x: 30, y: 55, w: 10, h: 10 }, b2: { x: 180, y: 55, w: 10, h: 10 },
+    c1: { x: 30, y: 90, w: 10, h: 10 }, c2: { x: 180, y: 90, w: 10, h: 10 },
+    d1: { x: 330, y: 20, w: 10, h: 10 }, d2: { x: 480, y: 20, w: 10, h: 10 },
+    e1: { x: 330, y: 55, w: 10, h: 10 }, e2: { x: 480, y: 55, w: 10, h: 10 }
+  };
+  drawEdge(ctx, reg, { from: "a1", fromSide: "right", to: "a2", toSide: "left", type: "inherit" });
+  ctx.font = FONT; ctx.fillStyle = INK; ctx.fillText("继承（extends）", 200, 30);
+  drawEdge(ctx, reg, { from: "b1", fromSide: "right", to: "b2", toSide: "left", type: "realize" });
+  ctx.fillText("实现（implements）", 200, 65);
+  drawEdge(ctx, reg, { from: "c1", fromSide: "right", to: "c2", toSide: "left", type: "compose" });
+  ctx.fillText("组合（ owns ）", 200, 100);
+  drawEdge(ctx, reg, { from: "d1", fromSide: "right", to: "d2", toSide: "left", type: "dep" });
+  ctx.fillText("依赖（虚线箭头）", 500, 30);
+  drawEdge(ctx, reg, { from: "e1", fromSide: "right", to: "e2", toSide: "left", type: "assoc" });
+  ctx.fillText("关联（实线箭头）", 500, 65);
+  drawNote(ctx, 330, 88, "注释便签", 150);
+})();
+</script>
+</body>
+</html>
