@@ -1,6 +1,7 @@
 package org.dromara.northstar.common.utils;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 
 public class ReflectionUtil {
 	
@@ -59,9 +60,9 @@ public class ReflectionUtil {
 
         // 对常见类型进行转换
         if (fieldType == int.class || fieldType == Integer.class) {
-            return Integer.parseInt(value.toString());
+            return new BigDecimal(value.toString().trim()).intValue();
         } else if (fieldType == long.class || fieldType == Long.class) {
-            return Long.parseLong(value.toString());
+            return new BigDecimal(value.toString().trim()).longValue();
         } else if (fieldType == double.class || fieldType == Double.class) {
             return Double.parseDouble(value.toString());
         } else if (fieldType == float.class || fieldType == Float.class) {

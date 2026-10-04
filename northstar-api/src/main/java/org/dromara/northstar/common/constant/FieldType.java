@@ -7,7 +7,9 @@ public enum FieldType {
 	PASSWORD,
 	
 	NUMBER,
-	
+
+	INTEGER,
+
 	DATE,
 	
 	SELECT,

@@ -29,6 +29,12 @@ class ReflectionUtilTest {
         // 测试设置长整型字段
         ReflectionUtil.setFieldValue(mock, "volume", 200000000L);
         assertEquals(200000000L, mock.volume);
+
+        // 测试浮点字符串设置整型字段（存储层 Double 取值回填 int 字段的场景）
+        ReflectionUtil.setFieldValue(mock, "number", 128.0D);
+        assertEquals(128, mock.number);
+        ReflectionUtil.setFieldValue(mock, "volume", "100000000.0");
+        assertEquals(100000000L, mock.volume);
     }
 
     @Test
