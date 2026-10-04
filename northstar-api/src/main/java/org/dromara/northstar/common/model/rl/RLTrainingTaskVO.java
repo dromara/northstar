@@ -30,6 +30,14 @@ public class RLTrainingTaskVO {
 	private String validationStartDate;
 	private int totalRounds;
 	private int episodesPerRound;
+	/** 沙箱每局初始资金 */
+	private double initBalance;
+	/** 决策点超时强触发 bar 数 */
+	private int maxHoldingBars;
+	/** 权益击穿阈值（相对初始资金的最大回撤比例） */
+	private double ruinThreshold;
+	/** 单局最长 bar 数（采样预算） */
+	private int maxEpisodeBars;
 	private RLTrainingStatus status;
 	private int currentRound;
 	private long createdAt;

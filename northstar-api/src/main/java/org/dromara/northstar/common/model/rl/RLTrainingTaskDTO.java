@@ -35,6 +35,14 @@ public class RLTrainingTaskDTO {
 	private int totalRounds;
 	/** 每轮局数（全部合约合计，均分到各合约环境） */
 	private int episodesPerRound;
+	/** 沙箱每局初始资金（正数） */
+	private Double initBalance;
+	/** 决策点超时强触发 bar 数（防死行情里永不触发导致数据饿死，>=1） */
+	private Integer maxHoldingBars;
+	/** 权益击穿阈值（相对初始资金的最大回撤比例，(0,1)，击穿即 terminated） */
+	private Double ruinThreshold;
+	/** 单局最长 bar 数（采样预算，>=1） */
+	private Integer maxEpisodeBars;
 	/** 超参数取值表（字段清单由模型的 Hyperparameter 类定义） */
 	private Map<String, Double> hyperParams;
 	/** 显式降级路径：baseVersion > 0 时设为 false 表示不继承权重从零训练（血缘仍记录父版本） */
