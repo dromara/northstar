@@ -69,6 +69,17 @@ public class CommonControllerAdvice {
 		return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ResultBean<>(HttpStatus.NOT_ACCEPTABLE.value(), e.getLocalizedMessage()));
 	}
 	
+	/** 状态冲突（如 RL fork 双重校验失败）：透传具体原因，避免被兜底成 500 通用文案 */
+	@ExceptionHandler(IllegalStateException.class)
+	public ResponseEntity<ResultBean<Void>> handleStateException(Exception e) {
+		if(log.isDebugEnabled()) {
+			log.error("", e);
+		} else {			
+			log.error(e.getLocalizedMessage());
+		}
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResultBean<>(HttpStatus.CONFLICT.value(), e.getLocalizedMessage()));
+	}
+	
 	@ExceptionHandler(NoResourceFoundException.class)
 	public ResponseEntity<Void> handleNoResourceException(Exception e, HttpServletRequest req){
 		ipColltr.log(req);

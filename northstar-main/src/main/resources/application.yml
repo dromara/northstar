@@ -18,6 +18,17 @@ northstar:
   data-service:
     #baseUrl: http://127.0.0.1:443
     baseUrl: https://marketplace.quantit.tech
+  rl:
+    # RL 模型根目录（相对工作目录；不存在时自动回退 northstar-rl/models 等候选路径）
+    models-root: ${NS_RL_MODELS_ROOT:models}
+    # Python 解释器（建议使用 northstar-rl/.venv）
+    python: ${NS_RL_PYTHON:python}
+    # train_round.py 所在目录（缺省按 northstar-rl/training 等候选路径解析）
+    training-dir: ${NS_RL_TRAINING_DIR:}
+    # 单轮训练执行器：python（生产）/ stub（无 PyTorch 的测试环境）
+    train-executor: ${NS_RL_TRAIN_EXECUTOR:python}
+    # 训练数据根目录（数据加载阶段落地的 CSV，按任务ID分目录）
+    data-root: ${NS_RL_DATA_ROOT:data/rl-training}
     
 logging:
   level: 

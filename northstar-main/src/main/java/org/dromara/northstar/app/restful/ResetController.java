@@ -4,6 +4,7 @@ import org.dromara.northstar.app.service.ContractConfigService;
 import org.dromara.northstar.app.service.CustomIndicatorService;
 import org.dromara.northstar.app.service.GatewayService;
 import org.dromara.northstar.app.service.ModuleService;
+import org.dromara.northstar.app.rl.RLTrainingService;
 import org.dromara.northstar.common.constant.GatewayUsage;
 import org.dromara.northstar.event.SseBroadcastHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +35,15 @@ public class ResetController {
 	
 	@Autowired
 	private ContractConfigService contractConfigService;
+	
+	@Autowired
+	private RLTrainingService rlTrainingService;
 
 	@DeleteMapping
 	public void reset() {
 		log.info("重置程序");
+		// 停止并清空 RL 训练任务
+		rlTrainingService.resetAll();
 		// 移除模组
 		moduleService.getModules().stream()
 			.forEach(m -> moduleService.removeModule(m.getDescription().getName()));

@@ -32,7 +32,7 @@ northstar/
 ├── northstar-gateway-sim/           # 模拟网关模块（模拟行情/交易）
 ├── northstar-gateway-playback/      # 回放网关模块（回测）
 ├── northstar-strategy-example/      # 策略示例模块
-├── northstar-rl/                    # 强化学习模块（DJL/PyTorch 推理 + Python 离线训练），另有独立 README.md
+├── northstar-rl/                    # 强化学习模块（RL 策略 SPI 实现、模型版本管理、DJL 推理、Python 离线训练），另有 DESIGN.md 与 README.md
 ├── northstar-main/                  # 主 Spring Boot 应用模块
 ├── northstar-monitor-next/          # 前端项目（Vue3 + Vite），以 Git 子模块引入，另有独立 AGENTS.md
 ├── northstar-doc/                   # 用户使用文档（VitePress 静态站点，pnpm dev/build/preview）
@@ -146,6 +146,8 @@ pnpm e2e       # Cypress E2E 测试
 ### `northstar-api` 核心目录
 
 - `org.dromara.northstar.common.model.core/` - 核心数据模型（`Tick`、`Bar`、`Contract`、`Order`、`Trade`、`Position`、`Account`、`SubmitOrderReq` 等）
+- `org.dromara.northstar.common.model.rl/` - RL 训练 Web 契约（`RLTrainingTaskDTO/VO`、`RLRoundMetrics`、`RLModelVO`、`RLStrategyVO` 等）
+- `org.dromara.northstar.strategy.rl/` - RL 策略 SPI（`RLStrategy`、`RLModelSpec`、`RLFeatureSpec`、`RLRewardContext`、`TradeAction`）
 - `org.dromara.northstar.common.constant/` - 公共常量（`Constants.java`）
 - `org.dromara.northstar.strategy/` - 策略框架（`TradeStrategy`、`AbstractStrategy`、`IModuleContext`、`IAccount`、`IModuleAccount`）
 - `org.dromara.northstar.indicator/` - 指标框架（`Indicator`、`AbstractIndicator`）及指标实现；`Configuration`、`Num` 位于 `indicator/model/` 子包
@@ -196,6 +198,7 @@ public class NorthstarApplication { ... }
 | `MetaDataController` | 元数据管理 |
 | `NotificationController` | 通知设置 |
 | `ContractConfigController` | 合约配置 |
+| `RLController` | RL 强化学习训练（策略/模型目录、训练任务 CRUD 与三段式生命周期控制：创建/加载数据/启动训练/暂停/继续/停止/删除，路径 `/northstar/rl`） |
 | `ResetController` | 系统重置操作（仅在 `e2e`、`dev` profile 启用） |
 | `CommonControllerAdvice` | 全局异常处理 |
 
@@ -215,6 +218,23 @@ public class NorthstarApplication { ... }
 - `MetaDataService` - 元数据
 - `MultichartsService` - 多图表
 - `NotificationService` - 通知
+- `RLTrainingService`（`org.dromara.northstar.app.rl`）- RL 训练任务三段式生命周期（创建 CREATED → 数据加载 LOADING/READY → 启动训练 RUNNING）、模型目录、SSE 推送（事件名 `RL_TRAINING`）；同包还有 `RLTrainingDataManager`（数据加载阶段从数据源拉取行情并落地 CSV，训练阶段只读 CSV，CSV 按任务ID分目录存于 `northstar.rl.data-root`）、`TradingEnvironment`（单合约交易环境）、`RLTrainingRunner`（按轮驱动）、`RLModuleSandbox`（模组沙箱）
+
+### RL 训练配置（application.yml `northstar.rl.*`）
+
+| 配置项 | 默认值 | 说明 |
+|---|---|---|
+| `models-root` | `models` | 模型根目录（缺省按 `models`、`northstar-rl/models`、`../northstar-rl/models` 候选解析） |
+| `python` | `python` | Python 解释器路径（建议 northstar-rl/.venv） |
+| `training-dir` | 自动解析 | `train_round.py` 所在目录 |
+| `train-executor` | `python` | `python` 子进程 / `stub`（无 PyTorch 的测试环境） |
+| `data-root` | `data/rl-training` | 训练数据根目录（数据加载阶段落地的 CSV，按任务ID分目录，任务数据仅加载一次，重启后仍有效） |
+
+存放归属原则：`data-root` 存任务级临时生产资料（行情 CSV，随任务删除）；`models-root` 存版本级长期资产（checkpoint.pt、model.pt、rounds/ 经验分片、buffer.npz、ingested.json、版本 metadata，随版本保留，供跨任务 fork 继承、模组绑定与血缘复盘）。详见 `northstar-rl/DESIGN.md` §5.2「数据归属原则」。
+
+沙箱每局初始资金、决策点超时强触发 bar 数、权益击穿阈值、单局最长 bar 数四项已移至训练任务创建窗口（任务级参数，随任务持久化），不再由配置文件管理。
+
+均可用环境变量覆盖（`NS_RL_MODELS_ROOT`、`NS_RL_PYTHON`、`NS_RL_TRAINING_DIR`、`NS_RL_TRAIN_EXECUTOR`、`NS_RL_DATA_ROOT` 等）。
 
 ### 事件引擎
 
@@ -355,19 +375,20 @@ server:
   - `@MockitoBean` → `org.springframework.test.context.bean.override.mockito.MockitoBean`（spring-test）
   - `@DataJpaTest` → `org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest`（依赖 `spring-boot-data-jpa-test`，northstar-main 已声明）
   - `@AutoConfigureMockMvc` → `org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc`（依赖 `spring-boot-webmvc-test`，northstar-main 已声明）
-- 当前项目共有 **91** 个 `*Test.java` 文件，分布如下：
-  - `northstar-api`: 40
-  - `northstar-main`: 36（含 `TradePlanE2ETest`：画线交易计划的 Controller 层 e2e 测试，通过向事件引擎投递指定价格的 Tick 模拟行情，替代原 Cypress 版本中依赖随机行情的用例；以及 `PlannedTradeHandlerTest` / `LineTraderTest`：画线交易计划的纯 mock 单元测试）
+- 当前项目共有 **104** 个 `*Test.java` 文件，分布如下：
+  - `northstar-api`: 41（含 `RLModelSpecTest`：RL 模型规格 specHash 稳定性与结构化 diff）
+  - `northstar-main`: 42（含 `TradePlanE2ETest`：画线交易计划的 Controller 层 e2e 测试，通过向事件引擎投递指定价格的 Tick 模拟行情，替代原 Cypress 版本中依赖随机行情的用例；以及 `PlannedTradeHandlerTest` / `LineTraderTest`：画线交易计划的纯 mock 单元测试；`RLTrainingServiceTest` / `RLTrainingRunnerTest` / `TradingEnvironmentTest` / `RLTrainingDataManagerTest`：RL 训练服务与生命周期、按轮驱动（串行信号量/轮边界调参/达标判定/配额分配）、交易环境（三类强制触发点）与训练数据 CSV 存取；`RLControllerTest`：RL REST 端点）
   - `northstar-gateway-sim`: 6
-  - `northstar-gateway-playback`: 4
+  - `northstar-gateway-playback`: 5
   - `northstar-strategy-example`: 0
-  - `northstar-rl`: 5（含 `DqnInferenceExampleTest`：真实加载 `models/cartpole/model.pt` 的推理示例，默认跳过，需 `-Drl.inference.test=true` 显式开启）
+  - `northstar-rl`: 10（含 `DqnInferenceExampleTest`：真实加载 `models/cartpole/versions/v1/model.pt` 的推理示例，默认跳过，需 `-Drl.inference.test=true` 显式开启；`RlTrendStrategyGoldenTest`：rlSpec 的 specHash golden 测试，防策略无意识演进；`RlTrendStrategyTest`：observe() golden 快照、reward 重罚分支与模组加载 specHash 失败路径；`RLModelStoreTest`：模型/版本目录、fork 校验与回收；`PythonTrainExecutorTest`：训练 stdout 协议解析）
+- Python 侧另有 `northstar-rl/training/tests/`（pytest，覆盖 DQN 训练器、增量经验读取、版本目录契约、预处理存量转换与原子写不残留）
 
 ### 集成测试
 
 - 命名：`*IT.java`
 - 插件：Maven Failsafe 3.5.6（绑定 integration-test + verify）
-- 现有 5 个 RESTful API e2e 测试位于 `northstar-main/src/test/java/org/dromara/northstar/app/restful/it/`
+- 现有 6 个 RESTful API e2e 测试位于 `northstar-main/src/test/java/org/dromara/northstar/app/restful/it/`（含 `RLTrainingFlowIT`：RL 训练全链路，数据源与 Python 执行器以替身注入）
 - 运行：`mvn failsafe:integration-test` 或随 `mvn clean verify` 执行
 
 ### 测试覆盖率

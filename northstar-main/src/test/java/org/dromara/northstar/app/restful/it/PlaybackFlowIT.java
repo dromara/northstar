@@ -56,10 +56,11 @@ class PlaybackFlowIT extends RestE2ESupport {
 		JSONObject status = JSON.parseObject(statusJson);
 		assertThat(status.getString("state")).isEqualTo("INITIAL");
 
-		// INITIAL 态直接开始回放 → 500（兜底错误响应）
+		// INITIAL 态直接开始回放 → 409 状态冲突（IllegalStateException 透出具体原因）
 		mvc.perform(authed(auth, get("/northstar/playback/start")))
-				.andExpect(status().isInternalServerError())
-				.andExpect(content().string(containsString("\"status\":500")));
+				.andExpect(status().isConflict())
+				.andExpect(content().string(containsString("\"status\":409")))
+				.andExpect(content().string(containsString("需先进行数据预加载")));
 
 		// 调速
 		mvc.perform(authed(auth, put("/northstar/playback/speed/{interval}", 100)))

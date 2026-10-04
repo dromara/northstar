@@ -448,8 +448,8 @@ public class ModuleService implements CommandLineRunner {
 		List<ModuleDealRecordVO> dealRecords = getDealRecords(moduleName);
 		int totalWins = dealRecords.stream().filter(rec -> rec.getProfit() > 0).toList().size();
 		
-		double avgProfit = dealRecords.stream().filter(rec -> rec.getProfit() > 0).mapToDouble(rec -> rec.getProfit()).average().orElse(0.1D);
-		double avgLoss = dealRecords.stream().filter(rec -> rec.getProfit() < 0).mapToDouble(rec -> Math.abs(rec.getProfit())).average().orElse(0.1D);
+		double avgProfit = dealRecords.stream().filter(rec -> rec.getProfit() > 0).mapToDouble(rec -> rec.getProfit()).average().orElse(0);
+		double avgLoss = dealRecords.stream().filter(rec -> rec.getProfit() < 0).mapToDouble(rec -> Math.abs(rec.getProfit())).average().orElse(0);
 		
 		double maxDrawdown = 0;
 		double peak = initBalance;
@@ -501,10 +501,16 @@ public class ModuleService implements CommandLineRunner {
 						.maxDrawdownRate(maxDrawdownRate)
 						.annualizedReturnRate(annualizedReturnRate)
 						.winRate(100.0 * totalWins / dealRecords.size())
-						.profitLossRatio(avgProfit / avgLoss)
+						// 无亏损（含全胜与零交易）时盈亏比不可比，统一以 null 表达（口径同 BacktestRunner / RLTrainingRunner）
+						.profitLossRatio(profitLossRatio(avgProfit, avgLoss))
 						.modulePositions(positions)
 						.build())
 				.build();
+	}
+
+	/** 平均盈亏比 = 平均盈利 / 平均亏损绝对值；无亏损（avgLoss == 0）时返回 null 表示"不可比" */
+	static Double profitLossRatio(double avgProfit, double avgLoss) {
+		return avgLoss == 0 ? null : avgProfit / avgLoss;
 	}
 
 	@Transactional

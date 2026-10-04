@@ -4,17 +4,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.dromara.northstar.common.constant.Interval;
+import org.dromara.northstar.common.model.BacktestModuleVO;
 import org.dromara.northstar.common.model.ContractChartDescription;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
+import org.dromara.northstar.common.model.DealRecord;
 import org.dromara.northstar.common.model.ListValue;
 import org.dromara.northstar.common.model.ModuleChartDescription;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.TimeValues;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.data.IAccountRepository;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
@@ -48,6 +52,71 @@ class BacktestRunnerTest {
 
 		assertThat(result.getChartData().getData().get(Interval.M1)).hasSize(1);
 		assertThat(result.getChartData().getData().get(Interval.M15)).isEmpty();
+	}
+
+	@Test
+	void shouldReturnNullProfitLossRatioWhenNoLosingDeal() {
+		// 全胜（无亏损）时盈亏比数学上为 +∞，统一以 null 表达（口径同 RLTrainingRunner.profitFactor）
+		BacktestRunner runner = runnerWithDeals(List.of(
+				DealRecord.builder().dealProfit(200).transactionFee(10).build(),
+				DealRecord.builder().dealProfit(100).transactionFee(10).build()));
+
+		List<BacktestModuleVO> result = runner.getBacktestModule();
+
+		assertThat(result).hasSize(1);
+		assertThat(result.get(0).getProfitLossRatio()).isNull();
+		assertThat(result.get(0).getWinRate()).isEqualTo(1.0);
+		assertThat(result.get(0).getTotalTrades()).isEqualTo(2);
+	}
+
+	@Test
+	void shouldReturnNullProfitLossRatioWhenNoDeal() {
+		BacktestRunner runner = runnerWithDeals(List.of());
+
+		BacktestModuleVO result = runner.getBacktestModule().get(0);
+
+		assertThat(result.getProfitLossRatio()).isNull();
+		assertThat(result.getWinRate()).isEqualTo(0);
+	}
+
+	@Test
+	void shouldComputeProfitLossRatioWithLosses() {
+		// 平均盈利 300 / 平均亏损 100 = 3.0
+		BacktestRunner runner = runnerWithDeals(List.of(
+				DealRecord.builder().dealProfit(300).transactionFee(10).build(),
+				DealRecord.builder().dealProfit(-100).transactionFee(10).build()));
+
+		BacktestModuleVO result = runner.getBacktestModule().get(0);
+
+		assertThat(result.getProfitLossRatio()).isEqualTo(3.0);
+		assertThat(result.getWinRate()).isEqualTo(0.5);
+	}
+
+	private BacktestRunner runnerWithDeals(List<DealRecord> deals) {
+		Contract contract = Contract.builder()
+				.contractId("rb0000@SHFE@FUTURES@PLAYBACK")
+				.unifiedSymbol("rb0000@SHFE@FUTURES")
+				.symbol("rb0000")
+				.name("螺纹钢指数")
+				.build();
+		IModuleContext ctx = mock(IModuleContext.class);
+		when(ctx.getModuleDescription()).thenReturn(ModuleDescription.builder()
+				.name("testModule").initBalance(100_000).build());
+		when(ctx.bindedContracts()).thenReturn(List.of(contract));
+		when(ctx.getDefaultVolume()).thenReturn(1);
+		ModuleAccount account = mock(ModuleAccount.class);
+		when(account.getPositions()).thenReturn(List.of());
+		when(ctx.getModuleAccount()).thenReturn(account);
+		IModule module = mock(IModule.class);
+		when(module.getModuleContext()).thenReturn(ctx);
+		IAccountRepository accountRepo = mock(IAccountRepository.class);
+		when(accountRepo.findDealRecords("testModule")).thenReturn(deals);
+		return BacktestRunner.builder()
+				.moduleList(List.of(module))
+				.accountRepo(accountRepo)
+				.fromDate(LocalDate.of(2024, 1, 1))
+				.toDate(LocalDate.of(2024, 2, 1))
+				.build();
 	}
 
 	@Test

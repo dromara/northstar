@@ -297,7 +297,9 @@ public class BacktestRunner {
 							.maxDrawdownPercentage(maxDrawdownPercentage)
 							.annualizedReturn(annualizedReturn)
 							.winRate(dealRecords.isEmpty() ? 0 : winning / dealRecords.size())
-							.profitLossRatio(lossAvg == 0 ? 0 : profitAvg / Math.abs(lossAvg))
+							// 无亏损（含全胜与零交易）时盈亏比数学上为 +∞，不可序列化亦不可比，统一以 null 表达；
+							// 口径与 RLTrainingRunner.profitFactor 保持一致
+							.profitLossRatio(lossAvg == 0 ? null : profitAvg / Math.abs(lossAvg))
 							.totalTrades(dealRecords.size())
 							.build();
 				})
