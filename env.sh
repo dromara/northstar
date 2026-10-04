@@ -6,14 +6,22 @@
 #   1. 创建 ~/northstar-env 与 ~/northstar-dist
 #   2. 检查并安装 JDK（默认 25），自动适配 x86_64 / aarch64
 #   3. 将 JDK 命令软链到系统 PATH，并幂等写入 JAVA_HOME 环境变量
+#   4. 准备 RL 强化学习训练的 Python 环境：在 ~/northstar-env/rl-venv 创建虚拟环境，
+#      安装 northstar-rl/training/requirements.txt 依赖（numpy/torch/gymnasium 等），
+#      并幂等写入 NS_RL_PYTHON 指向该虚拟环境解释器，
+#      应用启动时自动使用（未设置时默认的 python 为系统解释器，缺少依赖会导致训练失败）
+#      注意：venv 属于运行环境而非源码仓库，生产环境（northstar-dist）下没有 northstar-rl 目录
 #
 # 支持通过环境变量覆盖默认行为：
 #   JDK_MAJOR=25            目标 JDK 主版本号
 #   JDK_URL=<url>           自定义下载地址（指定后不再使用内置地址，可指向国内镜像）
-#   ENV_DIR=<path>          JDK 安装目录（默认 ~/northstar-env）
+#   ENV_DIR=<path>          JDK/RL venv 安装目录（默认 ~/northstar-env，rl-venv 位于其下）
 #   DIST_DIR=<path>         部署目录（默认 ~/northstar-dist）
 #   LINK_DIR=<path>         命令软链目录（默认 /usr/local/bin，无权限时自动回退 ~/.local/bin）
 #   CURL_OPTS="<opts>"      透传给 curl 的额外参数（如 "-k" 忽略证书校验）
+#   PYTHON=<path>           用于创建 venv 的系统 Python（默认自动探测 python3 / python）
+#   REQUIREMENTS=<path>     RL 依赖清单 requirements.txt 路径（默认按候选路径自动查找，找不到则用内置默认依赖）
+#   PIP_INDEX_URL=<url>     pip 镜像地址（官方源不可达时，如 https://pypi.tuna.tsinghua.edu.cn/simple）
 #
 # 网络受限环境可在执行前自行 export https_proxy=http://<proxy>:<port>
 #
@@ -30,6 +38,8 @@ ENV_DIR="${ENV_DIR:-$HOME/northstar-env}"
 DIST_DIR="${DIST_DIR:-$HOME/northstar-dist}"
 JDK_HOME="$ENV_DIR/jdk-$JDK_MAJOR"
 CURL_OPTS="${CURL_OPTS:-}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RL_VENV_PYTHON=""
 
 # ---------- 工具函数 ----------
 
@@ -126,6 +136,85 @@ install_jdk() {
     log "JDK $JDK_MAJOR 安装完成：$JDK_HOME"
 }
 
+# 解析依赖清单路径：优先 REQUIREMENTS 环境变量；其次按候选路径查找（仓库布局 / 部署目录布局）；
+# 均不存在时返回空（调用方退回内置默认依赖）。
+resolve_requirements() {
+    if [[ -n "${REQUIREMENTS:-}" && -f "${REQUIREMENTS}" ]]; then
+        echo "${REQUIREMENTS}"
+        return 0
+    fi
+    local c
+    for c in \
+        "$SCRIPT_DIR/northstar-rl/training/requirements.txt" \
+        "$SCRIPT_DIR/training/requirements.txt" \
+        "northstar-rl/training/requirements.txt" \
+        "training/requirements.txt" \
+        "../northstar-rl/training/requirements.txt"; do
+        if [[ -f "$c" ]]; then
+            echo "$c"
+            return 0
+        fi
+    done
+    return 1
+}
+
+# 准备 RL 训练 Python 环境：venv + requirements + NS_RL_PYTHON（失败仅告警，不影响 JDK 安装）
+# venv 与 JDK 同属运行环境，安装在 ENV_DIR/rl-venv（生产环境 northstar-dist 下没有 northstar-rl 源码目录）
+setup_python_rl_env() {
+    local venv="$ENV_DIR/rl-venv"
+
+    # 已存在 venv 直接复用；否则用系统 Python 创建（PYTHON 环境变量可指定）
+    local sys_py="${PYTHON:-}"
+    if [[ -z "$sys_py" ]]; then
+        if command -v python3 >/dev/null 2>&1; then
+            sys_py="$(command -v python3)"
+        elif command -v python >/dev/null 2>&1; then
+            sys_py="$(command -v python)"
+        else
+            log "未检测到 Python，跳过 RL 训练环境准备（强化学习训练需要 Python 3.10+）。"
+            return 0
+        fi
+    fi
+
+    if [[ ! -x "$venv/bin/python" ]]; then
+        log "创建 RL 训练虚拟环境：$venv"
+        if ! "$sys_py" -m venv "$venv"; then
+            err "虚拟环境创建失败（Debian/Ubuntu 可能需要先安装 python3-venv 包），跳过 RL 依赖安装。"
+            return 0
+        fi
+    fi
+
+    local vpy="$venv/bin/python"
+    "$vpy" -m pip install --upgrade pip --disable-pip-version-check -q
+    # 可通过 PIP_INDEX_URL 环境变量指定 pip 镜像（如 https://pypi.tuna.tsinghua.edu.cn/simple）
+    local -a pip_opts=(install --disable-pip-version-check)
+    if [[ -n "${PIP_INDEX_URL:-}" ]]; then
+        pip_opts+=(-i "$PIP_INDEX_URL")
+    fi
+    local requirements
+    if requirements=$(resolve_requirements); then
+        log "安装/校验 RL 训练依赖：$requirements"
+        pip_opts+=(-r "$requirements")
+    else
+        # 内置默认依赖与 northstar-rl/training/requirements.txt 保持一致，新增依赖需同步两处
+        log "未找到 requirements.txt，安装内置默认依赖：torch gymnasium numpy pytest"
+        pip_opts+=(torch gymnasium numpy pytest)
+    fi
+    if ! "$vpy" -m pip "${pip_opts[@]}"; then
+        err "RL 依赖安装失败，强化学习训练将不可用。请检查网络后重跑；如官方源无法访问，可先 export PIP_INDEX_URL=<镜像地址> 再重试。"
+        return 0
+    fi
+    # 自检：train_round.py 依赖 numpy/torch 必须可导入
+    if ! "$vpy" -c "import numpy, torch" >/dev/null 2>&1; then
+        err "依赖自检失败（numpy/torch 不可导入），强化学习训练将不可用。"
+        return 0
+    fi
+
+    RL_VENV_PYTHON="$vpy"
+    export NS_RL_PYTHON="$vpy"
+    log "RL 训练 Python 环境就绪：$vpy"
+}
+
 # 将 JDK bin 下所有命令软链到 LINK_DIR
 link_commands() {
     log "链接 JDK 命令到 $LINK_DIR ..."
@@ -140,11 +229,16 @@ link_commands() {
     done
 }
 
-# 幂等写入 JAVA_HOME / PATH
+# 幂等写入 JAVA_HOME / PATH（含 RL 训练 Python 解释器 NS_RL_PYTHON）
 configure_env() {
     local content="# >>> northstar-jdk >>>
 export JAVA_HOME=$JDK_HOME
-export PATH=\$JAVA_HOME/bin:\$PATH
+export PATH=\$JAVA_HOME/bin:\$PATH"
+    if [[ -n "$RL_VENV_PYTHON" ]]; then
+        content="$content
+export NS_RL_PYTHON=$RL_VENV_PYTHON"
+    fi
+    content="$content
 # <<< northstar-jdk <<<"
 
     if [[ $EUID -eq 0 || -n "$SUDO" ]]; then
@@ -197,6 +291,7 @@ main() {
     fi
 
     link_commands
+    setup_python_rl_env
     configure_env
     hash -r 2>/dev/null || true
 

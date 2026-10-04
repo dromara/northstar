@@ -94,7 +94,7 @@ northstar/
 | `northstar-monitor-next/vite.config.ts` | Vite 构建配置 |
 | `lombok.config` | Lombok 配置（`lombok.addLombokGeneratedAnnotation=true`） |
 | `.gitmodules` | Git 子模块配置 |
-| `env.sh` / `env.ps1` | Linux / Windows 环境初始化脚本（安装 JDK 25） |
+| `env.sh` / `env.ps1` | Linux / Windows 环境初始化脚本（安装 JDK 25；并准备 RL 训练 Python 虚拟环境 rl-venv + 依赖，写入 NS_RL_PYTHON） |
 | `startup.sh` | 生产启动脚本 |
 | `update-protobuf-obj.ps1` | 重新生成 protobuf Java 类 |
 
@@ -225,7 +225,7 @@ public class NorthstarApplication { ... }
 | 配置项 | 默认值 | 说明 |
 |---|---|---|
 | `models-root` | `models` | 模型根目录（缺省按 `models`、`northstar-rl/models`、`../northstar-rl/models` 候选解析） |
-| `python` | `python` | Python 解释器路径（建议 northstar-rl/.venv） |
+| `python` | `python` | Python 解释器路径（显式配置优先；缺省为 `python` 时自动探测环境脚本安装的 rl-venv（`~/northstar-env/rl-venv` / `c:\northstar_env\rl-venv`），其次系统 python） |
 | `training-dir` | 自动解析 | `train_round.py` 所在目录 |
 | `train-executor` | `python` | `python` 子进程 / `stub`（无 PyTorch 的测试环境） |
 | `data-root` | `data/rl-training` | 训练数据根目录（数据加载阶段落地的 CSV，按任务ID分目录，任务数据仅加载一次，重启后仍有效） |
@@ -421,8 +421,8 @@ nohup java -Xlog:gc*:gc.log -Xms2g -Xmx2g \
 
 ### 环境初始化
 
-- `env.sh`（Linux）：创建 `~/northstar-env` 和 `~/northstar-dist`，安装 JDK 25
-- `env.ps1`（Windows）：创建 `c:\northstar_env\` 和 `c:\northstar_dist\`，安装 JDK 25 MSI 并更新用户 PATH
+- `env.sh`（Linux）：创建 `~/northstar-env` 和 `~/northstar-dist`，安装 JDK 25；并在 `~/northstar-env/rl-venv` 创建 RL 训练虚拟环境、安装依赖（`REQUIREMENTS` 环境变量可指定 requirements.txt，找不到时安装内置默认依赖）、写入 `NS_RL_PYTHON`
+- `env.ps1`（Windows）：创建 `c:\northstar_env\` 和 `c:\northstar_dist\`，安装 JDK 25 MSI 并更新用户 PATH；并在 `c:\northstar_env\rl-venv` 创建 RL 训练虚拟环境、写入用户级环境变量 `NS_RL_PYTHON`
 
 ### Docker / CI
 

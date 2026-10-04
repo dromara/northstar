@@ -37,4 +37,4 @@ build/
 /.apt_generated_tests/
 
 # RL 训练运行时产物（种子模型仅 metadata.json，版本目录只增不改、不入库）
-models/**/versions/
+models/
