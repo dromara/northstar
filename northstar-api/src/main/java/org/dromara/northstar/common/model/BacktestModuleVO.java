@@ -15,26 +15,27 @@ public class BacktestModuleVO {
 
 	private ContractSimpleInfo contract;
 	
-	private int totalTrades;
+	private Integer totalTrades;
 	
-	private int transactionFees;
+	private Integer transactionFees;
 	
-	private double balance;
+	private Double balance;
 	
-	private double realizedProfit;
+	private Double realizedProfit;
 	
-	private double unrealizedProfit;
+	private Double unrealizedProfit;
 	
-	private double annualizedReturn;
+	private Double annualizedReturn;
 	
-	private double profitLossRatio;
+	/** 平均盈亏比；null 表示无亏损（全胜或零交易），数学上为 +∞ 不可比 */
+	private Double profitLossRatio;
 	
-	private double maxDrawdown;
+	private Double maxDrawdown;
 	
-	private double maxDrawdownPercentage;
+	private Double maxDrawdownPercentage;
 	
-	private double winRate;
+	private Double winRate;
 	
-	private int tradeSize;
+	private Integer tradeSize;
 	
 }

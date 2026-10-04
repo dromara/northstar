@@ -14,20 +14,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RLRoundMetrics {
 
-	private int round;
+	private Integer round;
 	/** 平均奖励（每条 transition） */
-	private double avgReward;
+	private Double avgReward;
 	/** 本轮累计回报 */
-	private double cumulativeReward;
+	private Double cumulativeReward;
 	/** 训练 loss（Python stdout 结构化输出） */
-	private double loss;
-	private double epsilon;
-	private double lr;
+	private Double loss;
+	private Double epsilon;
+	private Double lr;
 	/** 平均决策间隔（bar 数/决策，观测触发条件松紧） */
-	private double avgDecisionInterval;
+	private Double avgDecisionInterval;
 	/** 验证集胜率（每 N 轮评估一次） */
 	private Double evalWinRate;
-	/** 验证集盈亏比 */
+	/** 验证集盈亏比（null = 未评估，或全胜/零交易时无亏损不可比） */
 	private Double evalProfitFactor;
 	/** 验证集交易笔数 */
 	private Integer evalTrades;
