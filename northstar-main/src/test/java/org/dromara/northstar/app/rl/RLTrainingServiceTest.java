@@ -83,7 +83,7 @@ class RLTrainingServiceTest {
 		service.dataManager = dataManager;
 
 		when(appCtx.getBeansWithAnnotation(StrategicComponent.class))
-				.thenAnswer(_ -> Map.of("rlTrendStrategy", strategy));
+				.thenAnswer(_ -> Map.of("RlTestStrategy", strategy));
 	}
 
 	private RLTrainingTaskDTO dto() {

@@ -74,7 +74,7 @@ northstar-rl/models/{modelId}/
 ```json
 {
   "name": "dqn-demo",
-  "strategy_class": "org.dromara.northstar.rl.strategy.RlTrendStrategy",
+  "strategy_class": "org.dromara.northstar.rl.strategy.RlTestStrategy",
   "algo": "DQN",
   "state_dim": 6,
   "action_dim": 3,
@@ -262,7 +262,7 @@ enum AdvanceResult {
 1. 游标层：locate 回溯 warmupBars 根，预热段 `WARMUP` 语义隔离；
 2. 配置层：`warmupBars = max(策略各指标回看周期) × 安全系数`（EMA/ATR 等递推指标需 2~3 倍 burn-in），与实盘模组的 `weeksOfDataForPreparation` 语义对齐；
 3. 数据层：数据缓存从**预热起始日**开始加载；启动训练时静态校验"预热时段 bar 数 ≥ warmupBars"，不满足直接拒绝——预热不足从运行期事故变成配置期错误；
-4. 判定层：episode 正式段的**初始决策点**推迟到策略 `shouldObserve()` 首次返回 true（或距首个正式 bar 达到 maxHoldingBars 强触发上限）——`shouldObserve()` 内含策略的指标就绪守卫（如 RlTrendStrategy 的 `isReady()`），指标未稳定时不会采到第一批 transition；数够根数只是必要条件。
+4. 判定层：episode 正式段的**初始决策点**推迟到策略 `shouldObserve()` 首次返回 true（或距首个正式 bar 达到 maxHoldingBars 强触发上限）——`shouldObserve()` 内含策略的指标就绪守卫（如 RlTestStrategy 的 `isReady()`），指标未稳定时不会采到第一批 transition；数够根数只是必要条件。
 
 ### 5.4 经验数据：增量读取
 

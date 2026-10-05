@@ -49,7 +49,7 @@ class TradingEnvironmentTest {
 	void setUp() throws Exception {
 		Files.createDirectories(modelDir.resolve("versions/v1/rounds"));
 		Files.writeString(modelDir.resolve("metadata.json"), """
-				{"name":"dqn-demo","strategy_class":"org.dromara.northstar.rl.strategy.RlTrendStrategy",
+				{"name":"dqn-demo","strategy_class":"org.dromara.northstar.strategy.example.RlTestStrategy",
 				 "algo":"DQN","state_dim":6,"action_dim":3,"actions":["HOLD","BUY","SELL"],
 				 "network":{"hidden":[128,128]},"preprocessing":{"type":"identity"},
 				 "spec_hash":"x","latest_version":1}

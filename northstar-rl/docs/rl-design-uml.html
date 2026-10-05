@@ -255,7 +255,7 @@ function drawNote(ctx, x, y, text, w) {
       attrs: ["HOLD", "BUY", "SELL"] },
     { id: "rwd", x: 440, y: 540, name: "RLRewardContext", stereotype: "record",
       attrs: ["+prevEquity: double", "+currEquity: double", "+trades: List<Trade>  // 用于扣成本", "+dt: int  // 决策间隔 bar 数", "+episodeEnd: boolean"] },
-    { id: "impl", x: 30, y: 600, name: "RlTrendStrategy（示例）",
+    { id: "impl", x: 30, y: 600, name: "RlTestStrategy（示例）",
       attrs: ["-agent: RLAgent  // 运行时注入"],
       methods: ["onMergedBar: shouldObserve→observe→act→onAction"] }
   ];

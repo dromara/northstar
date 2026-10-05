@@ -381,7 +381,7 @@ server:
   - `northstar-gateway-sim`: 6
   - `northstar-gateway-playback`: 5
   - `northstar-strategy-example`: 0
-  - `northstar-rl`: 10（含 `DqnInferenceExampleTest`：真实加载 `models/cartpole/versions/v1/model.pt` 的推理示例，默认跳过，需 `-Drl.inference.test=true` 显式开启；`RlTrendStrategyGoldenTest`：rlSpec 的 specHash golden 测试，防策略无意识演进；`RlTrendStrategyTest`：observe() golden 快照、reward 重罚分支与模组加载 specHash 失败路径；`RLModelStoreTest`：模型/版本目录、fork 校验与回收；`PythonTrainExecutorTest`：训练 stdout 协议解析）
+  - `northstar-rl`: 10（含 `DqnInferenceExampleTest`：真实加载 `models/cartpole/versions/v1/model.pt` 的推理示例，默认跳过，需 `-Drl.inference.test=true` 显式开启；`RlTestStrategyGoldenTest`：rlSpec 的 specHash golden 测试，防策略无意识演进；`RlTestStrategyTest`：observe() golden 快照、reward 重罚分支与模组加载 specHash 失败路径；`RLModelStoreTest`：模型/版本目录、fork 校验与回收；`PythonTrainExecutorTest`：训练 stdout 协议解析）
 - Python 侧另有 `northstar-rl/training/tests/`（pytest，覆盖 DQN 训练器、增量经验读取、版本目录契约、预处理存量转换与原子写不残留）
 
 ### 集成测试

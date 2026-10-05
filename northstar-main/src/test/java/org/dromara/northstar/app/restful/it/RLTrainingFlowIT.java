@@ -20,19 +20,15 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-import org.dromara.northstar.app.rl.RLTrainingTaskRecord;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.ContractDefinition;
-import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.dromara.northstar.common.model.core.TimeSlot;
+import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.dromara.northstar.common.model.rl.RLTrainingTaskDTO;
-import org.dromara.northstar.data.jdbc.RLTrainingTaskRepository;
-import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.gateway.mktdata.NorthstarDataSource;
 import org.dromara.northstar.gateway.playback.PlaybackContract;
 import org.dromara.northstar.rl.model.RLModelStore;
@@ -41,7 +37,6 @@ import org.dromara.northstar.strategy.example.RlTestStrategy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -65,9 +60,6 @@ class RLTrainingFlowIT extends RestE2ESupport {
 
 	@MockitoBean
 	private RLTrainExecutor trainExecutor;
-
-	@Autowired
-	private RLTrainingTaskRepository repo;
 
 	private static Path modelsRoot;
 	private static Path dataRoot;
@@ -164,7 +156,7 @@ class RLTrainingFlowIT extends RestE2ESupport {
 
 	private RLTrainingTaskDTO taskDTO(int rounds) {
 		return RLTrainingTaskDTO.builder()
-				.strategyClass("org.dromara.northstar.rl.strategy.RlTrendStrategy")
+				.strategyClass("org.dromara.northstar.strategy.example.RlTestStrategy")
 				.modelId("dqn-demo")
 				.baseVersion(0)
 				.contracts(List.of(SYMBOL))
@@ -226,7 +218,7 @@ class RLTrainingFlowIT extends RestE2ESupport {
 
 		MvcResult strategies = mvc.perform(authed(auth, get("/northstar/rl/strategies")))
 				.andExpect(status().isOk()).andReturn();
-		assertThat(strategies.getResponse().getContentAsString()).contains("RlTrendStrategy");
+		assertThat(strategies.getResponse().getContentAsString()).contains("RlTestStrategy");
 
 		MvcResult models = mvc.perform(authed(auth, get("/northstar/rl/models")))
 				.andExpect(status().isOk()).andReturn();
@@ -311,7 +303,7 @@ class RLTrainingFlowIT extends RestE2ESupport {
 		Auth auth = login();
 		// 慢速桩执行器让任务停留在运行中，便于观测暂停/继续
 		when(trainExecutor.trainRound(any(Path.class), anyInt(), anyInt(), any(), anyLong()))
-				.thenAnswer(inv -> {
+				.thenAnswer(_ -> {
 					Thread.sleep(300);
 					return new RLTrainExecutor.RLTrainResult(0.1, 300, 100);
 				});

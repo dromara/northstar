@@ -27,7 +27,7 @@ Java RLTrainingRunner（northstar-main，按轮驱动）
 northstar-rl/
 ├── models/
 │   ├── cartpole/                 # 示例模型（版本化目录）：metadata.json + versions/v1/
-│   └── dqn-demo/             # RlTrendStrategy 的种子模型（metadata.json，latest_version=0）
+│   └── dqn-demo/             # RlTestStrategy 的种子模型（metadata.json，latest_version=0）
 ├── training/                     # Python 训练侧
 │   ├── train_round.py            # 单轮训练入口：按 algo 分发、增量读取分片、统计量冻结
 │   ├── registry.py               # 模型注册表：按模型名定义网络结构（Python 端唯一权威）
@@ -50,7 +50,7 @@ northstar-rl/
     │   ├── ExperienceStore.java  # 任务级经验仓库：replay-r{轮}-c{合约}.csv 分片
     │   └── Transition.java       # (s, a, r, s', dt, terminated)
     ├── strategy/
-    │   └── RlTrendStrategy.java  # 示例 RL 策略（6 维状态 × 3 动作，训练/实盘同一钩子路径）
+    │   └── RlTestStrategy.java  # 示例 RL 策略（6 维状态 × 3 动作，训练/实盘同一钩子路径）
     ├── training/
     │   ├── DqnHyperParams.java   # DQN 超参数定义（DynamicParams/@Setting，UI 动态渲染）
     │   ├── RLAlgorithms.java     # algo -> Hyperparameter 注册表与默认值表
@@ -64,7 +64,7 @@ northstar-rl/
 ### 定义权在代码，metadata.json 仅是传输协议
 
 - **网络结构**：由 Python 端 `training/registry.py` 按**模型名**注册（唯一权威定义处）；
-  Java 端 `RLStrategy.modelName()` 声明策略绑定的模型名（如 `RlTrendStrategy` → `dqn-demo`），
+  Java 端 `RLStrategy.modelName()` 声明策略绑定的模型名（如 `RlTestStrategy` → `dqn-demo`），
   按名引用、不做结构假设。
 - **维度与超参**：由 Java 端 `RLModelSpec` 定义（state_dim/action_dim/actions/features），
   经模型级 metadata.json 同步给 Python（`train_round.py` 读维度、按名取网络）。
@@ -175,7 +175,7 @@ RL 训练 Python 环境（venv + numpy/torch/gymnasium 依赖）由仓库根目�
 
 ## 在交易策略中使用（训练与实盘）
 
-RL 策略实现 `RLStrategy` 接口（见 `RlTrendStrategy` 示例），需声明 `modelName()`：
+RL 策略实现 `RLStrategy` 接口（见 `RlTestStrategy` 示例），需声明 `modelName()`：
 策略绑定的模型名必须与 Python 端 `training/registry.py` 的注册 key 一致，
 网络结构以 Python 注册表为准，Java 不参与定义。训练任务通过监控台
 「交易自动化 → 强化学习训练」创建（REST 契约见 DESIGN.md §6.3）。
