@@ -27,7 +27,7 @@ Java RLTrainingRunner（northstar-main，按轮驱动）
 northstar-rl/
 ├── models/
 │   ├── cartpole/                 # 示例模型（版本化目录）：metadata.json + versions/v1/
-│   └── rl-trend-dqn/             # RlTrendStrategy 的种子模型（metadata.json，latest_version=0）
+│   └── dqn-demo/             # RlTrendStrategy 的种子模型（metadata.json，latest_version=0）
 ├── training/                     # Python 训练侧
 │   ├── train_round.py            # 单轮训练入口：按 algo 分发、增量读取分片、统计量冻结
 │   ├── registry.py               # 模型注册表：按模型名定义网络结构（Python 端唯一权威）
@@ -64,7 +64,7 @@ northstar-rl/
 ### 定义权在代码，metadata.json 仅是传输协议
 
 - **网络结构**：由 Python 端 `training/registry.py` 按**模型名**注册（唯一权威定义处）；
-  Java 端 `RLStrategy.modelName()` 声明策略绑定的模型名（如 `RlTrendStrategy` → `rl-trend-dqn`），
+  Java 端 `RLStrategy.modelName()` 声明策略绑定的模型名（如 `RlTrendStrategy` → `dqn-demo`），
   按名引用、不做结构假设。
 - **维度与超参**：由 Java 端 `RLModelSpec` 定义（state_dim/action_dim/actions/features），
   经模型级 metadata.json 同步给 Python（`train_round.py` 读维度、按名取网络）。
@@ -180,7 +180,7 @@ RL 策略实现 `RLStrategy` 接口（见 `RlTrendStrategy` 示例），需声�
 网络结构以 Python 注册表为准，Java 不参与定义。训练任务通过监控台
 「交易自动化 → 强化学习训练」创建（REST 契约见 DESIGN.md §6.3）。
 实盘模组绑定固定版本号：在策略初始化参数中配置 `推理模型版本目录`
-（如 `models/rl-trend-dqn/versions/v1`），模组加载时校验 specHash，不一致快速失败。
+（如 `models/dqn-demo/versions/v1`），模组加载时校验 specHash，不一致快速失败。
 
 ## 常见问题
 

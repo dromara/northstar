@@ -1,4 +1,4 @@
-package org.dromara.northstar.rl.strategy;
+package org.dromara.northstar.strategy.example;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -44,10 +44,10 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
  *
  * ## 风险提示：该策略仅作技术演示，据此交易，风险自担 ##
  */
-@StrategicComponent(RlTrendStrategy.NAME)
-public class RlTrendStrategy extends AbstractStrategy implements RLStrategy {
+@StrategicComponent(RlTestStrategy.NAME)
+public class RlTestStrategy extends AbstractStrategy implements RLStrategy {
 
-	protected static final String NAME = "RL趋势策略";
+	protected static final String NAME = "RL测试策略";
 
 	private InitParams params;
 
@@ -63,7 +63,7 @@ public class RlTrendStrategy extends AbstractStrategy implements RLStrategy {
 		@Setting(label = "触发灵敏度", type = FieldType.NUMBER, order = 10, unit = "%")
 		private double observeThreshold = 0.2;	// 单bar涨跌幅超过该阈值（百分比）即触发决策点
 
-		@Setting(label = "推理模型版本目录", order = 20, placeholder = "如 models/rl-trend-dqn/versions/v1，留空则实盘不启用推理", required = false)
+		@Setting(label = "推理模型版本目录", order = 20, placeholder = "如 models/dqn-demo/versions/v1，留空则实盘不启用推理", required = false)
 		private String modelVersionDir = "";
 	}
 
@@ -84,7 +84,7 @@ public class RlTrendStrategy extends AbstractStrategy implements RLStrategy {
 
 	@Override
 	public String modelName() {
-		return "rl-trend-dqn";	// 网络结构身份：Python registry.py 以同名 key 注册 DQN 网络构建函数
+		return "dqn-demo";	// 网络结构身份：Python registry.py 以同名 key 注册 DQN 网络构建函数
 	}
 
 	@Override

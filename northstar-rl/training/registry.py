@@ -44,4 +44,4 @@ def network_spec(name: str) -> dict:
 
 
 # 结构与 Java 侧默认一致：RLModelMetadata.Network 默认 hidden=[128,128]、activation=relu
-_register("rl-trend-dqn", hidden=[128, 128], activation="relu")
+_register("dqn-demo", hidden=[128, 128], activation="relu")

@@ -15,5 +15,9 @@
 		<groupId>org.dromara.northstar.pro</groupId>
 		<artifactId>northstar-api</artifactId>
 	</dependency>
+	<dependency>
+		<groupId>org.dromara.northstar.pro</groupId>
+		<artifactId>northstar-rl</artifactId>
+	</dependency>
   </dependencies>
 </project>

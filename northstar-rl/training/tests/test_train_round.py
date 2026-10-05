@@ -32,7 +32,7 @@ def _make_model_dir(tmp_path, algo="DQN", preprocessing=None, hyper_params=None)
     version_dir = model_dir / "versions" / "v1"
     (version_dir / "rounds").mkdir(parents=True)
     (model_dir / "metadata.json").write_text(json.dumps({
-        "name": "rl-trend-dqn", "algo": algo, "state_dim": 4, "action_dim": 2,
+        "name": "dqn-demo", "algo": algo, "state_dim": 4, "action_dim": 2,
         "actions": ["LEFT", "RIGHT"],
         "preprocessing": {"type": "identity"}, "spec_hash": "x", "latest_version": 1,
     }), encoding="utf-8")

@@ -25,7 +25,7 @@ import org.dromara.northstar.common.model.rl.RLTrainingStatus;
 import org.dromara.northstar.common.model.rl.RLTrainingTaskDTO;
 import org.dromara.northstar.common.model.rl.RLTrainingTaskDetailVO;
 import org.dromara.northstar.common.model.rl.RLTrainingTaskVO;
-import org.dromara.northstar.rl.strategy.RlTrendStrategy;
+import org.dromara.northstar.strategy.example.RlTestStrategy;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -48,10 +48,10 @@ class RLControllerTest {
 
 	private final RLTrainingTaskVO taskVO = RLTrainingTaskVO.builder()
 			.taskId("task-1")
-			.strategyClass(RlTrendStrategy.class.getName())
-			.strategyName("RL趋势策略")
-			.modelId("rl-trend-dqn")
-			.modelName("rl-trend-dqn")
+			.strategyClass(RlTestStrategy.class.getName())
+			.strategyName("RL测试策略")
+			.modelId("dqn-demo")
+			.modelName("dqn-demo")
 			.algo("DQN")
 			.baseVersion(0)
 			.targetVersion(1)
@@ -72,18 +72,18 @@ class RLControllerTest {
 	@Test
 	void listRLStrategies() throws Exception {
 		when(service.rlStrategies()).thenReturn(List.of(RLStrategyVO.builder()
-				.name("RL趋势策略").className(RlTrendStrategy.class.getName()).build()));
+				.name("RL测试策略").className(RlTestStrategy.class.getName()).build()));
 		mockMvc.perform(get("/northstar/rl/strategies"))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].name").value("RL趋势策略"))
-				.andExpect(jsonPath("$[0].className").value(RlTrendStrategy.class.getName()));
+				.andExpect(jsonPath("$[0].name").value("RL测试策略"))
+				.andExpect(jsonPath("$[0].className").value(RlTestStrategy.class.getName()));
 	}
 
 	@Test
 	void listModels() throws Exception {
 		when(service.models()).thenReturn(List.of(RLModelVO.builder()
-				.modelId("rl-trend-dqn").name("rl-trend-dqn").algo("DQN")
-				.strategyClass(RlTrendStrategy.class.getName())
+				.modelId("dqn-demo").name("dqn-demo").algo("DQN")
+				.strategyClass(RlTestStrategy.class.getName())
 				.network(RLModelVO.NetworkVO.builder().hidden(List.of(128, 128)).activation("relu").build())
 				.hyperParamFields(List.of())
 				.versionDetails(List.of(RLModelVO.VersionMetaVO.builder().version(1).hyperParams(Map.of("lr", 0.0005)).build()))
@@ -91,7 +91,7 @@ class RLControllerTest {
 				.build()));
 		mockMvc.perform(get("/northstar/rl/models"))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].modelId").value("rl-trend-dqn"))
+				.andExpect(jsonPath("$[0].modelId").value("dqn-demo"))
 				.andExpect(jsonPath("$[0].network.hidden[0]").value(128))
 				.andExpect(jsonPath("$[0].versionDetails[0].version").value(1))
 				.andExpect(jsonPath("$[0].latestVersion").value(1));
@@ -101,8 +101,8 @@ class RLControllerTest {
 	void createTask() throws Exception {
 		when(service.createTask(any(RLTrainingTaskDTO.class))).thenReturn(taskVO);
 		RLTrainingTaskDTO dto = RLTrainingTaskDTO.builder()
-				.strategyClass(RlTrendStrategy.class.getName())
-				.modelId("rl-trend-dqn")
+				.strategyClass(RlTestStrategy.class.getName())
+				.modelId("dqn-demo")
 				.baseVersion(0)
 				.contracts(List.of("rb0000@SHFE@FUTURES"))
 				.warmupStartDate("2022-01-01")

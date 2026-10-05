@@ -21,8 +21,8 @@ import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.rl.model.RLModelMetadata;
 import org.dromara.northstar.rl.model.RLModelStore;
-import org.dromara.northstar.rl.strategy.RlTrendStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
+import org.dromara.northstar.strategy.example.RlTestStrategy;
 import org.dromara.northstar.support.utils.EventEmitterHolder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,7 +54,7 @@ class RLTrainingServiceTest {
 
 	RLModelStore modelStore;
 	TestableService service;
-	RlTrendStrategy strategy = new RlTrendStrategy();
+	RlTestStrategy strategy = new RlTestStrategy();
 
 	/** 截获 runner 构建（同步），避免真实数据加载与异步训练 */
 	static class TestableService extends RLTrainingService {
@@ -88,8 +88,8 @@ class RLTrainingServiceTest {
 
 	private RLTrainingTaskDTO dto() {
 		return RLTrainingTaskDTO.builder()
-				.strategyClass(RlTrendStrategy.class.getName())
-				.modelId("rl-trend-dqn")
+				.strategyClass(RlTestStrategy.class.getName())
+				.modelId("dqn-demo")
 				.baseVersion(0)
 				.contracts(List.of("rb0000@SHFE@FUTURES"))
 				.warmupStartDate("2024-01-01")
@@ -109,8 +109,8 @@ class RLTrainingServiceTest {
 	void rlStrategiesOnlyListsRLStrategyImplementations() {
 		var list = service.rlStrategies();
 		assertEquals(1, list.size());
-		assertEquals(RlTrendStrategy.class.getName(), list.get(0).getClassName());
-		assertEquals("RL趋势策略", list.get(0).getName());
+		assertEquals(RlTestStrategy.class.getName(), list.get(0).getClassName());
+		assertEquals("RL测试策略", list.get(0).getName());
 	}
 
 	@Test
@@ -118,7 +118,7 @@ class RLTrainingServiceTest {
 		var models = service.models();
 		assertEquals(1, models.size());
 		var model = models.get(0);
-		assertEquals("rl-trend-dqn", model.getModelId());
+		assertEquals("dqn-demo", model.getModelId());
 		assertEquals("DQN", model.getAlgo());
 		assertNull(model.getNetwork(), "无已训练版本时 Python 尚未回写 network，应为 null");
 		assertEquals(10, model.getHyperParamFields().size(), "DQN 超参数字段清单");
@@ -129,9 +129,9 @@ class RLTrainingServiceTest {
 	@Test
 	void modelsNetworkComesFromLatestVersionMetadata() throws Exception {
 		service.createTask(dto());	// fork v1
-		var verMeta = modelStore.findVersion("rl-trend-dqn", 1).orElseThrow();
+		var verMeta = modelStore.findVersion("dqn-demo", 1).orElseThrow();
 		verMeta.setNetwork(Map.of("type", "mlp", "hidden", List.of(128, 128), "activation", "relu"));
-		verMeta.save(modelStore.versionDir("rl-trend-dqn", 1));
+		verMeta.save(modelStore.versionDir("dqn-demo", 1));
 
 		var model = service.models().get(0);
 		assertEquals(List.of(128, 128), model.getNetwork().getHidden(), "network 透传自版本级 metadata");
@@ -188,9 +188,9 @@ class RLTrainingServiceTest {
 		assertEquals("DQN", vo.getAlgo());
 		assertEquals(0.001, vo.getHyperParams().get("lr"));
 		assertEquals(0.99, vo.getHyperParams().get("gamma"), "未覆盖项取默认值");
-		assertTrue(modelStore.findVersion("rl-trend-dqn", 1).isPresent());
-		assertEquals(1, modelStore.findModel("rl-trend-dqn").orElseThrow().getLatestVersion());
-		long seed = modelStore.findVersion("rl-trend-dqn", 1).orElseThrow().getTraining().getSeed();
+		assertTrue(modelStore.findVersion("dqn-demo", 1).isPresent());
+		assertEquals(1, modelStore.findModel("dqn-demo").orElseThrow().getLatestVersion());
+		long seed = modelStore.findVersion("dqn-demo", 1).orElseThrow().getTraining().getSeed();
 		assertTrue(seed >= 0 && seed <= 0xFFFFFFFFL, "采样种子须在 [0, 2^32-1] 内（Python numpy 播种范围）");
 		assertTrue(service.built.isEmpty(), "创建阶段不构建训练环境");
 		verify(repo, atLeastOnce()).save(any(RLTrainingTaskDO.class));
@@ -203,32 +203,32 @@ class RLTrainingServiceTest {
 
 		assertThrows(IllegalStateException.class, () -> service.createTask(dto()));
 
-		assertFalse(Files.exists(modelStore.versionDir("rl-trend-dqn", 1)), "版本目录应被回收");
-		assertEquals(0, modelStore.findModel("rl-trend-dqn").orElseThrow().getLatestVersion());
+		assertFalse(Files.exists(modelStore.versionDir("dqn-demo", 1)), "版本目录应被回收");
+		assertEquals(0, modelStore.findModel("dqn-demo").orElseThrow().getLatestVersion());
 	}
 
 	@Test
 	void createTaskBootstrapsWhenMetadataMissing() throws Exception {
-		Files.delete(modelsRoot.resolve("rl-trend-dqn").resolve(RLModelMetadata.FILE_NAME));
+		Files.delete(modelsRoot.resolve("dqn-demo").resolve(RLModelMetadata.FILE_NAME));
 
 		RLTrainingTaskVO vo = service.createTask(dto());
 
 		assertEquals(RLTrainingStatus.CREATED, vo.getStatus(), "metadata 缺失不得阻塞任务创建（bootstrap）");
 		assertEquals(1, vo.getTargetVersion());
-		RLModelMetadata rebuilt = modelStore.findModel("rl-trend-dqn").orElseThrow();
+		RLModelMetadata rebuilt = modelStore.findModel("dqn-demo").orElseThrow();
 		assertEquals(strategy.rlSpec().specHash(), rebuilt.getSpecHash(), "metadata 应由策略现场 spec 重建");
 	}
 
 	@Test
 	void createTaskRewritesStaleMetadata() throws Exception {
 		// 人为篡改模型 specHash 与特征清单，模拟陈旧 metadata：创建任务时应重写而非失败
-		var model = modelStore.findModel("rl-trend-dqn").orElseThrow();
+		var model = modelStore.findModel("dqn-demo").orElseThrow();
 		model.setSpecHash("deadbeefdeadbeef");
 		var features = new ArrayList<>(model.getFeatures());
 		features.set(0, new RLModelMetadata.FeatureInfo("ret1", "Z_SCORE"));
 		model.setFeatures(features);
 		try {
-			model.save(modelsRoot.resolve("rl-trend-dqn"));
+			model.save(modelsRoot.resolve("dqn-demo"));
 		} catch (Exception e) {
 			fail(e);
 		}
@@ -236,7 +236,7 @@ class RLTrainingServiceTest {
 		RLTrainingTaskVO vo = service.createTask(dto());
 
 		assertEquals(RLTrainingStatus.CREATED, vo.getStatus());
-		RLModelMetadata rewritten = modelStore.findModel("rl-trend-dqn").orElseThrow();
+		RLModelMetadata rewritten = modelStore.findModel("dqn-demo").orElseThrow();
 		assertEquals(strategy.rlSpec().specHash(), rewritten.getSpecHash(), "陈旧 metadata 应重写为现场 spec");
 		assertEquals("RATIO", rewritten.getFeatures().get(0).getNormalizer());
 	}
@@ -246,18 +246,18 @@ class RLTrainingServiceTest {
 		RLTrainingTaskDTO bad = dto();
 		bad.setModelId("another-model");
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> service.createTask(bad));
-		assertTrue(e.getMessage().contains("rl-trend-dqn"), "报错应说明策略绑定的模型名: " + e.getMessage());
+		assertTrue(e.getMessage().contains("dqn-demo"), "报错应说明策略绑定的模型名: " + e.getMessage());
 	}
 
 	@Test
 	void createTaskWritesTriggerSummaryToVersionMetadata() {
 		RLTrainingTaskVO vo = service.createTask(dto());
 
-		var verMeta = modelStore.findVersion("rl-trend-dqn", vo.getTargetVersion()).orElseThrow();
+		var verMeta = modelStore.findVersion("dqn-demo", vo.getTargetVersion()).orElseThrow();
 		String triggerSummary = verMeta.getTraining().getTriggerSummary();
 		assertNotNull(triggerSummary, "触发条件摘要应写入版本 metadata（供复盘）");
 		assertTrue(triggerSummary.contains("决策点超时强触发=240bar"), triggerSummary);
-		assertTrue(triggerSummary.contains(RlTrendStrategy.class.getName()), triggerSummary);
+		assertTrue(triggerSummary.contains(RlTestStrategy.class.getName()), triggerSummary);
 	}
 
 	/* ---------- 数据加载 ---------- */
@@ -373,8 +373,8 @@ class RLTrainingServiceTest {
 
 		verify(repo).deleteById(vo.getTaskId());
 		verify(dataManager).deleteTaskData(eq(vo.getTaskId()), anyString());
-		assertFalse(Files.exists(modelStore.versionDir("rl-trend-dqn", 1)), "未开始训练的任务删除时回收版本目录");
-		assertEquals(0, modelStore.findModel("rl-trend-dqn").orElseThrow().getLatestVersion());
+		assertFalse(Files.exists(modelStore.versionDir("dqn-demo", 1)), "未开始训练的任务删除时回收版本目录");
+		assertEquals(0, modelStore.findModel("dqn-demo").orElseThrow().getLatestVersion());
 	}
 
 	@Test
@@ -387,8 +387,8 @@ class RLTrainingServiceTest {
 		service.deleteTask(vo.getTaskId());
 
 		verify(repo).deleteById(vo.getTaskId());
-		assertTrue(Files.exists(modelStore.versionDir("rl-trend-dqn", 1)), "已完成的任务删除时保留版本目录");
-		assertEquals(1, modelStore.findModel("rl-trend-dqn").orElseThrow().getLatestVersion());
+		assertTrue(Files.exists(modelStore.versionDir("dqn-demo", 1)), "已完成的任务删除时保留版本目录");
+		assertEquals(1, modelStore.findModel("dqn-demo").orElseThrow().getLatestVersion());
 	}
 
 	@Test
@@ -417,8 +417,8 @@ class RLTrainingServiceTest {
 
 		verify(repo).deleteById(vo.getTaskId());
 		verify(dataManager).deleteTaskData(eq(vo.getTaskId()), anyString());
-		assertFalse(Files.exists(modelStore.versionDir("rl-trend-dqn", 1)), "LOADING 任务删除时回收未训练的版本");
-		assertEquals(0, modelStore.findModel("rl-trend-dqn").orElseThrow().getLatestVersion());
+		assertFalse(Files.exists(modelStore.versionDir("dqn-demo", 1)), "LOADING 任务删除时回收未训练的版本");
+		assertEquals(0, modelStore.findModel("dqn-demo").orElseThrow().getLatestVersion());
 	}
 
 	@Test
@@ -431,9 +431,9 @@ class RLTrainingServiceTest {
 		service.deleteTask(taskA.getTaskId());	// 先删旧任务（非 LIFO 顺序）
 
 		verify(repo).deleteById(taskA.getTaskId());
-		assertFalse(Files.exists(modelStore.versionDir("rl-trend-dqn", 1)), "v1 目录应回收");
-		assertTrue(Files.exists(modelStore.versionDir("rl-trend-dqn", 2)), "v2 不受影响");
-		assertEquals(2, modelStore.findModel("rl-trend-dqn").orElseThrow().getLatestVersion(),
+		assertFalse(Files.exists(modelStore.versionDir("dqn-demo", 1)), "v1 目录应回收");
+		assertTrue(Files.exists(modelStore.versionDir("dqn-demo", 2)), "v2 不受影响");
+		assertEquals(2, modelStore.findModel("dqn-demo").orElseThrow().getLatestVersion(),
 				"回收非最新版本时 latest_version 不变");
 	}
 
@@ -611,12 +611,12 @@ class RLTrainingServiceTest {
 	@Test
 	void retryDiscardsFailedRoundShardsAndRestarts() throws Exception {
 		RLTrainingTaskVO vo = service.createTask(dto());	// fork v1
-		Path roundsDir = modelStore.roundsDir("rl-trend-dqn", 1);
+		Path roundsDir = modelStore.roundsDir("dqn-demo", 1);
 		Files.createDirectories(roundsDir);
 		Files.writeString(roundsDir.resolve("replay-r0-c0.csv"), "hdr\n");
 		Files.writeString(roundsDir.resolve("replay-r1-c0.csv"), "hdr\n");
 		Files.writeString(roundsDir.resolve("replay-r1-c1.csv"), "hdr\n");
-		Path ingestedFile = modelStore.versionDir("rl-trend-dqn", 1).resolve("ingested.json");
+		Path ingestedFile = modelStore.versionDir("dqn-demo", 1).resolve("ingested.json");
 		Files.writeString(ingestedFile, "[\"replay-r0-c0.csv\",\"replay-r1-c0.csv\"]");
 
 		RLTrainingTaskRecord failed = record(vo);
@@ -759,7 +759,7 @@ class RLTrainingServiceTest {
 		verify(runner).stop();
 		verify(runner).awaitTermination(any());
 		verify(repo).deleteById(vo.getTaskId());
-		assertTrue(Files.exists(modelStore.versionDir("rl-trend-dqn", 1)), "FINISHED 任务保留版本目录");
+		assertTrue(Files.exists(modelStore.versionDir("dqn-demo", 1)), "FINISHED 任务保留版本目录");
 	}
 
 	@Test
@@ -786,9 +786,9 @@ class RLTrainingServiceTest {
 		verify(runner).awaitTermination(any());
 		verify(dataManager).deleteTaskData(eq(taskA.getTaskId()), anyString());
 		verify(dataManager).deleteTaskData(eq(taskB.getTaskId()), anyString());
-		assertFalse(Files.exists(modelStore.versionDir("rl-trend-dqn", 1)), "未训练版本应回收");
-		assertTrue(Files.exists(modelStore.versionDir("rl-trend-dqn", 2)), "已训练版本应保留");
-		assertEquals(2, modelStore.findModel("rl-trend-dqn").orElseThrow().getLatestVersion());
+		assertFalse(Files.exists(modelStore.versionDir("dqn-demo", 1)), "未训练版本应回收");
+		assertTrue(Files.exists(modelStore.versionDir("dqn-demo", 2)), "已训练版本应保留");
+		assertEquals(2, modelStore.findModel("dqn-demo").orElseThrow().getLatestVersion());
 		verify(repo).deleteAll();
 	}
 

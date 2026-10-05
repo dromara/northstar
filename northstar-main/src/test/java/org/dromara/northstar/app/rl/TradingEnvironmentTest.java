@@ -22,7 +22,7 @@ import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.rl.agent.RLAgent;
 import org.dromara.northstar.rl.experience.ExperienceStore;
-import org.dromara.northstar.rl.strategy.RlTrendStrategy;
+import org.dromara.northstar.strategy.example.RlTestStrategy;
 import org.dromara.northstar.strategy.rl.TradeAction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,7 +49,7 @@ class TradingEnvironmentTest {
 	void setUp() throws Exception {
 		Files.createDirectories(modelDir.resolve("versions/v1/rounds"));
 		Files.writeString(modelDir.resolve("metadata.json"), """
-				{"name":"rl-trend-dqn","strategy_class":"org.dromara.northstar.rl.strategy.RlTrendStrategy",
+				{"name":"dqn-demo","strategy_class":"org.dromara.northstar.rl.strategy.RlTrendStrategy",
 				 "algo":"DQN","state_dim":6,"action_dim":3,"actions":["HOLD","BUY","SELL"],
 				 "network":{"hidden":[128,128]},"preprocessing":{"type":"identity"},
 				 "spec_hash":"x","latest_version":1}
@@ -114,7 +114,7 @@ class TradingEnvironmentTest {
 	private TradingEnvironment newEnv(RLAgent agent) {
 		// maxHoldingBars 取 10：初始决策点改为"指标就绪或强触发上限"后才观测（预热第四层收口），
 		// 上限须小于单局 bar 数上限(120)，否则低波动合成行情下整局无决策点、零采样
-		return new TradingEnvironment(gatewayContract, bars, 120, 300, new RlTrendStrategy(), agent, 0,
+		return new TradingEnvironment(gatewayContract, bars, 120, 300, new RlTestStrategy(), agent, 0,
 				"rl-test", new TradingEnvironment.RLEnvConfig(100_000, 60, 10, 0.5, 120));
 	}
 
@@ -223,7 +223,7 @@ class TradingEnvironmentTest {
 		};
 		List<Bar> downBars = synthBars(1, 100, i -> 4000 - i * 30);
 		TradingEnvironment env = new TradingEnvironment(gatewayContract, downBars, 20, 99,
-				new RlTrendStrategy(), fixedActionAgent(TradeAction.BUY), 0, "rl-ruin",
+				new RlTestStrategy(), fixedActionAgent(TradeAction.BUY), 0, "rl-ruin",
 				new TradingEnvironment.RLEnvConfig(100_000, 20, 5, 0.02, 500));
 
 		TradingEnvironment.SampleStats stats;
@@ -249,7 +249,7 @@ class TradingEnvironmentTest {
 		// 无波动行情（shouldObserve 恒 false）：所有决策点只能由超时强触发产生，dt 被封顶
 		List<Bar> flatBars = synthBars(3, 100, _ -> 3000);
 		TradingEnvironment env = new TradingEnvironment(gatewayContract, flatBars, 20, 299,
-				new RlTrendStrategy(), fixedActionAgent(TradeAction.HOLD), 0, "rl-flat",
+				new RlTestStrategy(), fixedActionAgent(TradeAction.HOLD), 0, "rl-flat",
 				new TradingEnvironment.RLEnvConfig(100_000, 20, 10, 0.9, 500));
 
 		TradingEnvironment.SampleStats stats;

@@ -36,8 +36,8 @@ import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.gateway.mktdata.NorthstarDataSource;
 import org.dromara.northstar.gateway.playback.PlaybackContract;
 import org.dromara.northstar.rl.model.RLModelStore;
-import org.dromara.northstar.rl.strategy.RlTrendStrategy;
 import org.dromara.northstar.rl.training.RLTrainExecutor;
+import org.dromara.northstar.strategy.example.RlTestStrategy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,7 +78,7 @@ class RLTrainingFlowIT extends RestE2ESupport {
 		dataRoot = Files.createTempDirectory("rl-it-data");
 		// 种子模型：metadata 即传输载荷，由策略现场 spec 引导生成（specHash 与策略实时计算值一致）
 		RLModelStore store = new RLModelStore(modelsRoot);
-		store.syncModel(new RlTrendStrategy());
+		store.syncModel(new RlTestStrategy());
 		registry.add("northstar.rl.models-root", () -> modelsRoot.toString());
 		registry.add("northstar.rl.data-root", () -> dataRoot.toString());
 	}
@@ -165,7 +165,7 @@ class RLTrainingFlowIT extends RestE2ESupport {
 	private RLTrainingTaskDTO taskDTO(int rounds) {
 		return RLTrainingTaskDTO.builder()
 				.strategyClass("org.dromara.northstar.rl.strategy.RlTrendStrategy")
-				.modelId("rl-trend-dqn")
+				.modelId("dqn-demo")
 				.baseVersion(0)
 				.contracts(List.of(SYMBOL))
 				.warmupStartDate("2024-01-01")
@@ -231,7 +231,7 @@ class RLTrainingFlowIT extends RestE2ESupport {
 		MvcResult models = mvc.perform(authed(auth, get("/northstar/rl/models")))
 				.andExpect(status().isOk()).andReturn();
 		String body = models.getResponse().getContentAsString();
-		assertThat(body).contains("rl-trend-dqn").contains("hyperParamFields").contains("lr");
+		assertThat(body).contains("dqn-demo").contains("hyperParamFields").contains("lr");
 	}
 
 	@Test
@@ -283,7 +283,7 @@ class RLTrainingFlowIT extends RestE2ESupport {
 		assertThat(metrics.get(0).getDoubleValue("avgDecisionInterval")).isGreaterThan(0);
 
 		// 版本目录契约：metadata + rounds 分片
-		Path versionDir = modelsRoot.resolve("rl-trend-dqn/versions/v" + targetVersion);
+		Path versionDir = modelsRoot.resolve("dqn-demo/versions/v" + targetVersion);
 		assertThat(versionDir.resolve("metadata.json")).exists();
 		assertThat(Files.list(versionDir.resolve("rounds")).findAny()).isPresent();
 
@@ -441,7 +441,7 @@ class RLTrainingFlowIT extends RestE2ESupport {
 	}
 
 	private int modelStoreLatestVersion() throws Exception {
-		Path metaFile = modelsRoot.resolve("rl-trend-dqn/metadata.json");
+		Path metaFile = modelsRoot.resolve("dqn-demo/metadata.json");
 		return JSON.parseObject(Files.readString(metaFile)).getIntValue("latest_version");
 	}
 }

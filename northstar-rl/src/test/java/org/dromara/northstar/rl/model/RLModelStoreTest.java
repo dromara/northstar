@@ -328,28 +328,28 @@ class RLModelStoreTest {
     @Test
     void listModelsRebuildsDirWithRegisteredStrategy() {
         // 目录存在但 metadata.json 缺失：目录名与注册策略 modelName 匹配 → 现场重建收录
-        FakeStrategy strategy = new FakeStrategy("rl-trend-dqn", spec);
+        FakeStrategy strategy = new FakeStrategy("dqn-demo", spec);
         RLModelStore storeWithStrategies = new RLModelStore(root, List.of(strategy));
-        assertDoesNotThrow(() -> Files.createDirectories(storeWithStrategies.modelDir("rl-trend-dqn")));
+        assertDoesNotThrow(() -> Files.createDirectories(storeWithStrategies.modelDir("dqn-demo")));
 
         List<RLModelMetadata> models = storeWithStrategies.listModels();
         assertEquals(1, models.size());
         assertEquals(spec.specHash(), models.get(0).getSpecHash());
-        assertTrue(Files.isRegularFile(storeWithStrategies.modelDir("rl-trend-dqn").resolve(RLModelMetadata.FILE_NAME)),
+        assertTrue(Files.isRegularFile(storeWithStrategies.modelDir("dqn-demo").resolve(RLModelMetadata.FILE_NAME)),
                 "重建应写出 metadata.json");
     }
 
     @Test
     void listModelsBootstrapsRegisteredStrategyWithoutDirectory() {
         // 目录尚不存在：已注册策略声明的模型也应收录（现场 bootstrap），前端随时有候选模型
-        FakeStrategy strategy = new FakeStrategy("rl-trend-dqn", spec);
+        FakeStrategy strategy = new FakeStrategy("dqn-demo", spec);
         RLModelStore storeWithStrategies = new RLModelStore(root, List.of(strategy));
-        assertFalse(Files.exists(storeWithStrategies.modelDir("rl-trend-dqn")));
+        assertFalse(Files.exists(storeWithStrategies.modelDir("dqn-demo")));
 
         List<RLModelMetadata> models = storeWithStrategies.listModels();
         assertEquals(1, models.size());
         assertEquals(0, models.get(0).getLatestVersion());
-        assertTrue(Files.isRegularFile(storeWithStrategies.modelDir("rl-trend-dqn").resolve(RLModelMetadata.FILE_NAME)),
+        assertTrue(Files.isRegularFile(storeWithStrategies.modelDir("dqn-demo").resolve(RLModelMetadata.FILE_NAME)),
                 "bootstrap 应写出 metadata.json");
     }
 
@@ -362,10 +362,10 @@ class RLModelStoreTest {
 
     @Test
     void listModelsRebuildsCorruptMetadataWithRegisteredStrategy() throws Exception {
-        FakeStrategy strategy = new FakeStrategy("rl-trend-dqn", spec);
+        FakeStrategy strategy = new FakeStrategy("dqn-demo", spec);
         RLModelStore storeWithStrategies = new RLModelStore(root, List.of(strategy));
-        Files.createDirectories(storeWithStrategies.modelDir("rl-trend-dqn"));
-        Files.writeString(storeWithStrategies.modelDir("rl-trend-dqn").resolve(RLModelMetadata.FILE_NAME), "{corrupt");
+        Files.createDirectories(storeWithStrategies.modelDir("dqn-demo"));
+        Files.writeString(storeWithStrategies.modelDir("dqn-demo").resolve(RLModelMetadata.FILE_NAME), "{corrupt");
 
         List<RLModelMetadata> models = storeWithStrategies.listModels();
         assertEquals(1, models.size(), "损坏的 metadata 应按现场 spec 重建收录");
