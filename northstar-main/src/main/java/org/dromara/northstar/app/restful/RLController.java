@@ -85,6 +85,12 @@ public class RLController {
 		return service.resume(taskId);
 	}
 
+	/** 重试失败任务（清理失败轮经验分片后从当前轮断点续训） */
+	@GetMapping("training/{taskId}/retry")
+	public RLTrainingTaskVO retry(@PathVariable String taskId) {
+		return service.retry(taskId);
+	}
+
 	@GetMapping("training/{taskId}/stop")
 	public RLTrainingTaskVO stop(@PathVariable String taskId) {
 		return service.stop(taskId);

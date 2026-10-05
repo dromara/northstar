@@ -24,7 +24,10 @@ public class RLModelVO {
 	private String algo;
 	/** 绑定的策略类全限定名 */
 	private String strategyClass;
-	/** 神经网络结构（创建时固化，只读展示） */
+	/**
+	 * 神经网络结构（Python 每轮训练后回写到版本级 metadata，Java 只作透传）。
+	 * 可为 null：模型尚无已训练版本时 Python 尚未回写结构信息。
+	 */
 	private NetworkVO network;
 	/** 超参数字段清单：由模型的 Hyperparameter 类定义，UI 据此动态渲染表单 */
 	private List<ComponentField> hyperParamFields;

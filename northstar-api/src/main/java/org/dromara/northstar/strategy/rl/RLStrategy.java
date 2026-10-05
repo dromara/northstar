@@ -16,6 +16,12 @@ import org.dromara.northstar.strategy.TradeStrategy;
 public interface RLStrategy extends TradeStrategy {
 
 	/**
+	 * 模型名：即网络结构身份，与 Python 训练侧 registry.py 中同名注册的网络构建函数一一对应。
+	 * 模型目录名（models/{modelName}/）与模型级 metadata.json 的 name 字段均取自该值。
+	 */
+	String modelName();
+
+	/**
 	 * 模型规格：状态特征清单 + 动作枚举 + 预处理类型（创建模型后终身不可变）
 	 */
 	RLModelSpec rlSpec();

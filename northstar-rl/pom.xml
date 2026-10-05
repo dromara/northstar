@@ -21,6 +21,11 @@
 	</properties>
 
 	<dependencies>
+		<!-- 平台 API：RL 策略 SPI、动态参数机制、核心数据模型 -->
+		<dependency>
+			<groupId>org.dromara.northstar.pro</groupId>
+			<artifactId>northstar-api</artifactId>
+		</dependency>
 		<!-- DJL 核心 API -->
 		<dependency>
 			<groupId>ai.djl</groupId>

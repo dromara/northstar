@@ -11,6 +11,10 @@ import ai.djl.translate.TranslatorContext;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
+
+import org.dromara.northstar.rl.model.RLModelMetadata;
+import org.dromara.northstar.rl.model.RLVersionMetadata;
 
 /**
  * 通用 DQN 推理 Agent：本质上是预训练模型的调用壳。
@@ -98,35 +102,37 @@ public class DqnAgent<A extends Enum<A>> implements AutoCloseable {
     }
 
     /**
-     * 从 model 目录创建 Agent：读取 metadata.json 初始化维度与预处理策略，
+     * 从模型版本目录创建 Agent：读取模型级 metadata（维度/动作表）与版本级 metadata（预处理策略），
      * 并校验 metadata 的动作表与动作枚举逐一对应（名称与顺序都必须一致）。
      *
-     * @param modelDir 包含 metadata.json 与模型文件的目录
+     * @param versionDir 版本目录（models/{modelId}/versions/v{n}，含 model.pt 与版本 metadata.json）
      */
-    public static <A extends Enum<A>> DqnAgent<A> fromModelDir(Path modelDir, Class<A> actionType)
+    public static <A extends Enum<A>> DqnAgent<A> fromVersionDir(Path versionDir, Class<A> actionType)
             throws IOException, MalformedModelException {
-        ModelMetadata meta = ModelMetadata.load(modelDir);
+        Path modelDir = versionDir.getParent().getParent();
+        RLModelMetadata meta = RLModelMetadata.load(modelDir);
+        RLVersionMetadata verMeta = RLVersionMetadata.load(versionDir);
         A[] constants = actionType.getEnumConstants();
-        String[] actions = meta.getActions();
-        if (actions == null || actions.length != constants.length) {
+        List<String> actions = meta.getActions();
+        if (actions == null || actions.size() != constants.length) {
             throw new IllegalArgumentException(
-                    "metadata 动作表（" + (actions == null ? 0 : actions.length) + " 个）与枚举 "
+                    "metadata 动作表（" + (actions == null ? 0 : actions.size()) + " 个）与枚举 "
                             + actionType.getSimpleName() + "（" + constants.length + " 个）数量不一致");
         }
         for (int i = 0; i < constants.length; i++) {
-            if (!constants[i].name().equals(actions[i])) {
+            if (!constants[i].name().equals(actions.get(i))) {
                 throw new IllegalArgumentException(
                         "动作下标 " + i + " 不匹配：枚举为 " + constants[i].name()
-                                + "，metadata 为 " + actions[i]);
+                                + "，metadata 为 " + actions.get(i));
             }
         }
-        ModelMetadata.Preprocessing pp = meta.getPreprocessing();
+        RLModelMetadata.Preprocessing pp = verMeta.getPreprocessing();
         Translator<float[], float[]> translator = switch (pp.getType()) {
             case "identity" -> new FloatVectorTranslator();
             case "standardize" -> standardizing(pp.getMean(), pp.getStd());
             default -> throw new IllegalArgumentException("未知的预处理类型: " + pp.getType());
         };
-        return new DqnAgent<>(modelDir.resolve(meta.getModelFile()),
+        return new DqnAgent<>(versionDir.resolve("model.pt"),
                 meta.getStateDim(), meta.getActionDim(), actionType, translator);
     }
 

@@ -21,12 +21,14 @@ public class DqnInference {
     }
 
     private static final Path MODEL_DIR = Path.of("models/cartpole");
+    private static final int VERSION = 1;
     private static final int EPISODES = 5;
 
     public static void main(String[] args) throws Exception {
-        // 从 model 目录初始化：维度、预处理策略、模型文件路径全部来自 metadata.json，
+        // 从模型版本目录初始化：维度、预处理策略、模型文件路径全部来自模型/版本 metadata，
         // 并校验 CartPoleAction 枚举与 metadata 动作表一致。
-        try (DqnAgent<CartPoleAction> agent = DqnAgent.fromModelDir(MODEL_DIR, CartPoleAction.class)) {
+        Path versionDir = MODEL_DIR.resolve("versions").resolve("v" + VERSION);
+        try (DqnAgent<CartPoleAction> agent = DqnAgent.fromVersionDir(versionDir, CartPoleAction.class)) {
             System.out.println("模型加载成功: " + MODEL_DIR.toAbsolutePath()
                     + " (inputDim=" + agent.getInputDim() + ", actionDim=" + agent.getActionDim() + ")");
 

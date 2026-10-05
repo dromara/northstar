@@ -38,32 +38,45 @@ class DqnAgentTest {
         assertTrue(e.getMessage().contains("actionDim"));
     }
 
+    private Path versionDir(Path modelsRoot) throws Exception {
+        Path dir = modelsRoot.resolve("cartpole/versions/v1");
+        Files.createDirectories(dir);
+        return dir;
+    }
+
     @Test
-    void fromModelDirRejectsActionTableMismatch(@TempDir Path dir) throws Exception {
-        // 动作表数量与枚举不一致
-        Files.writeString(dir.resolve(ModelMetadata.FILE_NAME), """
+    void fromVersionDirRejectsActionTableMismatch(@TempDir Path dir) throws Exception {
+        Path versionDir = versionDir(dir);
+        Files.writeString(dir.resolve("cartpole/metadata.json"), """
                 {"state_dim":4,"action_dim":3,"actions":["LEFT","RIGHT","KEEP"]}
                 """);
+        Files.writeString(versionDir.resolve("metadata.json"), """
+                {"version":1,"preprocessing":{"type":"identity"}}
+                """);
+        // 动作表数量与枚举不一致
         assertThrows(IllegalArgumentException.class,
-                () -> DqnAgent.fromModelDir(dir, TwoActions.class));
+                () -> DqnAgent.fromVersionDir(versionDir, TwoActions.class));
 
         // 数量一致但名称/顺序不一致
-        Files.writeString(dir.resolve(ModelMetadata.FILE_NAME), """
+        Files.writeString(dir.resolve("cartpole/metadata.json"), """
                 {"state_dim":4,"action_dim":2,"actions":["RIGHT","LEFT"]}
                 """);
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> DqnAgent.fromModelDir(dir, TwoActions.class));
+                () -> DqnAgent.fromVersionDir(versionDir, TwoActions.class));
         assertTrue(e.getMessage().contains("动作下标 0"));
     }
 
     @Test
-    void fromModelDirRejectsUnknownPreprocessingType(@TempDir Path dir) throws Exception {
-        Files.writeString(dir.resolve(ModelMetadata.FILE_NAME), """
-                {"state_dim":4,"action_dim":2,"actions":["LEFT","RIGHT"],
-                 "preprocessing":{"type":"minmax"}}
+    void fromVersionDirRejectsUnknownPreprocessingType(@TempDir Path dir) throws Exception {
+        Path versionDir = versionDir(dir);
+        Files.writeString(dir.resolve("cartpole/metadata.json"), """
+                {"state_dim":4,"action_dim":2,"actions":["LEFT","RIGHT"]}
+                """);
+        Files.writeString(versionDir.resolve("metadata.json"), """
+                {"version":1,"preprocessing":{"type":"minmax"}}
                 """);
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> DqnAgent.fromModelDir(dir, TwoActions.class));
+                () -> DqnAgent.fromVersionDir(versionDir, TwoActions.class));
         assertTrue(e.getMessage().contains("未知的预处理类型"));
     }
 

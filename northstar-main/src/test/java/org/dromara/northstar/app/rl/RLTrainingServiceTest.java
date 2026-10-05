@@ -71,8 +71,7 @@ class RLTrainingServiceTest {
 	@BeforeEach
 	void setUp() {
 		modelStore = new RLModelStore(modelsRoot);
-		modelStore.createModel("rl-trend-dqn", RlTrendStrategy.class.getName(), "DQN",
-				strategy.rlSpec(), List.of(128, 128));
+		modelStore.syncModel(strategy);
 
 		service = new TestableService();
 		service.repo = repo;
@@ -121,10 +120,22 @@ class RLTrainingServiceTest {
 		var model = models.get(0);
 		assertEquals("rl-trend-dqn", model.getModelId());
 		assertEquals("DQN", model.getAlgo());
-		assertEquals(List.of(128, 128), model.getNetwork().getHidden());
+		assertNull(model.getNetwork(), "无已训练版本时 Python 尚未回写 network，应为 null");
 		assertEquals(10, model.getHyperParamFields().size(), "DQN 超参数字段清单");
 		assertEquals(0, model.getLatestVersion());
 		assertTrue(model.getVersionDetails().isEmpty());
+	}
+
+	@Test
+	void modelsNetworkComesFromLatestVersionMetadata() throws Exception {
+		service.createTask(dto());	// fork v1
+		var verMeta = modelStore.findVersion("rl-trend-dqn", 1).orElseThrow();
+		verMeta.setNetwork(Map.of("type", "mlp", "hidden", List.of(128, 128), "activation", "relu"));
+		verMeta.save(modelStore.versionDir("rl-trend-dqn", 1));
+
+		var model = service.models().get(0);
+		assertEquals(List.of(128, 128), model.getNetwork().getHidden(), "network 透传自版本级 metadata");
+		assertEquals("relu", model.getNetwork().getActivation());
 	}
 
 	@Test
@@ -179,6 +190,8 @@ class RLTrainingServiceTest {
 		assertEquals(0.99, vo.getHyperParams().get("gamma"), "未覆盖项取默认值");
 		assertTrue(modelStore.findVersion("rl-trend-dqn", 1).isPresent());
 		assertEquals(1, modelStore.findModel("rl-trend-dqn").orElseThrow().getLatestVersion());
+		long seed = modelStore.findVersion("rl-trend-dqn", 1).orElseThrow().getTraining().getSeed();
+		assertTrue(seed >= 0 && seed <= 0xFFFFFFFFL, "采样种子须在 [0, 2^32-1] 内（Python numpy 播种范围）");
 		assertTrue(service.built.isEmpty(), "创建阶段不构建训练环境");
 		verify(repo, atLeastOnce()).save(any(RLTrainingTaskDO.class));
 		verifyNoInteractions(mktCenter, dataManager);
@@ -195,8 +208,20 @@ class RLTrainingServiceTest {
 	}
 
 	@Test
-	void createTaskRejectsSpecHashMismatch() {
-		// 人为篡改模型 specHash 与特征清单，模拟策略无意识演进
+	void createTaskBootstrapsWhenMetadataMissing() throws Exception {
+		Files.delete(modelsRoot.resolve("rl-trend-dqn").resolve(RLModelMetadata.FILE_NAME));
+
+		RLTrainingTaskVO vo = service.createTask(dto());
+
+		assertEquals(RLTrainingStatus.CREATED, vo.getStatus(), "metadata 缺失不得阻塞任务创建（bootstrap）");
+		assertEquals(1, vo.getTargetVersion());
+		RLModelMetadata rebuilt = modelStore.findModel("rl-trend-dqn").orElseThrow();
+		assertEquals(strategy.rlSpec().specHash(), rebuilt.getSpecHash(), "metadata 应由策略现场 spec 重建");
+	}
+
+	@Test
+	void createTaskRewritesStaleMetadata() throws Exception {
+		// 人为篡改模型 specHash 与特征清单，模拟陈旧 metadata：创建任务时应重写而非失败
 		var model = modelStore.findModel("rl-trend-dqn").orElseThrow();
 		model.setSpecHash("deadbeefdeadbeef");
 		var features = new ArrayList<>(model.getFeatures());
@@ -207,9 +232,21 @@ class RLTrainingServiceTest {
 		} catch (Exception e) {
 			fail(e);
 		}
-		IllegalStateException e = assertThrows(IllegalStateException.class, () -> service.createTask(dto()));
-		assertTrue(e.getMessage().contains("specHash"), "应输出 specHash 差异信息");
-		assertTrue(e.getMessage().contains("特征[0]变更"), "失败信息应包含结构化 diff: " + e.getMessage());
+
+		RLTrainingTaskVO vo = service.createTask(dto());
+
+		assertEquals(RLTrainingStatus.CREATED, vo.getStatus());
+		RLModelMetadata rewritten = modelStore.findModel("rl-trend-dqn").orElseThrow();
+		assertEquals(strategy.rlSpec().specHash(), rewritten.getSpecHash(), "陈旧 metadata 应重写为现场 spec");
+		assertEquals("RATIO", rewritten.getFeatures().get(0).getNormalizer());
+	}
+
+	@Test
+	void createTaskRejectsMismatchedModelId() {
+		RLTrainingTaskDTO bad = dto();
+		bad.setModelId("another-model");
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> service.createTask(bad));
+		assertTrue(e.getMessage().contains("rl-trend-dqn"), "报错应说明策略绑定的模型名: " + e.getMessage());
 	}
 
 	@Test
@@ -230,7 +267,7 @@ class RLTrainingServiceTest {
 		RLTrainingTaskVO vo = service.createTask(dto());
 		persistedAs(record(vo));
 		when(dataManager.dataExists(eq(vo.getTaskId()), anyString())).thenReturn(false);
-		when(dataManager.fetchAndSave(any(), any(), eq(vo.getTaskId()))).thenReturn(100);
+		when(dataManager.fetchAndSave(any(), any(), eq(vo.getTaskId()), anyString())).thenReturn(100);
 		when(mktCenter.getContract(eq(ChannelType.PLAYBACK), anyString())).thenReturn(mock(IContract.class));
 
 		RLTrainingTaskVO loading = service.loadData(vo.getTaskId());
@@ -335,7 +372,7 @@ class RLTrainingServiceTest {
 		service.deleteTask(vo.getTaskId());
 
 		verify(repo).deleteById(vo.getTaskId());
-		verify(dataManager).deleteTaskData(vo.getTaskId());
+		verify(dataManager).deleteTaskData(eq(vo.getTaskId()), anyString());
 		assertFalse(Files.exists(modelStore.versionDir("rl-trend-dqn", 1)), "未开始训练的任务删除时回收版本目录");
 		assertEquals(0, modelStore.findModel("rl-trend-dqn").orElseThrow().getLatestVersion());
 	}
@@ -379,7 +416,7 @@ class RLTrainingServiceTest {
 		service.deleteTask(vo.getTaskId());
 
 		verify(repo).deleteById(vo.getTaskId());
-		verify(dataManager).deleteTaskData(vo.getTaskId());
+		verify(dataManager).deleteTaskData(eq(vo.getTaskId()), anyString());
 		assertFalse(Files.exists(modelStore.versionDir("rl-trend-dqn", 1)), "LOADING 任务删除时回收未训练的版本");
 		assertEquals(0, modelStore.findModel("rl-trend-dqn").orElseThrow().getLatestVersion());
 	}
@@ -411,7 +448,7 @@ class RLTrainingServiceTest {
 
 		// 仅 loadData 同步落库一次（LOADING）；异步循环检测到删除后自清残留并安静退出，不再落库（防复活）
 		verify(repo, timeout(1000).times(1)).save(any(RLTrainingTaskDO.class));
-		verify(dataManager, timeout(1000)).deleteTaskData(vo.getTaskId());
+		verify(dataManager, timeout(1000)).deleteTaskData(eq(vo.getTaskId()), anyString());
 	}
 
 	@Test
@@ -426,7 +463,7 @@ class RLTrainingServiceTest {
 		java.util.concurrent.CountDownLatch taskDeleted = new java.util.concurrent.CountDownLatch(1);
 		when(dataManager.dataExists(eq(taskId), anyString())).thenReturn(false);
 		when(mktCenter.getContract(eq(ChannelType.PLAYBACK), anyString())).thenReturn(mock(IContract.class));
-		when(dataManager.fetchAndSave(any(), any(), eq(taskId))).thenAnswer(_ -> {
+		when(dataManager.fetchAndSave(any(), any(), eq(taskId), anyString())).thenAnswer(_ -> {
 			fetchStarted.countDown();
 			assertTrue(taskDeleted.await(5, java.util.concurrent.TimeUnit.SECONDS));
 			return 100;
@@ -444,7 +481,7 @@ class RLTrainingServiceTest {
 
 		verify(repo).deleteById(taskId);
 		// deleteTask 清一次 + 加载循环消费取消标记兜底再清一次
-		verify(dataManager, timeout(3000).atLeast(2)).deleteTaskData(taskId);
+		verify(dataManager, timeout(3000).atLeast(2)).deleteTaskData(eq(taskId), anyString());
 		// 被取消的加载循环不得把任务推进到 READY
 		verify(repo, after(500).never()).save(argThat(doObj ->
 				doObj.convertTo().getStatus() == RLTrainingStatus.READY));
@@ -501,11 +538,18 @@ class RLTrainingServiceTest {
 
 		assertThrows(IllegalArgumentException.class,
 				() -> service.updateParams(vo.getTaskId(), Map.of("lr", 0.01)), "已完结任务不可调参");
+	}
 
-		finished.setStatus(RLTrainingStatus.FAILED);
-		persistedAs(finished);
-		assertThrows(IllegalArgumentException.class,
-				() -> service.updateParams(vo.getTaskId(), Map.of("lr", 0.01)), "已失败任务不可调参");
+	@Test
+	void updateParamsAllowsFailedTaskForRetry() {
+		RLTrainingTaskVO vo = service.createTask(dto());
+		RLTrainingTaskRecord failed = record(vo);
+		failed.setStatus(RLTrainingStatus.FAILED);
+		failed.setFailReason("Python 训练失败");
+		persistedAs(failed);
+
+		RLTrainingTaskVO updated = service.updateParams(vo.getTaskId(), Map.of("lr", 0.01));
+		assertEquals(0.01, updated.getHyperParams().get("lr"), "失败任务修复问题后应可调整超参再重试");
 	}
 
 	@Test
@@ -552,6 +596,82 @@ class RLTrainingServiceTest {
 		verify(repo, never()).save(argThat(doObj ->
 				doObj.convertTo().getStatus() == RLTrainingStatus.RUNNING));
 		assertEquals(1, service.built.size(), "重建失败不应在 runnerMap 中残留半成品");
+	}
+
+	/* ---------- 重试失败任务 ---------- */
+
+	@Test
+	void retryRejectsNonFailedTask() {
+		RLTrainingTaskVO vo = service.createTask(dto());
+		persistedAs(record(vo));
+
+		assertThrows(IllegalArgumentException.class, () -> service.retry(vo.getTaskId()), "非失败任务不可重试");
+	}
+
+	@Test
+	void retryDiscardsFailedRoundShardsAndRestarts() throws Exception {
+		RLTrainingTaskVO vo = service.createTask(dto());	// fork v1
+		Path roundsDir = modelStore.roundsDir("rl-trend-dqn", 1);
+		Files.createDirectories(roundsDir);
+		Files.writeString(roundsDir.resolve("replay-r0-c0.csv"), "hdr\n");
+		Files.writeString(roundsDir.resolve("replay-r1-c0.csv"), "hdr\n");
+		Files.writeString(roundsDir.resolve("replay-r1-c1.csv"), "hdr\n");
+		Path ingestedFile = modelStore.versionDir("rl-trend-dqn", 1).resolve("ingested.json");
+		Files.writeString(ingestedFile, "[\"replay-r0-c0.csv\",\"replay-r1-c0.csv\"]");
+
+		RLTrainingTaskRecord failed = record(vo);
+		failed.setStatus(RLTrainingStatus.FAILED);
+		failed.setFailReason("Python 训练失败，退出码 1");
+		failed.setCurrentRound(1);
+		persistedAs(failed);
+		RLTrainingRunner startedRunner = mock(RLTrainingRunner.class);
+		service.runnerBuilder = _ -> startedRunner;
+
+		RLTrainingTaskVO retried = service.retry(vo.getTaskId());
+
+		assertEquals(RLTrainingStatus.RUNNING, retried.getStatus());
+		assertNull(retried.getFailReason(), "重试后应清空失败原因");
+		assertTrue(Files.exists(roundsDir.resolve("replay-r0-c0.csv")), "已完成轮的分片保留");
+		assertFalse(Files.exists(roundsDir.resolve("replay-r1-c0.csv")), "失败轮分片应清理");
+		assertFalse(Files.exists(roundsDir.resolve("replay-r1-c1.csv")), "失败轮分片应清理");
+		assertEquals("[\"replay-r0-c0.csv\"]", Files.readString(ingestedFile), "ingested 清单回滚失败轮条目");
+		assertEquals(1, service.built.size(), "重试应重建训练环境");
+		verify(startedRunner).startAsync();
+	}
+
+	@Test
+	void retryWithoutShardsRestartsCleanly() throws Exception {
+		RLTrainingTaskVO vo = service.createTask(dto());
+		RLTrainingTaskRecord failed = record(vo);
+		failed.setStatus(RLTrainingStatus.FAILED);
+		failed.setCurrentRound(0);
+		persistedAs(failed);
+		RLTrainingRunner startedRunner = mock(RLTrainingRunner.class);
+		service.runnerBuilder = _ -> startedRunner;
+
+		RLTrainingTaskVO retried = service.retry(vo.getTaskId());
+
+		assertEquals(RLTrainingStatus.RUNNING, retried.getStatus());
+		assertEquals(1, service.built.size());
+		verify(startedRunner).startAsync();
+	}
+
+	@Test
+	void retryBuildFailureKeepsTaskFailed() {
+		RLTrainingTaskVO vo = service.createTask(dto());
+		RLTrainingTaskRecord failed = record(vo);
+		failed.setStatus(RLTrainingStatus.FAILED);
+		failed.setFailReason("旧失败原因");
+		persistedAs(failed);
+		service.runnerBuilder = _ -> {
+			throw new IllegalStateException("CSV 数据损坏");
+		};
+
+		assertThrows(IllegalStateException.class, () -> service.retry(vo.getTaskId()));
+		verify(repo).save(argThat(doObj -> {
+			RLTrainingTaskRecord saved = doObj.convertTo();
+			return saved.getStatus() == RLTrainingStatus.FAILED && saved.getFailReason() != null;
+		}));
 	}
 
 	/* ---------- buildRunner 真实静态校验 ---------- */
@@ -664,8 +784,8 @@ class RLTrainingServiceTest {
 
 		verify(runner).stop();
 		verify(runner).awaitTermination(any());
-		verify(dataManager).deleteTaskData(taskA.getTaskId());
-		verify(dataManager).deleteTaskData(taskB.getTaskId());
+		verify(dataManager).deleteTaskData(eq(taskA.getTaskId()), anyString());
+		verify(dataManager).deleteTaskData(eq(taskB.getTaskId()), anyString());
 		assertFalse(Files.exists(modelStore.versionDir("rl-trend-dqn", 1)), "未训练版本应回收");
 		assertTrue(Files.exists(modelStore.versionDir("rl-trend-dqn", 2)), "已训练版本应保留");
 		assertEquals(2, modelStore.findModel("rl-trend-dqn").orElseThrow().getLatestVersion());

@@ -4,8 +4,12 @@ target/
 # Python 训练侧
 .venv/
 __pycache__/
+.pytest_cache/
 
-# 训练中间产物（model 目录内，不入库）
-models/**/replay.csv
-models/**/checkpoint.pt
-models/**/model_best.pt
+# 训练数据（data-root 落在本模块时兜底）
+data/
+
+# 训练中间产物：版本目录（checkpoint.pt / model.pt / buffer.npz / ingested.json /
+# rounds/ 经验分片 / 版本 metadata.json）全部运行时生成，不入库；
+# 仅种子模型级 metadata.json 入库（模型定义，随代码版本管理）
+models/**/versions/

@@ -100,7 +100,7 @@ class RLTrainingDataManagerTest {
 		LocalDate startDate = LocalDate.now().minusDays(30);
 		stubOneWeekOfBars(startDate);
 
-		int written = manager.fetchAndSave(ic, startDate, TASK_ID);
+		int written = manager.fetchAndSave(ic, startDate, TASK_ID, "test-task");
 
 		assertEquals(15, written, "5 天 × 3 根 bar");
 		assertTrue(manager.dataExists(TASK_ID, SYMBOL), "落盘后应判定数据存在");

@@ -76,10 +76,9 @@ class RLTrainingFlowIT extends RestE2ESupport {
 	static void rlProps(org.springframework.test.context.DynamicPropertyRegistry registry) throws Exception {
 		modelsRoot = Files.createTempDirectory("rl-it-models");
 		dataRoot = Files.createTempDirectory("rl-it-data");
-		// 种子模型：specHash 与策略实时计算值保持一致（与仓库内种子相同的生成方式）
+		// 种子模型：metadata 即传输载荷，由策略现场 spec 引导生成（specHash 与策略实时计算值一致）
 		RLModelStore store = new RLModelStore(modelsRoot);
-		store.createModel("rl-trend-dqn", RlTrendStrategy.class.getName(), "DQN",
-				new RlTrendStrategy().rlSpec(), List.of(128, 128));
+		store.syncModel(new RlTrendStrategy());
 		registry.add("northstar.rl.models-root", () -> modelsRoot.toString());
 		registry.add("northstar.rl.data-root", () -> dataRoot.toString());
 	}

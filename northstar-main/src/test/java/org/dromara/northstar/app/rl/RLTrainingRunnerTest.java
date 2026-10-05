@@ -68,6 +68,7 @@ class RLTrainingRunnerTest {
 		record = RLTrainingTaskRecord.builder()
 				.taskId("t1")
 				.modelId("m")
+				.modelName("rl-trend-dqn")
 				.targetVersion(1)
 				.totalRounds(2)
 				.episodesPerRound(2)
