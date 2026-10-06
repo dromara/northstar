@@ -108,4 +108,66 @@ class RingArrayTest {
 	}
 	
 	
+
+	@Test
+	void testCloneEmpty() {
+		RingArray<Integer> copy = ringArray.clone();
+		assertThat(copy.length()).isEqualTo(ringArray.length());
+		assertThat(copy.size()).isZero();
+		assertThat(copy.toArray()).containsOnlyNulls();
+		assertThat(copy.toList()).isEmpty();
+	}
+	
+	@Test
+	void testCloneMatchesSourceState() {
+		ringArray.update(1, false);
+		ringArray.update(2, true);
+		ringArray.update(3, true);
+		
+		RingArray<Integer> copy = ringArray.clone();
+		assertThat(copy.length()).isEqualTo(ringArray.length());
+		assertThat(copy.size()).isEqualTo(ringArray.size());
+		assertThat(copy.toArray()).isEqualTo(ringArray.toArray());
+		assertThat(copy.toList()).isEqualTo(ringArray.toList());
+		assertThat(copy.get()).isEqualTo(ringArray.get());
+		assertThat(copy.get(-1)).isEqualTo(ringArray.get(-1));
+		assertThat(copy.get(1)).isEqualTo(ringArray.get(1));
+	}
+	
+	@Test
+	void testCloneContinuesSameBehavior() {
+		ringArray.update(1, false);
+		ringArray.update(2, true);
+		ringArray.update(3, true);
+		
+		RingArray<Integer> copy = ringArray.clone();
+		// 克隆后的更新序列与源对象一致，说明游标位置与更新标记都被正确复制
+		ringArray.update(4, true);
+		copy.update(4, true);
+		assertThat(copy.get()).isEqualTo(ringArray.get());
+		assertThat(copy.get(-1)).isEqualTo(ringArray.get(-1));
+		assertThat(copy.toArray()).isEqualTo(ringArray.toArray());
+		
+		ringArray.update(5, false);
+		copy.update(5, false);
+		assertThat(copy.toArray()).isEqualTo(ringArray.toArray());
+	}
+	
+	@Test
+	void testCloneIsIndependent() {
+		ringArray.update(1, false);
+		ringArray.update(2, true);
+		
+		RingArray<Integer> copy = ringArray.clone();
+		// 修改副本不影响源对象
+		copy.update(100, true);
+		assertThat(copy.get()).isEqualTo(100);
+		assertThat(ringArray.get()).isEqualTo(2);
+		// 修改源对象不影响副本
+		ringArray.update(200, true);
+		assertThat(ringArray.get()).isEqualTo(200);
+		assertThat(copy.get()).isEqualTo(100);
+		assertThat(copy.toArray()).isNotEqualTo(ringArray.toArray());
+	}
+
 }

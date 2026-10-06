@@ -1,6 +1,7 @@
 package org.dromara.northstar.indicator.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -104,5 +105,19 @@ public class RingArray<T> {
 	 */
 	public int length() {
 		return array.length;
+	}
+	
+	/**
+	 * 克隆出一个独立的副本，副本与源对象的状态一致（包括游标位置与更新标记），
+	 * 之后对两者的修改互不影响，效果类似 List.copyOf
+	 * @return
+	 */
+	@Override
+	public synchronized RingArray<T> clone() {
+		RingArray<T> copy = new RingArray<>(array.length);
+		copy.array = Arrays.copyOf(array, array.length);
+		copy.cursor = cursor;
+		copy.lastFlag = lastFlag;
+		return copy;
 	}
 }
