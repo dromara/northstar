@@ -26,7 +26,7 @@ public class RingArray<T> {
 		this.array = (T[]) new Object[size];
 	}
 	
-	public T get() {
+	public synchronized T get() {
 		return get(0);
 	}
 	
@@ -37,7 +37,7 @@ public class RingArray<T> {
 	 * @param index
 	 * @return
 	 */
-	public T get(int index) {
+	public synchronized T get(int index) {
 		return array[getIndex(index)];
 	}
 	
@@ -68,7 +68,7 @@ public class RingArray<T> {
 		return (cursor + array.length + incr) % array.length;
 	}
 	
-	public Object[] toArray() {
+	public synchronized Object[] toArray() {
 		Object[] result = new Object[array.length];
 		for(int i=0; i<array.length; i++) {
 			result[i] = get(-i);
@@ -80,7 +80,7 @@ public class RingArray<T> {
 	 * 返回的列表按自然顺序排列
 	 * @return
 	 */
-	public List<T> toList(){
+	public synchronized List<T> toList(){
 		List<T> result = new ArrayList<>(array.length);
 		for(int i=0; i<array.length; i++) {
 			if(get(-i) != null) {				
