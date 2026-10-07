@@ -176,6 +176,7 @@ public class TimeFrameScopedRegistry {
 							.toList();
 					List<ModuleIndicatorDescription> scopedIndicators = indicatorBufMap.entrySet()
 							.stream()
+							.filter(e -> e.getKey().getConfiguration().visible())
 							.filter(e -> e.getKey().getConfiguration().contract().equals(contract))
 							.map(e -> ModuleIndicatorDescription.builder()
 									.name(e.getKey().getConfiguration().indicatorName())
