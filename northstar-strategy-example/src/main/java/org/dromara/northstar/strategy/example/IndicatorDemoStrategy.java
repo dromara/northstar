@@ -57,7 +57,7 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		ctx.registerIndicator(new RSIIndicator(makeConfig("RSI1"), 7));
 		ctx.registerIndicator(new RSIIndicator(makeConfig("RSI2"), 14));
 		// 指标的难度级数：进阶（多值指标，内部嵌套）
-		ctx.registerIndicator(new MACDIndicator(makeConfig("MACD"), 12, 26, 9));
+		ctx.registerIndicator(new MACDIndicator(c, Interval.M15, 12, 26, 9));
 		ctx.registerIndicator(new BOLLIndicator(makeConfig("BOLL"), 20, 2));	
 		// 指标的难度级数：进阶（控制日内计算，多值混算）
 		ctx.registerIndicator(new IntraDaySettlePriceIndicator(makeConfig("SP")));	// 日内均价

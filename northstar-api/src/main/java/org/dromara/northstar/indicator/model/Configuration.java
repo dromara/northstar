@@ -1,5 +1,6 @@
 package org.dromara.northstar.indicator.model;
 
+import org.dromara.northstar.common.constant.IndicatorPlacement;
 import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.LineStyle;
 import org.dromara.northstar.common.model.core.Contract;
@@ -45,7 +46,15 @@ public record Configuration(
 		Boolean ifPlotPerBar, /**
 								 * 是否在模组图表中显示
 								 */
-		Boolean visible) {
+		Boolean visible,
+		/**
+		 * 指标组名（同组指标线在前端聚合成一个指标项，空串表示独立成组）
+		 */
+		String group,
+		/**
+		 * 指标主副图归属
+		 */
+		IndicatorPlacement placement) {
 
 	public Configuration {
 		if (interval == null)
@@ -64,6 +73,10 @@ public record Configuration(
 			throw new IllegalArgumentException(indicatorName + "未绑定计算合约");
 		if (lineStyle == null)
 			lineStyle = LineStyle.LINES;
+		if (group == null)
+			group = "";
+		if (placement == null)
+			placement = IndicatorPlacement.MAIN;
 	}
 
 	public String indicatorID() {

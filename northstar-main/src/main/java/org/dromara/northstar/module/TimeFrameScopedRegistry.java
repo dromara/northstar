@@ -182,6 +182,8 @@ public class TimeFrameScopedRegistry {
 									.name(e.getKey().getConfiguration().indicatorName())
 									.contract(ContractSimpleInfo.from(e.getKey().getConfiguration().contract()))
 									.style(e.getKey().getConfiguration().lineStyle())
+									.group(e.getKey().getConfiguration().group())
+									.placement(e.getKey().getConfiguration().placement())
 									.values(e.getValue().toList().stream().map(n -> new TimeSeriesValue(n.value(), n.timestamp())).toList())
 									.build())
 							.toList();
@@ -192,6 +194,8 @@ public class TimeFrameScopedRegistry {
 							.map(ind -> IndicatorVO.builder()
 								.name(ind.getName())
 								.style(ind.getStyle())
+								.group(ind.getGroup())
+								.placement(ind.getPlacement())
 								.build())
 							.toList();
 					fieldNames.addAll(allIndicators.stream().map(ModuleIndicatorDescription::getName).toList());

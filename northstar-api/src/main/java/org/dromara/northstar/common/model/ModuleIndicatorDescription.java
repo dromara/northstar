@@ -2,6 +2,7 @@ package org.dromara.northstar.common.model;
 
 import java.util.List;
 
+import org.dromara.northstar.common.constant.IndicatorPlacement;
 import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.LineStyle;
 
@@ -28,6 +29,12 @@ public class ModuleIndicatorDescription {
 	/* 指标线样式 */
 	@Builder.Default
 	private LineStyle style = LineStyle.LINES;
+	/* 指标组名（同组指标线在前端聚合成一个指标项，空串表示独立成组） */
+	@Builder.Default
+	private String group = "";
+	/* 指标主副图归属 */
+	@Builder.Default
+	private IndicatorPlacement placement = IndicatorPlacement.MAIN;
 	/* 指标值 */
 	private List<TimeSeriesValue> values;
 }

@@ -1,5 +1,6 @@
 package org.dromara.northstar.common.model;
 
+import org.dromara.northstar.common.constant.IndicatorPlacement;
 import org.dromara.northstar.common.constant.LineStyle;
 
 import lombok.AllArgsConstructor;
@@ -16,5 +17,9 @@ public class IndicatorVO {
 	private String name;
 	
 	private LineStyle style;
+	
+	private String group;
+	
+	private IndicatorPlacement placement;
 	
 }

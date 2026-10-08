@@ -2,6 +2,9 @@ package org.dromara.northstar.indicator.momentum;
 
 import java.util.List;
 
+import org.dromara.northstar.common.constant.IndicatorPlacement;
+import org.dromara.northstar.common.constant.Interval;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.AbstractIndicator;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.constant.ValueType;
@@ -27,11 +30,12 @@ public class KDIndicator extends AbstractIndicator implements Indicator{
 	private Indicator k;
 	private Indicator d;
 	
-	public KDIndicator(Configuration cfg, int barCount, int m1, int m2) {
-		super(cfg.toBuilder().visible(false).build());
-		rsv = new RSVIndicator(cfg.toBuilder().visible(false).build(), barCount);
-		k = new SMAIndicator(cfg.toBuilder().indicatorName(cfg.indicatorName() + "_k").build(), rsv, m1, 1);
-		d = new SMAIndicator(cfg.toBuilder().indicatorName(cfg.indicatorName() + "_d").build(), k, m2, 1);
+	public KDIndicator(Contract c, Interval interval, int barCount, int m1, int m2) {
+		Configuration base = Configuration.builder().contract(c).interval(interval).group("KD").placement(IndicatorPlacement.SUB).build();
+		super(base.toBuilder().visible(false).build());
+		rsv = new RSVIndicator(base.toBuilder().visible(false).build(), barCount);
+		k = new SMAIndicator(base.toBuilder().indicatorName("K").build(), rsv, m1, 1);
+		d = new SMAIndicator(base.toBuilder().indicatorName("D").build(), k, m2, 1);
 	}
 
 	@Override

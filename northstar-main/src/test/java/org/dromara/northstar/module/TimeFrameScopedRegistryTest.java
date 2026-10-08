@@ -1,5 +1,6 @@
 package org.dromara.northstar.module;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -14,7 +15,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import org.dromara.northstar.common.constant.IndicatorPlacement;
 import org.dromara.northstar.common.constant.Interval;
+import org.dromara.northstar.common.model.ContractChartDescription;
+import org.dromara.northstar.common.model.IndicatorVO;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
@@ -213,5 +217,33 @@ class TimeFrameScopedRegistryTest {
 
 		verify(ind, times(1)).update(any(Num.class));				// 未确定的BAR仍更新指标
 		verify(strategy, never()).onMergedBar(any(Bar.class));		// 但不分发给策略
+	}
+
+	@Test
+	void testVisulizeIndicatorVOCarriesGroupAndPlacement() {
+		Indicator ind = mock(Indicator.class);
+		Configuration cfg = Configuration.builder()
+				.indicatorName("MACD_diff")
+				.contract(contract)
+				.interval(Interval.M1)
+				.valueType(ValueType.CLOSE)
+				.cacheLength(5)
+				.visible(true)
+				.group("MACD")
+				.placement(IndicatorPlacement.SUB)
+				.build();
+		when(ind.getConfiguration()).thenReturn(cfg);
+		when(ind.dependencies()).thenReturn(List.of());
+		when(strategy.customIndicators()).thenReturn(List.of());
+		registry.registerIndicator(ind);
+
+		List<ContractChartDescription> charts = registry.visulize();
+
+		assertThat(charts).hasSize(1);
+		assertThat(charts.get(0).getIndicators()).hasSize(1);
+		IndicatorVO vo = charts.get(0).getIndicators().get(0);
+		assertThat(vo.getName()).isEqualTo("MACD_diff");
+		assertThat(vo.getGroup()).isEqualTo("MACD");
+		assertThat(vo.getPlacement()).isEqualTo(IndicatorPlacement.SUB);
 	}
 }

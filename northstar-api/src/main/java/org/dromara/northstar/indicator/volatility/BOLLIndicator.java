@@ -2,6 +2,9 @@ package org.dromara.northstar.indicator.volatility;
 
 import java.util.List;
 
+import org.dromara.northstar.common.constant.IndicatorPlacement;
+import org.dromara.northstar.common.constant.Interval;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.AbstractIndicator;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.helper.DiffIndicator;
@@ -21,15 +24,16 @@ public class BOLLIndicator extends AbstractIndicator implements Indicator{
 
 	private Indicator mid;		// 中轨
 	private Indicator std;		// 标准差
-	private Indicator upper;	// 上轨
-	private Indicator lower;	// 下轨
+	private Indicator upper;		// 上轨
+	private Indicator lower;		// 下轨
 	
-	public BOLLIndicator(Configuration cfg, int barCount, double multipler) {
-		super(cfg.toBuilder().visible(false).build());
-		mid = new MAIndicator(cfg.toBuilder().indicatorName("BOLL_mid").build(), barCount);
-		std = new StandardDeviationIndicator(cfg.toBuilder().indicatorName("BOLL_std").build(), barCount);
-		upper = new SumIndicator(cfg.toBuilder().indicatorName("BOLL_upper").build(), mid, 1, std, multipler);
-		lower = new DiffIndicator(cfg.toBuilder().indicatorName("BOLL_lower").build(), mid, 1, std, multipler);
+	public BOLLIndicator(Contract c, Interval interval, int barCount, double multipler) {
+		Configuration base = Configuration.builder().contract(c).interval(interval).group("BOLL").placement(IndicatorPlacement.MAIN).build();
+		super(base.toBuilder().visible(false).build());
+		mid = new MAIndicator(base.toBuilder().indicatorName("MID").build(), barCount);
+		std = new StandardDeviationIndicator(base.toBuilder().indicatorName("STD").build(), barCount);
+		upper = new SumIndicator(base.toBuilder().indicatorName("UPPER").build(), mid, 1, std, multipler);
+		lower = new DiffIndicator(base.toBuilder().indicatorName("LOWER").build(), mid, 1, std, multipler);
 	}
 	
 	@Override
