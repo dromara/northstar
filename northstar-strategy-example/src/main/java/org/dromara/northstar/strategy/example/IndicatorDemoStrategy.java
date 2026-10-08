@@ -4,7 +4,6 @@ import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.common.model.core.Contract;
-import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.constant.ValueType;
 import org.dromara.northstar.indicator.helper.HHVIndicator;
 import org.dromara.northstar.indicator.helper.LLVIndicator;
@@ -16,8 +15,8 @@ import org.dromara.northstar.indicator.trend.EMAIndicator;
 import org.dromara.northstar.indicator.trend.MACDIndicator;
 import org.dromara.northstar.indicator.trend.MAIndicator;
 import org.dromara.northstar.indicator.trend.SMAIndicator;
+import org.dromara.northstar.indicator.volatility.ATRIndicator;
 import org.dromara.northstar.indicator.volatility.BOLLIndicator;
-import org.dromara.northstar.indicator.volatility.TrueRangeIndicator;
 import org.dromara.northstar.indicator.volume.IntraDaySettlePriceIndicator;
 import org.dromara.northstar.indicator.volume.VWAPIndicator;
 import org.dromara.northstar.indicator.wave.MABasedWaveIndicator;
@@ -44,9 +43,9 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		Contract c = ctx.getContract(params.indicatorSymbol);
 		//######## 以下写法仅用于监控台演示，因此没有赋值给类属性，同时为了简化参数也直接写死 ########//
 		// 指标的难度级数：基础（单值指标）
-		ctx.registerIndicator(new MAIndicator(makeConfig("MA5"), 5));	// MA5
-		ctx.registerIndicator(new EMAIndicator(makeConfig("EMA5"), 5));	// EMA5
-		ctx.registerIndicator(new SMAIndicator(makeConfig("SMA10"), 10, 2));
+		ctx.registerIndicator(new MAIndicator(c, Interval.M15, 5));	// MA5
+		ctx.registerIndicator(new EMAIndicator(c, Interval.M15, 5));	// EMA5
+		ctx.registerIndicator(new SMAIndicator(c, Interval.M15, 10, 2));
 		// 指标的难度级数：基础（指标嵌套）
 		ctx.registerIndicator(new HHVIndicator(makeConfig("HHV"), 
 				new SimpleValueIndicator(Configuration.builder().indicatorName("H").contract(c).valueType(ValueType.HIGH).cacheLength(10).visible(false).build())));	// 10个周期内的最高价
@@ -54,8 +53,7 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 				new SimpleValueIndicator(Configuration.builder().indicatorName("L").contract(c).valueType(ValueType.LOW).cacheLength(10).visible(false).build())));	// 10个周期内的最低价
 		
 		// 指标的难度级数：进阶（伪多值指标，内部手动更新值）
-		ctx.registerIndicator(new RSIIndicator(makeConfig("RSI1"), 7));
-		ctx.registerIndicator(new RSIIndicator(makeConfig("RSI2"), 14));
+		ctx.registerIndicator(new RSIIndicator(c, Interval.M15, 7));
 		// 指标的难度级数：进阶（多值指标，内部嵌套）
 		ctx.registerIndicator(new MACDIndicator(c, Interval.M15, 12, 26, 9));
 		ctx.registerIndicator(new BOLLIndicator(c, Interval.M15, 20, 2));	
@@ -63,11 +61,7 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		ctx.registerIndicator(new IntraDaySettlePriceIndicator(makeConfig("SP")));	// 日内均价
 		// 指标的难度级数：进阶（多值混算）
 		ctx.registerIndicator(new VWAPIndicator(makeConfig("VWAP"), 100));			// 成交加权均价
-		Indicator tr = new TrueRangeIndicator(makeConfig("TR"));
-		Indicator atr = new MAIndicator(makeConfig("ATR"), tr, 26);
-		ctx.registerIndicator(tr);
-		ctx.registerIndicator(atr);
-		
+		ctx.registerIndicator(new ATRIndicator(c, Interval.M15, 26));
 		// 指标的难度级数：精通（内部类定义内部实现）
 		ctx.registerIndicator(new KDIndicator(c, Interval.M15, 9, 3, 3));
 		// 指标的难度级数：精通（输出抑制，回溯连接，自定枚举）

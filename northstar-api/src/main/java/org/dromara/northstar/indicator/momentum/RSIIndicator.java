@@ -2,6 +2,9 @@ package org.dromara.northstar.indicator.momentum;
 
 import java.util.List;
 
+import org.dromara.northstar.common.constant.IndicatorPlacement;
+import org.dromara.northstar.common.constant.Interval;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.AbstractIndicator;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.constant.ValueType;
@@ -24,7 +27,8 @@ public class RSIIndicator extends AbstractIndicator implements Indicator {
 	private Indicator numerator;	//分子
 	private Indicator denominator;	//分母
 	
-	public RSIIndicator(Configuration cfg, int barCount) {
+	public RSIIndicator(Contract c, Interval interval, int barCount) {
+		Configuration cfg = Configuration.builder().indicatorName("RSI").contract(c).interval(interval).placement(IndicatorPlacement.SUB).build();
 		super(cfg);
 		close = new SimpleValueIndicator(cfg.toBuilder().valueType(ValueType.CLOSE).visible(false).build());
 		numerator = new SMAIndicator(cfg.toBuilder().visible(false).build(), barCount, 1);

@@ -31,7 +31,7 @@ public class BOLLIndicator extends AbstractIndicator implements Indicator{
 		Configuration base = Configuration.builder().contract(c).interval(interval).group("BOLL").placement(IndicatorPlacement.MAIN).build();
 		super(base.toBuilder().visible(false).build());
 		mid = new MAIndicator(base.toBuilder().indicatorName("MID").build(), barCount);
-		std = new StandardDeviationIndicator(base.toBuilder().indicatorName("STD").build(), barCount);
+		std = new StandardDeviationIndicator(base.toBuilder().indicatorName("STD").visible(false).build(), barCount);
 		upper = new SumIndicator(base.toBuilder().indicatorName("UPPER").build(), mid, 1, std, multipler);
 		lower = new DiffIndicator(base.toBuilder().indicatorName("LOWER").build(), mid, 1, std, multipler);
 	}

@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import org.dromara.northstar.common.constant.Interval;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.AbstractIndicator;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.model.Configuration;
@@ -19,6 +21,10 @@ public class EMAIndicator extends AbstractIndicator implements Indicator{
 	private double factor;
 	
 	private Indicator srcIndicator;
+	
+	public EMAIndicator(Contract c, Interval interval, int barCount) {
+		this(Configuration.builder().indicatorName("EMA"+barCount).contract(c).interval(interval).build(), barCount);
+	}
 	
 	public EMAIndicator(Configuration cfg, int barCount) {
 		super(cfg);
