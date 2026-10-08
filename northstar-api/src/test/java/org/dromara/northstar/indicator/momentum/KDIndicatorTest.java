@@ -3,8 +3,8 @@ package org.dromara.northstar.indicator.momentum;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.dromara.northstar.common.constant.IndicatorPlacement;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.core.Contract;
-import org.dromara.northstar.indicator.model.Configuration;
 import org.junit.jupiter.api.Test;
 
 class KDIndicatorTest {
@@ -13,7 +13,7 @@ class KDIndicatorTest {
 
 	@Test
 	void testGrouping() {
-		KDIndicator kd = new KDIndicator(Configuration.builder().indicatorName("KD").contract(c).build(), 9, 3, 3);
+		KDIndicator kd = new KDIndicator(c, Interval.M1, 9, 3, 3);
 		// K、D线同属一个指标组，且绘制在副图
 		assertThat(kd.getK().getConfiguration().group()).isEqualTo("KD");
 		assertThat(kd.getK().getConfiguration().placement()).isEqualTo(IndicatorPlacement.SUB);
