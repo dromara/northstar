@@ -22,6 +22,7 @@ export default defineConfig({
           { text: '历史回放', link: '/features/playback' },
           { text: '模拟盘交易', link: '/features/sim-trading' },
           { text: '程序化交易', link: '/features/auto-trading' },
+          { text: '模组指标可视化', link: '/features/indicator' },
           { text: '多账户交易', link: '/features/multi-account' },
           { text: '操盘手训练', link: '/features/training' }
         ]
@@ -45,6 +46,7 @@ export default defineConfig({
           { text: '历史回放', link: '/features/playback' },
           { text: '模拟盘交易', link: '/features/sim-trading' },
           { text: '程序化交易', link: '/features/auto-trading' },
+          { text: '模组指标可视化', link: '/features/indicator' },
           { text: '多账户交易', link: '/features/multi-account' },
           { text: '操盘手训练', link: '/features/training' }
         ]
