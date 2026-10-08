@@ -22,9 +22,17 @@ export default defineConfig({
           { text: '历史回放', link: '/features/playback' },
           { text: '模拟盘交易', link: '/features/sim-trading' },
           { text: '程序化交易', link: '/features/auto-trading' },
-          { text: '模组指标可视化', link: '/features/indicator' },
           { text: '多账户交易', link: '/features/multi-account' },
           { text: '操盘手训练', link: '/features/training' }
+        ]
+      },
+      {
+        text: '程序化交易进阶',
+        items: [
+          { text: '策略开发', link: '/dev/strategy' },
+          { text: '指标与可视化', link: '/dev/indicator' },
+          { text: '回测与策略探索', link: '/dev/backtest' },
+          { text: '强化学习训练', link: '/dev/rl-training' }
         ]
       },
       { text: 'FAQ', link: '/appendix/faq' },
@@ -46,9 +54,17 @@ export default defineConfig({
           { text: '历史回放', link: '/features/playback' },
           { text: '模拟盘交易', link: '/features/sim-trading' },
           { text: '程序化交易', link: '/features/auto-trading' },
-          { text: '模组指标可视化', link: '/features/indicator' },
           { text: '多账户交易', link: '/features/multi-account' },
           { text: '操盘手训练', link: '/features/training' }
+        ]
+      },
+      {
+        text: '扩展 · 程序化交易',
+        items: [
+          { text: '策略开发', link: '/dev/strategy' },
+          { text: '指标与可视化', link: '/dev/indicator' },
+          { text: '回测与策略探索', link: '/dev/backtest' },
+          { text: '强化学习训练', link: '/dev/rl-training' }
         ]
       },
       {
