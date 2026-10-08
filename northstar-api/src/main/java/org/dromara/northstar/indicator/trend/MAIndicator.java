@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import org.dromara.northstar.common.constant.Interval;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.AbstractIndicator;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.model.Configuration;
@@ -22,6 +24,10 @@ public class MAIndicator extends AbstractIndicator implements Indicator {
 	private double sum;
 	
 	private Indicator srcIndicator;
+	
+	public MAIndicator(Contract c, Interval interval, int barCount) {
+		this(Configuration.builder().indicatorName("MA"+barCount).contract(c).interval(interval).build(), barCount);
+	}
 	
 	public MAIndicator(Configuration cfg, int barCount) {
 		super(cfg);

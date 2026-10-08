@@ -119,11 +119,7 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 				.contract(c)
 				.indicatorName("EMA20")
 				.interval(Interval.M15).build(), 20);
-		MACDIndicator macd = new MACDIndicator(Configuration.builder()
-				.contract(c)
-				.indicatorName("MACD")
-				.interval(Interval.M15)
-				.build(), 12, 26, 9);
+		MACDIndicator macd = new MACDIndicator(c, Interval.M15, 12, 26, 9);
 		this.macdDiff = macd.getDiffLine();
 		this.macdDea = macd.getDeaLine();
 

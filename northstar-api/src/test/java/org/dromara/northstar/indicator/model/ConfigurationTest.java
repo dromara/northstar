@@ -3,6 +3,7 @@ package org.dromara.northstar.indicator.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.dromara.northstar.common.constant.IndicatorPlacement;
 import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.constant.ValueType;
@@ -20,6 +21,20 @@ class ConfigurationTest {
 		assertThat(cfg.cacheLength()).isEqualTo(16);
 		assertThat(cfg.ifPlotPerBar()).isFalse();
 		assertThat(cfg.visible()).isTrue();
+		assertThat(cfg.group()).isEmpty();
+		assertThat(cfg.placement()).isEqualTo(IndicatorPlacement.MAIN);
+	}
+	
+	@Test
+	void testExplicitGroupAndPlacement() {
+		Configuration cfg = Configuration.builder()
+				.indicatorName("testIndicator")
+				.contract(c)
+				.group("MACD")
+				.placement(IndicatorPlacement.SUB)
+				.build();
+		assertThat(cfg.group()).isEqualTo("MACD");
+		assertThat(cfg.placement()).isEqualTo(IndicatorPlacement.SUB);
 	}
 	
 	@Test

@@ -2,6 +2,10 @@ package org.dromara.northstar.indicator.trend;
 
 import java.util.List;
 
+import org.dromara.northstar.common.constant.IndicatorPlacement;
+import org.dromara.northstar.common.constant.Interval;
+import org.dromara.northstar.common.constant.LineStyle;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.AbstractIndicator;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.helper.DiffIndicator;
@@ -29,19 +33,24 @@ public class MACDIndicator extends AbstractIndicator implements Indicator{
 
 	/**
 	 * 求默认的MACD值
-	 * @param cfg
+	 * @param contract
+	 * @param timeFrame
 	 * @param shortBarCount
 	 * @param longBarCount
 	 * @param signalBarCount
 	 */
-	public MACDIndicator(Configuration cfg, int shortBarCount, int longBarCount, int signalBarCount) {
-		super(cfg);
+	public MACDIndicator(Contract contract, Interval timeFrame, int shortBarCount, int longBarCount, int signalBarCount) {
+		this(Configuration.builder().indicatorName("MACD").contract(contract).interval(timeFrame).group("MACD").placement(IndicatorPlacement.SUB).build(), shortBarCount, longBarCount, signalBarCount);
+	}
+	
+	private MACDIndicator(Configuration base, int shortBarCount, int longBarCount, int signalBarCount) {
+		super(base.toBuilder().lineStyle(LineStyle.ZERO_BASED_BARS).build());	// MACD柱按柱状渲染，对齐业界红绿柱形态
 		Assert.isTrue(shortBarCount < longBarCount, "长短周期设置不正确");
-		Indicator shortTermLine = new EMAIndicator(cfg.toBuilder().indicatorName(cfg.indicatorName() + "_fast").visible(false).build(), shortBarCount);
-		Indicator longTermLine = new EMAIndicator(cfg.toBuilder().indicatorName(cfg.indicatorName() + "_slow").visible(false).build(), longBarCount);
+		Indicator shortTermLine = new EMAIndicator(base.toBuilder().indicatorName("MACD_fast").visible(false).build(), shortBarCount);
+		Indicator longTermLine = new EMAIndicator(base.toBuilder().indicatorName("MACD_slow").visible(false).build(), longBarCount);
 		
-		diffLine = new DiffIndicator(cfg.toBuilder().indicatorName(cfg.indicatorName() + "_diff").build(), shortTermLine, longTermLine);
-		deaLine = new EMAIndicator(cfg.toBuilder().indicatorName(cfg.indicatorName() + "_dea").build(), diffLine, signalBarCount);
+		diffLine = new DiffIndicator(base.toBuilder().indicatorName("DIFF").build(), shortTermLine, longTermLine);
+		deaLine = new EMAIndicator(base.toBuilder().indicatorName("DEA").build(), diffLine, signalBarCount);
 	}
 	
 	/**
@@ -52,10 +61,11 @@ public class MACDIndicator extends AbstractIndicator implements Indicator{
 	 * @param signalBarCount
 	 */
 	public MACDIndicator(Configuration cfg, Indicator fastLine, Indicator slowLine, int signalBarCount) {
-		super(cfg);
+		Configuration base = cfg.toBuilder().group(cfg.indicatorName()).placement(IndicatorPlacement.SUB).build();
+		super(base.toBuilder().lineStyle(LineStyle.ZERO_BASED_BARS).build());
 		
-		diffLine = new DiffIndicator(cfg.toBuilder().indicatorName(cfg.indicatorName() + "_diff").build(), fastLine, slowLine);
-		deaLine = new EMAIndicator(cfg.toBuilder().indicatorName(cfg.indicatorName() + "_dea").build(), diffLine, signalBarCount);
+		diffLine = new DiffIndicator(base.toBuilder().indicatorName(cfg.indicatorName() + "_diff").build(), fastLine, slowLine);
+		deaLine = new EMAIndicator(base.toBuilder().indicatorName(cfg.indicatorName() + "_dea").build(), diffLine, signalBarCount);
 	}
 	
 	@Override

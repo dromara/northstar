@@ -3,7 +3,6 @@ package org.dromara.northstar.strategy.example;
 import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.core.Contract;
-import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.indicator.trend.PBXIndicator;
 import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
@@ -34,39 +33,15 @@ public class MultiContractExampleStrategy extends AbstractStrategy implements Tr
 		ctx.bindedContracts().forEach(c -> {
 			if(c1 == null) {
 				c1 = c;
-				pbx11 = new PBXIndicator(Configuration.builder()
-						.contract(c1)
-						.interval(Interval.M10)
-						.indicatorName("PBX1-1")
-						.build());
-				pbx12 = new PBXIndicator(Configuration.builder()
-						.contract(c1)
-						.interval(Interval.H1)
-						.indicatorName("PBX1-2")
-						.build());
-				pbx13 = new PBXIndicator(Configuration.builder()
-						.contract(c1)
-						.interval(Interval.D1)
-						.indicatorName("PBX1-3")
-						.build());
+				pbx11 = new PBXIndicator(c1, Interval.M10);
+				pbx12 = new PBXIndicator(c1, Interval.H1);
+				pbx13 = new PBXIndicator(c1, Interval.D1);
 				
 			} else if(c2 == null) {
 				c2 = c;
-				pbx21 = new PBXIndicator(Configuration.builder()
-						.contract(c2)
-						.interval(Interval.M10)
-						.indicatorName("PBX2-1")
-						.build());
-				pbx22 = new PBXIndicator(Configuration.builder()
-						.contract(c2)
-						.interval(Interval.H1)
-						.indicatorName("PBX2-2")
-						.build());
-				pbx23 = new PBXIndicator(Configuration.builder()
-						.contract(c2)
-						.interval(Interval.D1)
-						.indicatorName("PBX2-3")
-						.build());
+				pbx21 = new PBXIndicator(c2, Interval.M10);
+				pbx22 = new PBXIndicator(c2, Interval.H1);
+				pbx23 = new PBXIndicator(c2, Interval.D1);
 			}
 		});
 		
