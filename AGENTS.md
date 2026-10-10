@@ -147,7 +147,7 @@ pnpm e2e       # Cypress E2E 测试
 
 - `org.dromara.northstar.common.model.core/` - 核心数据模型（`Tick`、`Bar`、`Contract`、`Order`、`Trade`、`Position`、`Account`、`SubmitOrderReq` 等）
 - `org.dromara.northstar.common.model.rl/` - RL 训练 Web 契约（`RLTrainingTaskDTO/VO`、`RLRoundMetrics`、`RLModelVO`、`RLStrategyVO` 等）
-- `org.dromara.northstar.strategy.rl/` - RL 策略 SPI（`RLStrategy`、`RLModelSpec`、`RLFeatureSpec`、`RLRewardContext`、`TradeAction`）
+- `org.dromara.northstar.strategy.rl/` - RL 策略 SPI（`RLStrategy`、`RLModelSpec`、`RLFeatureSpec`、`RLRewardContext`、`TradeAction`、`RLAlgo`、`RLStatePreprocessor`）
 - `org.dromara.northstar.common.constant/` - 公共常量（`Constants.java`）
 - `org.dromara.northstar.strategy/` - 策略框架（`TradeStrategy`、`AbstractStrategy`、`IModuleContext`、`IAccount`、`IModuleAccount`）
 - `org.dromara.northstar.indicator/` - 指标框架（`Indicator`、`AbstractIndicator`）及指标实现；`Configuration`、`Num` 位于 `indicator/model/` 子包

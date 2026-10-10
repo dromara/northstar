@@ -43,6 +43,7 @@ import org.dromara.northstar.rl.model.RLVersionMetadata;
 import org.dromara.northstar.rl.training.RLAlgorithms;
 import org.dromara.northstar.rl.training.RLTrainExecutor;
 import org.dromara.northstar.strategy.StrategicComponent;
+import org.dromara.northstar.strategy.rl.PreprocessType;
 import org.dromara.northstar.strategy.rl.RLStrategy;
 import org.dromara.northstar.support.utils.EventEmitterHolder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -631,7 +632,10 @@ public class RLTrainingService implements CommandLineRunner {
 						"合约 %s 训练/验证时段划分无效：训练段[%d, %d)，验证段[%d, %d)",
 						unifiedSymbol, trainStartIdx, validationStartIdx, validationStartIdx, bars.size()));
 			}
-			RLAgent agent = new RLAgent(modelStore.modelDir(record.getModelId()), record.getTargetVersion());
+			RLAgent agent = new RLAgent(modelStore.modelDir(record.getModelId()), record.getTargetVersion(),
+					strategy.rlSpec().preprocessing() == PreprocessType.CUSTOM
+							? strategy.rlPreprocessor()
+							: null);
 			envs.add(new TradingEnvironment(ic, bars, trainStartIdx, validationStartIdx,
 					strategy, agent, idx++, "rl-" + record.getTaskId().substring(0, 8),
 					new TradingEnvironment.RLEnvConfig(record.getInitBalance(), warmupBars,

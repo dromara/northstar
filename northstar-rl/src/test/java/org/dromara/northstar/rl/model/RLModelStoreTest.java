@@ -20,6 +20,7 @@ import org.dromara.northstar.strategy.rl.RLAlgo;
 import org.dromara.northstar.strategy.rl.RLFeatureSpec;
 import org.dromara.northstar.strategy.rl.RLModelSpec;
 import org.dromara.northstar.strategy.rl.RLRewardContext;
+import org.dromara.northstar.strategy.rl.RLStatePreprocessor;
 import org.dromara.northstar.strategy.rl.RLStrategy;
 import org.dromara.northstar.strategy.rl.TradeAction;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,6 +44,7 @@ class RLModelStoreTest {
         private final String modelName;
         private final RLModelSpec spec;
         private RLAlgo algo = RLAlgo.DQN;
+        private RLStatePreprocessor preprocessor;
 
         FakeStrategy(String modelName, RLModelSpec spec) {
             this.modelName = modelName;
@@ -54,9 +56,19 @@ class RLModelStoreTest {
             return this;
         }
 
+        FakeStrategy withPreprocessor(RLStatePreprocessor preprocessor) {
+            this.preprocessor = preprocessor;
+            return this;
+        }
+
         @Override
         public RLAlgo rlAlgo() {
             return algo;
+        }
+
+        @Override
+        public RLStatePreprocessor rlPreprocessor() {
+            return preprocessor;
         }
 
         @Override
@@ -213,6 +225,44 @@ class RLModelStoreTest {
                 () -> store.syncModel(strategy.withAlgo(RLAlgo.PPO)));
         assertTrue(e.getMessage().contains("DQN") && e.getMessage().contains("PPO"));
         assertEquals(RLAlgo.DQN, store.findModel("m").orElseThrow().getAlgo(), "失败时不改写已持久化的 algo");
+    }
+
+    @Test
+    void syncModelBootstrapsCustomPreprocessingFromSpec() {
+        RLModelSpec customSpec = new RLModelSpec(List.of(
+                new RLFeatureSpec("ret1", NormalizerType.RATIO)),
+                TradeAction.class, PreprocessType.CUSTOM);
+        RLModelMetadata meta = store.syncModel(new FakeStrategy("m", customSpec).withPreprocessor(raw -> raw));
+
+        assertEquals("custom", meta.getPreprocessing().getType());
+        assertEquals("custom", store.findModel("m").orElseThrow().getPreprocessing().getType());
+    }
+
+    @Test
+    void syncModelRejectsCustomPreprocessingWithoutPreprocessor() {
+        RLModelSpec customSpec = new RLModelSpec(List.of(
+                new RLFeatureSpec("ret1", NormalizerType.RATIO)),
+                TradeAction.class, PreprocessType.CUSTOM);
+        // FakeStrategy 默认 rlPreprocessor() 返回 null（模拟"未实现"）
+        IllegalStateException e = assertThrows(IllegalStateException.class,
+                () -> store.syncModel(new FakeStrategy("m", customSpec)));
+        assertTrue(e.getMessage().contains("rlPreprocessor"));
+    }
+
+    @Test
+    void syncModelRejectsCustomPreprocessingWithThrowingDefaultMethod() {
+        RLModelSpec customSpec = new RLModelSpec(List.of(
+                new RLFeatureSpec("ret1", NormalizerType.RATIO)),
+                TradeAction.class, PreprocessType.CUSTOM);
+        // 沿用接口默认行为（抛 UnsupportedOperationException）的策略
+        RLStrategy strategy = new FakeStrategy("m", customSpec) {
+            @Override
+            public RLStatePreprocessor rlPreprocessor() {
+                throw new UnsupportedOperationException("rlSpec().preprocessing() 声明为 CUSTOM 时必须实现 rlPreprocessor()");
+            }
+        };
+        IllegalStateException e = assertThrows(IllegalStateException.class, () -> store.syncModel(strategy));
+        assertTrue(e.getMessage().contains("未实现"));
     }
 
     /* ---------- fork / delete ---------- */

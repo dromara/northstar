@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.dromara.northstar.rl.model.RLModelMetadata;
+import org.dromara.northstar.strategy.rl.RLStatePreprocessor;
 import org.dromara.northstar.strategy.rl.TradeAction;
 
 import ai.djl.MalformedModelException;
@@ -24,13 +25,20 @@ public class RLAgent implements AutoCloseable {
 
 	private final Path modelDir;
 	private final int version;
+	/** 策略提供的 custom 预处理器（仅 metadata 声明 custom 时必需）；null = 由 metadata 决定 identity/standardize */
+	private final RLStatePreprocessor customPreprocessor;
 
 	private DqnAgent<TradeAction> delegate;	// null = 未就绪（模型文件不存在）
 	private int stateDim;
 
 	public RLAgent(Path modelDir, int version) {
+		this(modelDir, version, null);
+	}
+
+	public RLAgent(Path modelDir, int version, RLStatePreprocessor customPreprocessor) {
 		this.modelDir = modelDir;
 		this.version = version;
+		this.customPreprocessor = customPreprocessor;
 		reload();
 	}
 
@@ -64,7 +72,7 @@ public class RLAgent implements AutoCloseable {
 			this.stateDim = meta.getStateDim();
 			if (Files.isRegularFile(versionDir.resolve("model.pt"))) {
 				delegate = switch (meta.getAlgo()) {
-					case DQN -> DqnAgent.fromVersionDir(versionDir, TradeAction.class);
+					case DQN -> DqnAgent.fromVersionDir(versionDir, TradeAction.class, customPreprocessor);
 					case PPO -> throw new UnsupportedOperationException("PPO 推理侧将在 v2 提供");
 				};
 			}

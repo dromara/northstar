@@ -15,7 +15,9 @@ import org.dromara.northstar.rl.experience.ExperienceStore;
 import org.dromara.northstar.rl.experience.Transition;
 import org.dromara.northstar.strategy.IModuleStrategyContext;
 import org.dromara.northstar.strategy.rl.EpisodeEnd;
+import org.dromara.northstar.strategy.rl.PreprocessType;
 import org.dromara.northstar.strategy.rl.RLRewardContext;
+import org.dromara.northstar.strategy.rl.RLStatePreprocessor;
 import org.dromara.northstar.strategy.rl.RLStrategy;
 import org.dromara.northstar.strategy.rl.TradeAction;
 
@@ -58,6 +60,8 @@ public class TradingEnvironment {
 	private final int validationStartIdx;
 	private final RLStrategy strategyTemplate;
 	private final RLAgent agent;
+	/** CUSTOM 预处理器：落盘 transition 前把原始观测变换到网络输入空间；null = identity/standardize（由 Python/推理侧处理） */
+	private final RLStatePreprocessor preprocessor;
 	private final int contractIdx;
 	private final String moduleNamePrefix;
 	private final IDataSource dataSource;
@@ -72,6 +76,9 @@ public class TradingEnvironment {
 		this.validationStartIdx = validationStartIdx;
 		this.strategyTemplate = strategyTemplate;
 		this.agent = agent;
+		this.preprocessor = strategyTemplate.rlSpec().preprocessing() == PreprocessType.CUSTOM
+				? strategyTemplate.rlPreprocessor()
+				: null;
 		this.contractIdx = contractIdx;
 		this.moduleNamePrefix = moduleNamePrefix;
 		this.dataSource = ic.dataSource();
@@ -184,7 +191,8 @@ public class TradingEnvironment {
 						sandbox.drainIntervalTrades(), dt, ruin ? EpisodeEnd.TERMINATED : EpisodeEnd.NONE);
 				double reward = strategy.reward(rewardCtx);
 				if (store != null) {
-					store.append(round, contractIdx, new Transition(s, a.ordinal(), (float) reward, ns, dt, ruin));
+					store.append(round, contractIdx, new Transition(
+							toNetworkSpace(s), a.ordinal(), (float) reward, toNetworkSpace(ns), dt, ruin));
 				}
 				cumReward += reward;
 				transitions++;
@@ -209,7 +217,8 @@ public class TradingEnvironment {
 			double reward = strategy.reward(new RLRewardContext(prevEquity, currEquity,
 					sandbox.drainIntervalTrades(), dt, EpisodeEnd.TRUNCATED));
 			if (store != null) {
-				store.append(round, contractIdx, new Transition(s, a.ordinal(), (float) reward, ns, dt, false));
+				store.append(round, contractIdx, new Transition(
+						toNetworkSpace(s), a.ordinal(), (float) reward, toNetworkSpace(ns), dt, false));
 			}
 			cumReward += reward;
 			transitions++;
@@ -242,8 +251,16 @@ public class TradingEnvironment {
 		}
 	}
 
-	private TradeAction chooseAction(float[] state, double epsilon, Random rng, boolean greedy) {
-		TradeAction[] actions = TradeAction.values();
+	/**
+	 * 落盘前的状态空间转换：CUSTOM 时由策略预处理器变换到网络输入空间（Python 对 custom 直通）；
+	 * identity/standardize 原样落盘（分别由 Python 冻结统计量 / 推理侧 Translator 处理）。
+	 * 原始观测本身保持不变，继续作为主循环与推理侧的输入。
+	 */
+	private float[] toNetworkSpace(float[] raw) {
+		return preprocessor != null ? preprocessor.apply(raw) : raw;
+	}
+
+	private TradeAction chooseAction(float[] state, double epsilon, Random rng, boolean greedy) {		TradeAction[] actions = TradeAction.values();
 		if (greedy && agent.isReady()) {
 			return agent.act(state);
 		}

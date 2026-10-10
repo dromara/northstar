@@ -12,7 +12,9 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
+import org.dromara.northstar.strategy.rl.PreprocessType;
 import org.dromara.northstar.strategy.rl.RLModelSpec;
+import org.dromara.northstar.strategy.rl.RLStatePreprocessor;
 import org.dromara.northstar.strategy.rl.RLStrategy;
 
 import lombok.extern.slf4j.Slf4j;
@@ -161,6 +163,7 @@ public class RLModelStore {
 	public synchronized RLModelMetadata syncModel(RLStrategy strategy) {
 		String modelId = strategy.modelName();
 		RLModelSpec spec = strategy.rlSpec();
+		validateCustomPreprocessor(modelId, strategy, spec);
 		Path dir = modelDir(modelId);
 		RLModelMetadata meta = null;
 		if (Files.isRegularFile(dir.resolve(RLModelMetadata.FILE_NAME))) {
@@ -210,6 +213,29 @@ public class RLModelStore {
 			throw new UncheckedIOException(e);
 		}
 		return meta;
+	}
+
+	/**
+	 * CUSTOM 预处理的创建期校验：声明了 CUSTOM 就必须提供可用的 {@link RLStatePreprocessor}，
+	 * 在创建训练任务时（syncModel 必经）暴露，而不是等到训练/推理期才失败。
+	 */
+	private static void validateCustomPreprocessor(String modelId, RLStrategy strategy, RLModelSpec spec) {
+		if (spec.preprocessing() != PreprocessType.CUSTOM) {
+			return;
+		}
+		RLStatePreprocessor preprocessor;
+		try {
+			preprocessor = strategy.rlPreprocessor();
+		} catch (UnsupportedOperationException e) {
+			throw new IllegalStateException(String.format(
+					"RL 模型 %s 的 preprocessing 声明为 CUSTOM，但策略 %s 未实现 rlPreprocessor()",
+					modelId, strategy.getClass().getName()), e);
+		}
+		if (preprocessor == null) {
+			throw new IllegalStateException(String.format(
+					"RL 模型 %s 的 preprocessing 声明为 CUSTOM，但策略 %s 的 rlPreprocessor() 返回 null",
+					modelId, strategy.getClass().getName()));
+		}
 	}
 
 	/** 以策略现场声明重写 metadata 的可变字段（name/strategy_class/algo/state_dim/action_dim/actions/features/spec_hash 与预处理类型） */

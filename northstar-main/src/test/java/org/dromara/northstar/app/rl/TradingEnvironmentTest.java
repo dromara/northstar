@@ -23,6 +23,11 @@ import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.rl.agent.RLAgent;
 import org.dromara.northstar.rl.experience.ExperienceStore;
 import org.dromara.northstar.strategy.example.RlTestStrategy;
+import org.dromara.northstar.strategy.rl.NormalizerType;
+import org.dromara.northstar.strategy.rl.PreprocessType;
+import org.dromara.northstar.strategy.rl.RLFeatureSpec;
+import org.dromara.northstar.strategy.rl.RLModelSpec;
+import org.dromara.northstar.strategy.rl.RLStatePreprocessor;
 import org.dromara.northstar.strategy.rl.TradeAction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +41,27 @@ import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
  * TradingEnvironment 单测：合成行情 + 真实沙箱 + 随机策略（无模型文件冷启动），
  * 验证事件驱动决策主循环产出的 transition 契约。
  */
-class TradingEnvironmentTest {
+public class TradingEnvironmentTest {
+
+	/** CUSTOM 预处理示例策略：预处理器把任意观测常数化为全 1（断言落盘分片用） */
+	public static class ConstantPpStrategy extends RlTestStrategy {
+		@Override
+		public RLModelSpec rlSpec() {
+			return new RLModelSpec(List.of(
+					new RLFeatureSpec("ret1", NormalizerType.RATIO),
+					new RLFeatureSpec("ret5", NormalizerType.RATIO),
+					new RLFeatureSpec("maDev", NormalizerType.RATIO),
+					new RLFeatureSpec("trendDev", NormalizerType.RATIO),
+					new RLFeatureSpec("rangePos", NormalizerType.RATIO),
+					new RLFeatureSpec("position", NormalizerType.NONE)),
+					TradeAction.class, PreprocessType.CUSTOM);
+		}
+
+		@Override
+		public RLStatePreprocessor rlPreprocessor() {
+			return raw -> new float[] {1, 1, 1, 1, 1, 1};
+		}
+	}
 
 	@TempDir
 	Path modelDir;
@@ -112,9 +137,13 @@ class TradingEnvironmentTest {
 	}
 
 	private TradingEnvironment newEnv(RLAgent agent) {
+		return newEnv(agent, new RlTestStrategy());
+	}
+
+	private TradingEnvironment newEnv(RLAgent agent, RlTestStrategy strategy) {
 		// maxHoldingBars 取 10：初始决策点改为"指标就绪或强触发上限"后才观测（预热第四层收口），
 		// 上限须小于单局 bar 数上限(120)，否则低波动合成行情下整局无决策点、零采样
-		return new TradingEnvironment(gatewayContract, bars, 120, 300, new RlTestStrategy(), agent, 0,
+		return new TradingEnvironment(gatewayContract, bars, 120, 300, strategy, agent, 0,
 				"rl-test", new TradingEnvironment.RLEnvConfig(100_000, 60, 10, 0.5, 120));
 	}
 
@@ -164,6 +193,26 @@ class TradingEnvironmentTest {
 	void evaluateReturnsNullWhenModelNotReady() throws Exception {
 		try (RLAgent agent = new RLAgent(modelDir, 1)) {
 			assertNull(newEnv(agent).evaluate(), "无模型文件时不做评估");
+		}
+	}
+
+	@Test
+	void customPreprocessorTransformsRecordedTransitions() throws Exception {
+		// CUSTOM 预处理：预处理器把任意观测常数化为全 1，落盘分片的状态列应全为 1.0
+		try (ExperienceStore store = new ExperienceStore(modelDir.resolve("versions/v1/rounds"), 6)) {
+			TradingEnvironment env = newEnv(fixedActionAgent(TradeAction.HOLD), new ConstantPpStrategy());
+			TradingEnvironment.SampleStats stats = env.sample(new Random(42), 2, 1.0, 0, store);
+			store.flush();
+			assertTrue(stats.transitions() > 0);
+
+			List<String> lines = Files.readAllLines(modelDir.resolve("versions/v1/rounds/replay-r0-c0.csv"));
+			for (String line : lines.subList(1, lines.size())) {
+				String[] cols = line.split(",");
+				for (int i = 0; i < 6; i++) {
+					assertEquals("1.0", cols[i], "s 维度 " + i + " 应为预处理器输出");
+					assertEquals("1.0", cols[8 + i], "s' 维度 " + i + " 应为预处理器输出");
+				}
+			}
 		}
 	}
 

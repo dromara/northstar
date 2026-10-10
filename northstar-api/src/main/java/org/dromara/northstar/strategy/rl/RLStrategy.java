@@ -41,6 +41,17 @@ public interface RLStrategy extends TradeStrategy {
 	RLModelSpec rlSpec();
 
 	/**
+	 * 自定义预处理函数：仅当 {@code rlSpec().preprocessing() == PreprocessType.CUSTOM} 时
+	 * 被框架调用（训练落盘前与推理进网络前各调用一次，两处必须是同一份无状态、确定性、保长的变换）。
+	 *
+	 * 默认实现快速失败：声明了 CUSTOM 却不提供预处理器会在创建训练任务时（syncModel 校验）暴露。
+	 */
+	default RLStatePreprocessor rlPreprocessor() {
+		throw new UnsupportedOperationException(
+				"rlSpec().preprocessing() 声明为 CUSTOM 时必须实现 rlPreprocessor()");
+	}
+
+	/**
 	 * 状态向量构建：返回与 rlSpec().features 一一对应的归一化特征值
 	 *
 	 * @param ctx		模组上下文

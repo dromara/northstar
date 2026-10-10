@@ -85,6 +85,7 @@ def train_dqn(model_meta, version_dir, ver_meta, grad_steps, lr_override, seed):
 
     # 预处理：standardize 的统计量在 v1 首次训练时计算并冻结；fork 版本默认沿用父版本统计量。
     # 不变量：buffer.npz 中的状态在统计量冻结后一律为标准化后的值；冻结瞬间一次性转换存量数据。
+    # custom：变换已由 Java 侧策略 RLStatePreprocessor 在经验落盘前完成，Python 直通（不冻结统计量）。
     pp = ver_meta.setdefault("preprocessing", {"type": "identity"})
     standardizing = pp.get("type") == "standardize"
     if standardizing and not pp.get("mean"):

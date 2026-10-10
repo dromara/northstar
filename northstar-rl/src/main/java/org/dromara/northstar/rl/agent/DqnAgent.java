@@ -15,6 +15,8 @@ import java.util.List;
 
 import org.dromara.northstar.rl.model.RLModelMetadata;
 import org.dromara.northstar.rl.model.RLVersionMetadata;
+import org.dromara.northstar.strategy.rl.RLStatePreprocessor;
+import org.dromara.northstar.strategy.rl.RLStrategy;
 
 /**
  * 通用 DQN 推理 Agent：本质上是预训练模型的调用壳。
@@ -88,6 +90,24 @@ public class DqnAgent<A extends Enum<A>> implements AutoCloseable {
         };
     }
 
+    /**
+     * 自定义预处理 Translator 工厂：委托策略提供的 {@link RLStatePreprocessor}。
+     * 框架额外守住保长契约（输出维度必须与输入一致），长度不符立即报错而非留给 NDArray 层。
+     */
+    public static Translator<float[], float[]> preprocessing(RLStatePreprocessor preprocessor) {
+        return new FloatVectorTranslator() {
+            @Override
+            protected float[] preprocess(float[] raw) {
+                float[] out = preprocessor.apply(raw);
+                if (out.length != raw.length) {
+                    throw new IllegalStateException(
+                            "自定义预处理输出维度 " + out.length + " 与观测维度 " + raw.length + " 不一致（须保持长度不变）");
+                }
+                return out;
+            }
+        };
+    }
+
     private final int inputDim;
     private final int actionDim;
     private final A[] actions;
@@ -109,6 +129,21 @@ public class DqnAgent<A extends Enum<A>> implements AutoCloseable {
      */
     public static <A extends Enum<A>> DqnAgent<A> fromVersionDir(Path versionDir, Class<A> actionType)
             throws IOException, MalformedModelException {
+        return fromVersionDir(versionDir, actionType, null);
+    }
+
+    /**
+     * {@link #fromVersionDir(Path, Class)} 的 custom 预处理变体。
+     *
+     * 仅当版本 metadata 声明 {@code preprocessing.type = "custom"} 时使用 customPreprocessor：
+     * 变换逻辑只存在于策略 Java 代码中，metadata 无法重建，必须由调用方（RLAgent）注入策略的
+     * {@link RLStrategy#rlPreprocessor()} 实例。metadata 为其他类型时该参数被忽略（identity/standardize
+     * 的变换可从 metadata 重建）。
+     *
+     * @param customPreprocessor 策略提供的自定义预处理器；metadata 声明 custom 时为必填，否则快速失败
+     */
+    public static <A extends Enum<A>> DqnAgent<A> fromVersionDir(Path versionDir, Class<A> actionType,
+            RLStatePreprocessor customPreprocessor) throws IOException, MalformedModelException {
         Path modelDir = versionDir.getParent().getParent();
         RLModelMetadata meta = RLModelMetadata.load(modelDir);
         RLVersionMetadata verMeta = RLVersionMetadata.load(versionDir);
@@ -130,6 +165,14 @@ public class DqnAgent<A extends Enum<A>> implements AutoCloseable {
         Translator<float[], float[]> translator = switch (pp.getType()) {
             case "identity" -> new FloatVectorTranslator();
             case "standardize" -> standardizing(pp.getMean(), pp.getStd());
+            case "custom" -> {
+                if (customPreprocessor == null) {
+                    throw new IllegalStateException(
+                            "模型版本声明了 custom 预处理，但未注入策略的 RLStatePreprocessor"
+                                    + "（须经由 RLAgent 传入 RLStrategy.rlPreprocessor() 的实例）");
+                }
+                yield preprocessing(customPreprocessor);
+            }
             default -> throw new IllegalArgumentException("未知的预处理类型: " + pp.getType());
         };
         return new DqnAgent<>(versionDir.resolve("model.pt"),

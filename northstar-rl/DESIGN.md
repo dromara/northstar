@@ -145,15 +145,16 @@ public record RLFeatureSpec(String name, NormalizerType normalizer, String descr
 public record RLModelSpec(
     List<RLFeatureSpec> features,     // 顺序敏感，顺序即向量下标；stateDim = features.size()
     Class<? extends Enum<?>> actionEnum,
-    PreprocessType preprocessing      // 预处理类型（identity / standardize）
+    PreprocessType preprocessing      // 预处理类型（identity / standardize / custom）
 ) {}
 ```
 
-接口另有一个带默认实现的方法 `default int rlWarmupBars() { return 60; }`：指标预热所需 bar 数（max(各指标回看周期) × 安全系数），创建训练任务时静态校验预热时段 bar 数不低于该值（见 §5.3 预热四层收口）。
+接口另有两个带默认实现的方法：`default int rlWarmupBars() { return 60; }`（指标预热所需 bar 数，创建训练任务时静态校验预热时段 bar 数不低于该值，见 §5.3）；`default RLStatePreprocessor rlPreprocessor()`（**仅 `preprocessing = CUSTOM` 时被调用**，默认实现快速失败——声明 CUSTOM 却不提供预处理器会在创建训练任务时（syncModel 校验）暴露。
 
 要点：
 
 - **量纲一致性**：状态特征必须是归一化/比例量（收益率、相对均线偏离、盈亏比），由 Translator 预处理保证与合约无关，多合约采样才成立；
+- **预处理三取值的执行位置**（变换必须恰好发生一次，训推两侧不得遗漏或重复）：`identity` 不做任何变换；`standardize` 由 Python 训练侧在经验入 buffer 前用冻结统计量变换（推理侧 Java Translator 用同一份 mean/std）；`custom` 完全在 Java 侧——`TradingEnvironment` 落盘 transition 前用策略的 `RLStatePreprocessor` 变换（Python 对 custom 直通），推理侧 `RLAgent` 的 Translator 进网络前用同一份变换；custom 变换必须**无状态、确定性、保长、不改入参**（需要数据相关统计量请改用 standardize），metadata 只记录 `type: "custom"`，变换逻辑本身不可重建、随策略代码演进（specHash 钉类型，实现漂移由 observe golden 测试同款手段兜底）。
 - **RL 动作翻译成普通下单调用**：`ctx.submitOrderReq(...)`，既有风控过滤器、状态机、资金校验全部继续生效，RL 不绕过任何安全边界；
 - **训推一致**：`observe()` / `shouldObserve()` / `onAction()` 三个钩子在训练环境与实盘模组中执行完全相同的代码路径；实盘 `onMergedBar` 里先判 `shouldObserve()`，为 true 才走 `observe() → act → onAction()`；
 - **探索与簿记归环境**：ε-greedy 在动作枚举层面由环境拦截，transition 记录由环境写入，策略零 RL 簿记负担。
@@ -384,7 +385,7 @@ s' = observe(); R = 区间累计收益 - 交易成本
 1. **模型输入/输出形状由策略代码定义**（见 §3.3/§4，模型名 + 现场 spec），从源头消除 90% 的 checkpoint 不兼容；
 2. **fork 校验**：父版本 specHash 必须与策略现场规格一致，且 `inheritWeights: true` 时父版本必须存在已训练的 checkpoint，不一致拒绝 fork（409 + 结构化差异详情）。`checkpoint_signature`（各层参数 shape 哈希 + optimizer 类型 + 累计步数）由 Python 每轮训练后更新，用于标识训练连续性；因模型名（网络结构身份）与 specHash 均不可漂移，network 比对待签名校验是恒真式，故 fork 处不做签名的静态比对（v1 的刻意弱化）；
 3. **显式降级路径**：`inheritWeights: false` → 不复制 checkpoint 从零训练，但继承特征定义与数据配置，血缘记录 `weight_inherited: false`，语义诚实；
-4. **预处理统计量永远冻结**：Translator 的 mean/std 在 v1 首次训练时计算并冻结；fork 一律沿用父版本统计量（保证输入分布一致，权重继承才有意义），**不提供重算入口**——想换统计量 = 创建新模型（v1 刻意收敛，比"重算与 inheritWeights 互斥"更保守）；
+4. **预处理统计量永远冻结**：Translator 的 mean/std 在 v1 首次训练时计算并冻结；fork 一律沿用父版本统计量（保证输入分布一致，权重继承才有意义），**不提供重算入口**——想换统计量 = 创建新模型（v1 刻意收敛，比"重算与 inheritWeights 互斥"更保守）；`custom` 预处理无统计量概念（变换是策略代码，不冻结、随策略演进），fork 语义同 identity；
 5. **模组绑版本必须固定版本号**，不允许绑 latest；模型切换 = 模组显式换绑 + 重建（保证行为可复盘，同时规避 Windows 文件锁问题——版本目录只增不改）。
 
 ## 8. 前端设计（已实现 PoC）
@@ -413,6 +414,7 @@ s' = observe(); R = 区间累计收益 - 交易成本
 | 权重继承必然兼容 | 模型形状不可变 + fork 校验父版本 specHash 与 checkpoint 存在性 |
 | 特征语义漂移必然暴露 | specHash 四处校验 + 结构化 diff（metadata 持久化特征清单）+ observe golden 测试 |
 | 输入分布漂移受控 | 预处理统计量永远冻结，不提供重算入口 |
+| 自定义预处理训推一致 | CUSTOM 变换仅存在于 Java 策略代码：训练落盘前与推理进网络前各执行一次，Python 直通；声明 CUSTOM 不提供预处理器时创建期（syncModel）快速失败 |
 | 量纲与合约无关 | 特征归一化由 Translator 保证 |
 | 每个版本可复盘 | 版本 metadata 完整血缘记录 |
 | "达标"有统计意义 | 验证时段评估 + 胜率/盈亏比/≥100 笔约束 |
