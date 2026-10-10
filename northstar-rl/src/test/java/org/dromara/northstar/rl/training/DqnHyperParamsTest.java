@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.dromara.northstar.common.constant.FieldType;
 import org.dromara.northstar.common.model.ComponentField;
+import org.dromara.northstar.strategy.rl.RLAlgo;
 import org.junit.jupiter.api.Test;
 
 class DqnHyperParamsTest {
@@ -40,7 +41,7 @@ class DqnHyperParamsTest {
 
     @Test
     void defaultsAreExposedAsMap() {
-        Map<String, Double> defaults = RLAlgorithms.hyperParamDefaults(RLAlgorithms.DQN);
+        Map<String, Double> defaults = RLAlgorithms.hyperParamDefaults(RLAlgo.DQN);
         assertEquals(5e-4, defaults.get("lr"), 1e-12);
         assertEquals(0.99, defaults.get("gamma"), 1e-12);
         assertEquals(128, defaults.get("batchSize"), 1e-12);
@@ -75,8 +76,7 @@ class DqnHyperParamsTest {
     }
 
     @Test
-    void unknownAlgoFailsFast() {
-        assertThrows(UnsupportedOperationException.class, () -> RLAlgorithms.hyperParamsOf("PPO"));
-        assertThrows(IllegalArgumentException.class, () -> RLAlgorithms.hyperParamsOf("XXX"));
+    void ppoAlgoFailsFastUntilV2() {
+        assertThrows(UnsupportedOperationException.class, () -> RLAlgorithms.hyperParamsOf(RLAlgo.PPO));
     }
 }

@@ -31,6 +31,7 @@ import org.dromara.northstar.rl.model.RLModelStore;
 import org.dromara.northstar.rl.model.RLVersionMetadata;
 import org.dromara.northstar.rl.training.RLAlgorithms;
 import org.dromara.northstar.rl.training.RLTrainExecutor;
+import org.dromara.northstar.strategy.rl.RLAlgo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -72,7 +73,7 @@ class RLTrainingRunnerTest {
 				.targetVersion(1)
 				.totalRounds(2)
 				.episodesPerRound(2)
-				.hyperParams(RLAlgorithms.hyperParamDefaults("DQN"))
+				.hyperParams(RLAlgorithms.hyperParamDefaults(RLAlgo.DQN))
 				.status(RLTrainingStatus.RUNNING)
 				.currentRound(0)
 				.seed(1)

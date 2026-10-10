@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.dromara.northstar.common.model.rl.RLRoundMetrics;
 import org.dromara.northstar.common.model.rl.RLTrainingStatus;
+import org.dromara.northstar.strategy.rl.RLAlgo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,7 +26,7 @@ public class RLTrainingTaskRecord {
 	private String strategyName;
 	private String modelId;
 	private String modelName;
-	private String algo;
+	private RLAlgo algo;
 	private int baseVersion;
 	private int targetVersion;
 	private List<String> contracts;

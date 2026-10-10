@@ -63,7 +63,10 @@ public class RLAgent implements AutoCloseable {
 			RLModelMetadata meta = RLModelMetadata.load(modelDir);
 			this.stateDim = meta.getStateDim();
 			if (Files.isRegularFile(versionDir.resolve("model.pt"))) {
-				delegate = DqnAgent.fromVersionDir(versionDir, TradeAction.class);
+				delegate = switch (meta.getAlgo()) {
+					case DQN -> DqnAgent.fromVersionDir(versionDir, TradeAction.class);
+					case PPO -> throw new UnsupportedOperationException("PPO 推理侧将在 v2 提供");
+				};
 			}
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);

@@ -94,6 +94,7 @@ northstar-rl/models/{modelId}/
 - **缺失即 bootstrap**：`RLModelStore.syncModel(strategy)` 以策略现场 spec 引导生成（`latest_version=0`，`preprocessing` 只写 type）；创建训练任务等入口一律先 sync，不再要求 metadata 预置；
 - **陈旧即重写**：文件中的 `spec_hash` 与现场 spec 不一致时，重写全部可变字段，**保留 `latest_version` 与 `preprocessing.mean/std`**（版本资产指针与训练侧统计量不得丢失）；
 - 模型名 = 网络结构身份：`RLStrategy.modelName()` 声明（如 `dqn-demo`），模型目录名与 `name` 字段均取自该值；Python 端以同名 key 在 `registry.py` 注册网络构建函数，**network 结构字段不再出现在模型级 metadata**，改由 Python 每轮训练后回写到版本级 metadata（§3.4）；
+- 训练算法 = `RLStrategy.rlAlgo()` 声明（`RLAlgo` 枚举，v1 仅 `DQN`，`PPO` 为 v2 预留），与模型名正交（同一网络主干可被不同算法复用）；`algo` 随 bootstrap/重写写入本文件，Java 超参注册表（`RLAlgorithms`）、Java 推理侧（`RLAgent`）与 Python `train_round.py` 均据其分发；**algo 是身份级字段**：`syncModel` 检出持久化值与策略声明不一致即快速失败（checkpoint 结构与超参历史按算法解释，变更算法须换新 modelName 建新模型），不随 spec 陈旧重写而变化；
 - 旧版文件遗留的 `network` 字段由 Gson 默认忽略，加载不报错；`features` 持久化特征清单（名称+归一化方式，顺序敏感），供 fork 校验失败时输出结构化 diff（见 §4.1），旧版 metadata 无该字段时按空清单处理。
 
 ### 3.4 版本级 metadata（出生证明）

@@ -26,6 +26,7 @@ import org.dromara.northstar.common.model.rl.RLTrainingTaskDTO;
 import org.dromara.northstar.common.model.rl.RLTrainingTaskDetailVO;
 import org.dromara.northstar.common.model.rl.RLTrainingTaskVO;
 import org.dromara.northstar.strategy.example.RlTestStrategy;
+import org.dromara.northstar.strategy.rl.RLAlgo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -52,7 +53,7 @@ class RLControllerTest {
 			.strategyName("RL测试策略")
 			.modelId("dqn-demo")
 			.modelName("dqn-demo")
-			.algo("DQN")
+			.algo(RLAlgo.DQN)
 			.baseVersion(0)
 			.targetVersion(1)
 			.contracts(List.of("rb0000@SHFE@FUTURES"))
@@ -82,7 +83,7 @@ class RLControllerTest {
 	@Test
 	void listModels() throws Exception {
 		when(service.models()).thenReturn(List.of(RLModelVO.builder()
-				.modelId("dqn-demo").name("dqn-demo").algo("DQN")
+				.modelId("dqn-demo").name("dqn-demo").algo(RLAlgo.DQN)
 				.strategyClass(RlTestStrategy.class.getName())
 				.network(RLModelVO.NetworkVO.builder().hidden(List.of(128, 128)).activation("relu").build())
 				.hyperParamFields(List.of())

@@ -16,6 +16,7 @@ import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.IModuleStrategyContext;
 import org.dromara.northstar.strategy.rl.NormalizerType;
 import org.dromara.northstar.strategy.rl.PreprocessType;
+import org.dromara.northstar.strategy.rl.RLAlgo;
 import org.dromara.northstar.strategy.rl.RLFeatureSpec;
 import org.dromara.northstar.strategy.rl.RLModelSpec;
 import org.dromara.northstar.strategy.rl.RLRewardContext;
@@ -41,10 +42,21 @@ class RLModelStoreTest {
     static class FakeStrategy extends AbstractStrategy implements RLStrategy {
         private final String modelName;
         private final RLModelSpec spec;
+        private RLAlgo algo = RLAlgo.DQN;
 
         FakeStrategy(String modelName, RLModelSpec spec) {
             this.modelName = modelName;
             this.spec = spec;
+        }
+
+        FakeStrategy withAlgo(RLAlgo algo) {
+            this.algo = algo;
+            return this;
+        }
+
+        @Override
+        public RLAlgo rlAlgo() {
+            return algo;
         }
 
         @Override
@@ -124,7 +136,7 @@ class RLModelStoreTest {
 
         assertEquals("rb-trend-dqn", meta.getName());
         assertEquals(FakeStrategy.class.getName(), meta.getStrategyClass());
-        assertEquals("DQN", meta.getAlgo());
+        assertEquals(RLAlgo.DQN, meta.getAlgo());
         assertEquals(2, meta.getStateDim());
         assertEquals(3, meta.getActionDim());
         assertEquals(List.of("HOLD", "BUY", "SELL"), meta.getActions());
@@ -182,6 +194,25 @@ class RLModelStoreTest {
         // 重写落盘：重新加载仍为现场 spec
         assertEquals(evolved.specHash(),
                 store.findModel("m").orElseThrow().getSpecHash());
+    }
+
+    @Test
+    void syncModelTakesAlgoFromStrategyDeclaration() {
+        RLModelMetadata meta = store.syncModel(new FakeStrategy("m", spec).withAlgo(RLAlgo.PPO));
+
+        assertEquals(RLAlgo.PPO, meta.getAlgo(), "algo 应来自策略声明而非默认写死");
+        assertEquals(RLAlgo.PPO, store.findModel("m").orElseThrow().getAlgo(), "落盘保留声明值");
+    }
+
+    @Test
+    void syncModelRejectsAlgoChangeEvenWhenSpecUnchanged() {
+        FakeStrategy strategy = new FakeStrategy("m", spec);
+        store.syncModel(strategy);
+
+        IllegalStateException e = assertThrows(IllegalStateException.class,
+                () -> store.syncModel(strategy.withAlgo(RLAlgo.PPO)));
+        assertTrue(e.getMessage().contains("DQN") && e.getMessage().contains("PPO"));
+        assertEquals(RLAlgo.DQN, store.findModel("m").orElseThrow().getAlgo(), "失败时不改写已持久化的 algo");
     }
 
     /* ---------- fork / delete ---------- */

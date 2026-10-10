@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dromara.northstar.strategy.rl.PreprocessType;
+import org.dromara.northstar.strategy.rl.RLAlgo;
 import org.dromara.northstar.strategy.rl.RLFeatureSpec;
 import org.dromara.northstar.strategy.rl.RLModelSpec;
 
@@ -37,9 +38,9 @@ public class RLModelMetadata {
 	/** 绑定的策略类全限定名（示例环境如 CartPole 无绑定策略，可为空） */
 	@SerializedName("strategy_class")
 	private String strategyClass;
-	/** 训练算法（DQN；PPO 预留给 v2） */
+	/** 训练算法：由策略 {@link RLStrategy#rlAlgo()} 声明；序列化为枚举名（DQN/PPO） */
 	@SerializedName("algo")
-	private String algo = "DQN";
+	private RLAlgo algo;
 	@SerializedName("state_dim")
 	private int stateDim;
 	@SerializedName("action_dim")
@@ -151,11 +152,11 @@ public class RLModelMetadata {
 		this.strategyClass = strategyClass;
 	}
 
-	public String getAlgo() {
+	public RLAlgo getAlgo() {
 		return algo;
 	}
 
-	public void setAlgo(String algo) {
+	public void setAlgo(RLAlgo algo) {
 		this.algo = algo;
 	}
 

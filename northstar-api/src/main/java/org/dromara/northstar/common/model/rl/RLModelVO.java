@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.dromara.northstar.common.model.ComponentField;
+import org.dromara.northstar.strategy.rl.RLAlgo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +22,7 @@ public class RLModelVO {
 
 	private String modelId;
 	private String name;
-	private String algo;
+	private RLAlgo algo;
 	/** 绑定的策略类全限定名 */
 	private String strategyClass;
 	/**

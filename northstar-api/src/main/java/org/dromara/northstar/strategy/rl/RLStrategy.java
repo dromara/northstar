@@ -22,6 +22,20 @@ public interface RLStrategy extends TradeStrategy {
 	String modelName();
 
 	/**
+	 * 训练算法：声明本模型用哪种算法训练。
+	 *
+	 * 与 {@link #modelName()} 正交：网络结构身份看 modelName，训练算法看本方法
+	 * （同一网络主干可被不同算法复用，如 PPO 的 actor-critic 可共享 DQN 的 MLP）。
+	 * 声明值写入模型级 metadata.json 的 algo 字段，Java/Python 训练侧均据其分发。
+	 *
+	 * 模型创建后不得变更：checkpoint 结构、超参历史与经验回放语义均按算法解释，
+	 * 变更算法须换 modelName 建新模型（syncModel 检出声明变更即快速失败）。
+	 */
+	default RLAlgo rlAlgo() {
+		return RLAlgo.DQN;
+	}
+
+	/**
 	 * 模型规格：状态特征清单 + 动作枚举 + 预处理类型（创建模型后终身不可变）
 	 */
 	RLModelSpec rlSpec();

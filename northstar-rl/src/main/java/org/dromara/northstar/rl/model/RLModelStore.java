@@ -148,8 +148,10 @@ public class RLModelStore {
 	 * 以策略现场 spec 为准同步模型级 metadata（bootstrap 或重写陈旧内容）：
 	 * <ul>
 	 *   <li>目录/metadata.json 不存在：创建目录并写出 metadata.json
-	 *       （name/strategy_class/algo/state_dim/action_dim/actions/features/spec_hash 全部来自现场 spec，
+	 *       （name/strategy_class/algo/state_dim/action_dim/actions/features/spec_hash 全部来自现场声明，
 	 *        latest_version=0，preprocessing 只写 type）</li>
+	 *   <li>已存在但 algo 与策略声明不一致：快速失败（checkpoint 结构与超参历史按算法解释，不得跨算法复用，
+	 *       变更算法须换新 modelName 建新模型）</li>
 	 *   <li>已存在且 spec_hash 一致：原样返回</li>
 	 *   <li>已存在但 spec_hash 不一致（陈旧）：重写全部可变字段，保留 latest_version 与 preprocessing.mean/std</li>
 	 * </ul>
@@ -182,6 +184,12 @@ public class RLModelStore {
 			log.info("RL 模型 {} 无 metadata.json，已按策略现场 spec 引导生成", modelId);
 			return meta;
 		}
+		if (meta.getAlgo() != strategy.rlAlgo()) {
+			throw new IllegalStateException(String.format(
+					"RL 模型 %s 的算法 %s 与策略声明 %s 不一致：checkpoint 结构与超参历史按算法解释，不得跨算法复用，"
+							+ "变更算法请更换 modelName 建新模型",
+					modelId, meta.getAlgo(), strategy.rlAlgo()));
+		}
 		if (spec.specHash().equals(meta.getSpecHash())) {
 			return meta;
 		}
@@ -189,11 +197,9 @@ public class RLModelStore {
 		int latestVersion = meta.getLatestVersion();
 		float[] mean = meta.getPreprocessing().getMean();
 		float[] std = meta.getPreprocessing().getStd();
-		String algo = meta.getAlgo();
 		log.warn("RL 模型 {} 的 metadata 与策略现场 spec 不一致（specHash {} != {}），重写可变字段（保留 latest_version 与预处理统计量）",
 				modelId, meta.getSpecHash(), spec.specHash());
 		applySpec(meta, strategy, spec);
-		meta.setAlgo(algo == null || algo.isBlank() ? "DQN" : algo);
 		meta.setLatestVersion(latestVersion);
 		meta.getPreprocessing().setType(spec.preprocessing().code());
 		meta.getPreprocessing().setMean(mean);
@@ -206,10 +212,11 @@ public class RLModelStore {
 		return meta;
 	}
 
-	/** 以策略现场 spec 重写 metadata 的可变字段（name/strategy_class/state_dim/action_dim/actions/features/spec_hash 与预处理类型） */
+	/** 以策略现场声明重写 metadata 的可变字段（name/strategy_class/algo/state_dim/action_dim/actions/features/spec_hash 与预处理类型） */
 	private static void applySpec(RLModelMetadata meta, RLStrategy strategy, RLModelSpec spec) {
 		meta.setName(strategy.modelName());
 		meta.setStrategyClass(strategy.getClass().getName());
+		meta.setAlgo(strategy.rlAlgo());
 		meta.setStateDim(spec.stateDim());
 		meta.setActionDim(spec.actionDim());
 		meta.setActions(spec.actions());

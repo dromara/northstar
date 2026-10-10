@@ -53,7 +53,7 @@ northstar-rl/
     │   └── RlTestStrategy.java  # 示例 RL 策略（6 维状态 × 3 动作，训练/实盘同一钩子路径）
     ├── training/
     │   ├── DqnHyperParams.java   # DQN 超参数定义（DynamicParams/@Setting，UI 动态渲染）
-    │   ├── RLAlgorithms.java     # algo -> Hyperparameter 注册表与默认值表
+    │   ├── RLAlgorithms.java     # RLAlgo -> Hyperparameter 注册表与默认值表
     │   ├── RLTrainExecutor.java  # 单轮训练执行器接口（RLTrainResult 记录）
     │   └── PythonTrainExecutor.java  # Python 子进程实现（解析 LOSS= 等结构化输出）
     └── example/DqnInference.java     # 推理示例：加载模型版本目录跑完整回合

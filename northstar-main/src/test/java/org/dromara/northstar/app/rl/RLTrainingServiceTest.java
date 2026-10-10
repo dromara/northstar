@@ -23,6 +23,7 @@ import org.dromara.northstar.rl.model.RLModelMetadata;
 import org.dromara.northstar.rl.model.RLModelStore;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.example.RlTestStrategy;
+import org.dromara.northstar.strategy.rl.RLAlgo;
 import org.dromara.northstar.support.utils.EventEmitterHolder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -119,7 +120,7 @@ class RLTrainingServiceTest {
 		assertEquals(1, models.size());
 		var model = models.get(0);
 		assertEquals("dqn-demo", model.getModelId());
-		assertEquals("DQN", model.getAlgo());
+		assertEquals(RLAlgo.DQN, model.getAlgo());
 		assertNull(model.getNetwork(), "无已训练版本时 Python 尚未回写 network，应为 null");
 		assertEquals(10, model.getHyperParamFields().size(), "DQN 超参数字段清单");
 		assertEquals(0, model.getLatestVersion());
@@ -185,7 +186,7 @@ class RLTrainingServiceTest {
 
 		assertEquals(RLTrainingStatus.CREATED, vo.getStatus(), "创建后处于待加载状态");
 		assertEquals(1, vo.getTargetVersion(), "从零训练创建 v1");
-		assertEquals("DQN", vo.getAlgo());
+		assertEquals(RLAlgo.DQN, vo.getAlgo());
 		assertEquals(0.001, vo.getHyperParams().get("lr"));
 		assertEquals(0.99, vo.getHyperParams().get("gamma"), "未覆盖项取默认值");
 		assertTrue(modelStore.findVersion("dqn-demo", 1).isPresent());
