@@ -23,7 +23,7 @@ public class MaliciousIPCollector {
 	public void log(HttpServletRequest req) {
 		String ip = req.getRemoteAddr();
 		log.info("记录可疑IP：{}", ip);
-		suspectIPMap.computeIfAbsent(ip, k -> new ConcurrentLinkedQueue<>());
+		suspectIPMap.computeIfAbsent(ip, _ -> new ConcurrentLinkedQueue<>());
 		ConcurrentLinkedQueue<Long> cacheQ = suspectIPMap.get(ip);
 		cacheQ.offer(System.currentTimeMillis());
 		if(cacheQ.size() > MAX_REQ) {

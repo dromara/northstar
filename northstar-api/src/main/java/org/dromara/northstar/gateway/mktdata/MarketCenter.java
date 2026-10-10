@@ -184,7 +184,7 @@ public class MarketCenter implements IMarketCenter, IContractManager{
 				continue;
 			}
 			String underlyingSymbol = c.contract().underlyingSymbol();
-			symbolOptionsMap.computeIfAbsent(underlyingSymbol, key -> new ArrayList<>());
+			symbolOptionsMap.computeIfAbsent(underlyingSymbol, _ -> new ArrayList<>());
 			symbolOptionsMap.get(underlyingSymbol).add(c);
 		}
 		for(Entry<String, List<IContract>> e : symbolOptionsMap.entrySet()) {

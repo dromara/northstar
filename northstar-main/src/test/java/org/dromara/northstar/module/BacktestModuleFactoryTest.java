@@ -87,7 +87,7 @@ class BacktestModuleFactoryTest {
         return new RestTemplateBuilder()
                 .readTimeout(Duration.ofSeconds(60))
                 .connectTimeout(Duration.ofSeconds(10))
-                .rootUri("https://marketplace.quantit.tech")
+                .baseUri("https://marketplace.quantit.tech")
 				.defaultHeader("Authorization", String.format("Bearer %s", token))
 				.defaultHeader("NS_Version", "UnitTest")
                 .build();

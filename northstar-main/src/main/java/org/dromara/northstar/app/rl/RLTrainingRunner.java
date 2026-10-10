@@ -310,7 +310,7 @@ public class RLTrainingRunner {
 	void writeAcceptedBy() {
 		record.getMetrics().stream()
 				.filter(m -> m.getEvalWinRate() != null)
-				.reduce((a, b) -> b)
+				.reduce((_, b) -> b)
 				.ifPresentOrElse(m -> {
 					if (!meetsAcceptanceCriteria(m)) {
 						log.info("RL 任务 {} 未达标（胜率={} 盈亏比={} 交易笔数={}），版本 v{} 不写入达标标记",

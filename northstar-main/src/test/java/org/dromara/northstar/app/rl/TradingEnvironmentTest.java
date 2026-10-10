@@ -59,7 +59,7 @@ public class TradingEnvironmentTest {
 
 		@Override
 		public RLStatePreprocessor rlPreprocessor() {
-			return raw -> new float[] {1, 1, 1, 1, 1, 1};
+			return _ -> new float[] {1, 1, 1, 1, 1, 1};
 		}
 	}
 

@@ -65,7 +65,7 @@ public class LoginIPLockService {
         if (ip == null || ip.isBlank()) {
             return LockStatus.NORMAL;
         }
-        IPLoginStatus status = statusMap.computeIfAbsent(ip, k -> new IPLoginStatus());
+        IPLoginStatus status = statusMap.computeIfAbsent(ip, _ -> new IPLoginStatus());
         synchronized (status) {
             long now = clock.millis();
 

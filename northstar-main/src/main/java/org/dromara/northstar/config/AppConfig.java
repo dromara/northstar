@@ -39,7 +39,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -100,7 +100,7 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean {
 		Iterator<HttpMessageConverter<?>> itCvt = converters.iterator();
 		while (itCvt.hasNext()) {
 			HttpMessageConverter<?> cvt = itCvt.next();
-			if (cvt instanceof MappingJackson2HttpMessageConverter) {
+			if (cvt instanceof JacksonJsonHttpMessageConverter) {
 				jacksonConverters.add(cvt);
 				itCvt.remove();
 			}
@@ -172,7 +172,7 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean {
         return new RestTemplateBuilder()
                 .readTimeout(Duration.ofSeconds(60))
                 .connectTimeout(Duration.ofSeconds(10))
-                .rootUri(baseUrl)
+                .baseUri(baseUrl)
 				.defaultHeader("Authorization", String.format("Bearer %s", token))
 				.defaultHeader("NS_Version", buildProperties.getVersion())
                 .build();

@@ -46,7 +46,7 @@ public class ContractConfigService {
         
         // 构建自定义配置 Map
         Map<String, ContractConfigDO> contractIdConfigMap = customEntities.stream()
-                .collect(Collectors.toMap(ContractConfigDO::getContractId, item -> item, (a, b) -> a));
+                .collect(Collectors.toMap(ContractConfigDO::getContractId, item -> item, (a, _) -> a));
         
         if (Boolean.TRUE.equals(onlyCustom)) {
             // 只返回自定义配置

@@ -28,7 +28,7 @@ public class InMemoryAccountRepository implements IAccountRepository {
 
 	@Override
 	public void saveDealRecord(DealRecord dealRecord) {
-		dealRecords.computeIfAbsent(dealRecord.getAccountName(), k -> new CopyOnWriteArrayList<>()).add(dealRecord);
+		dealRecords.computeIfAbsent(dealRecord.getAccountName(), _ -> new CopyOnWriteArrayList<>()).add(dealRecord);
 	}
 
 	@Override
