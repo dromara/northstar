@@ -6,7 +6,7 @@ import static xyz.redtorch.pb.CoreEnum.OffsetFlagEnum.*;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 
-public enum TradeAction {
+public enum TradeOperation {
 
 	/**
 	 * 买开
@@ -28,7 +28,7 @@ public enum TradeAction {
 	private DirectionEnum dir;
 	private OffsetFlagEnum flag;
 	
-	private TradeAction(DirectionEnum dir, OffsetFlagEnum flag) {
+	private TradeOperation(DirectionEnum dir, OffsetFlagEnum flag) {
 		this.dir = dir;
 		this.flag = flag;
 	}

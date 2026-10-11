@@ -12,7 +12,7 @@ import java.util.function.BooleanSupplier;
 
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.TickType;
-import org.dromara.northstar.common.constant.TradeAction;
+import org.dromara.northstar.common.constant.TradeOperation;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.SubmitOrderDTO;
@@ -55,7 +55,7 @@ class TradeFlowIT extends RestE2ESupport {
 		contract = mktCenter.getContract(Identifier.of(CONTRACT_ID)).contract();
 	}
 
-	private SubmitOrderDTO order(double volume, double price, TradeAction action) {
+	private SubmitOrderDTO order(double volume, double price, TradeOperation action) {
 		SubmitOrderDTO dto = new SubmitOrderDTO();
 		dto.setGatewayId(ACC_GW_ID);
 		dto.setOriginOrderId(UUID.randomUUID().toString());
@@ -120,7 +120,7 @@ class TradeFlowIT extends RestE2ESupport {
 		createGateway(auth, simMarketGateway(MKT_GW_ID));
 		createGateway(auth, simTradeGateway(ACC_GW_ID, MKT_GW_ID));
 		// 不连线直接发单
-		submit(order(1, 0, TradeAction.BK), 406);
+		submit(order(1, 0, TradeOperation.BK), 406);
 	}
 
 	@Test
@@ -138,11 +138,11 @@ class TradeFlowIT extends RestE2ESupport {
 		awaitWithTicks(BASE_PRICE, () -> mktCenter.lastTick(contract).isPresent(), "等待模拟行情就绪");
 
 		// 市价买开 1 手
-		submit(order(1, 0, TradeAction.BK), 200);
+		submit(order(1, 0, TradeOperation.BK), 200);
 		awaitWithTicks(BASE_PRICE, () -> longPosition() == 1, "等待多头持仓");
 
 		// 卖平 1 手
-		submit(order(1, 0, TradeAction.SP), 200);
+		submit(order(1, 0, TradeOperation.SP), 200);
 		awaitWithTicks(BASE_PRICE, () -> longPosition() == 0, "等待持仓清零");
 
 		// 成交记录（一次完整开平计一笔，事件引擎异步落库，轮询等待）
@@ -162,7 +162,7 @@ class TradeFlowIT extends RestE2ESupport {
 	void 未认证发单应返回403() throws Exception {
 		mvc.perform(post("/northstar/trade/order/submit")
 					.contentType(MediaType.APPLICATION_JSON)
-					.content(JSON.toJSONString(order(1, 0, TradeAction.BK))))
+					.content(JSON.toJSONString(order(1, 0, TradeOperation.BK))))
 				.andExpect(status().isForbidden());
 	}
 }

@@ -22,7 +22,7 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.GatewayUsage;
 import org.dromara.northstar.common.constant.TickType;
-import org.dromara.northstar.common.constant.TradeAction;
+import org.dromara.northstar.common.constant.TradeOperation;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.GatewayDescription;
@@ -250,7 +250,7 @@ class TradePlanE2ETest {
 	void testStandaloneStopLoss() throws Exception {
 		mockTick(BASE_PRICE);
 		// 先持有一手多头
-		submitOrder(TradeAction.BK, 1, 0);
+		submitOrder(TradeOperation.BK, 1, 0);
 		awaitCondition(() -> longPosition() == 1, "等待市价买开成交");
 
 		// 创建仅含止损价的交易计划（等价于单独止损线），止损价远离现价不会误触发
@@ -286,7 +286,7 @@ class TradePlanE2ETest {
 	void testStandaloneTakeProfit() throws Exception {
 		mockTick(BASE_PRICE);
 		// 先持有一手多头
-		submitOrder(TradeAction.BK, 1, 0);
+		submitOrder(TradeOperation.BK, 1, 0);
 		awaitCondition(() -> longPosition() == 1, "等待市价买开成交");
 
 		// 创建仅含止盈价的交易计划（等价于单独止盈线），止盈价远离现价不会误触发
@@ -412,7 +412,7 @@ class TradePlanE2ETest {
 		return JSON.parseArray(json);
 	}
 
-	private void submitOrder(TradeAction action, double volume, double price) throws Exception {
+	private void submitOrder(TradeOperation action, double volume, double price) throws Exception {
 		SubmitOrderDTO dto = new SubmitOrderDTO();
 		dto.setGatewayId(ACC_GW_ID);
 		dto.setOriginOrderId(UUID.randomUUID().toString());
@@ -466,7 +466,7 @@ class TradePlanE2ETest {
 	private void closeLeftoverPosition() throws Exception {
 		double vol = longPosition();
 		if (vol > 0) {
-			submitOrder(TradeAction.SP, vol, 0);
+			submitOrder(TradeOperation.SP, vol, 0);
 			awaitCondition(() -> longPosition() == 0, "等待残留持仓平仓");
 		}
 	}
