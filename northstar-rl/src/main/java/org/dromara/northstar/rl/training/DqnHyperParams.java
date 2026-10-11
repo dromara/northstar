@@ -20,8 +20,8 @@ public class DqnHyperParams extends DynamicParams {
 	@Setting(label = "学习率", type = FieldType.NUMBER, order = 1)
 	private double lr = 5e-4;
 
-	@Setting(label = "折扣因子γ", type = FieldType.NUMBER, order = 2)
-	private double gamma = 0.99;
+	@Setting(label = "折扣因子γ（0=按单局长度自动）", type = FieldType.NUMBER, order = 2)
+	private double gamma = 0;	// 0 = 自动：时间常数 τ 对齐单局 bar 数（γ=e^(-1/τ)），避免固定 0.99（τ≈100bar）在长持仓转移上过度折扣
 
 	@Setting(label = "起始探索率𝜺", type = FieldType.NUMBER, order = 3)
 	private double epsilonStart = 1.0;

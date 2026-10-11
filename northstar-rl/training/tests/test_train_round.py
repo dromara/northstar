@@ -1,5 +1,6 @@
 """train_round.py 端到端测试：版本目录契约、增量读取、预处理冻结、checkpoint 签名、algo 分发。"""
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -273,3 +274,22 @@ class TestIngestionCrashConsistency:
         out = capsys.readouterr().out
         assert "NEW_SAMPLES=10" in out, "分片应被重复入库（at-least-once）"
         assert len(np.load(version_dir / "buffer.npz")["states"]) == 20
+
+
+class TestResolveGamma:
+    def test_explicit_positive_gamma_wins(self):
+        assert train_round.resolve_gamma(0.97, 2000) == 0.97
+
+    def test_auto_gamma_time_constant_aligns_episode_bars(self):
+        g = train_round.resolve_gamma(0.0, 2000)
+        assert g == pytest.approx(math.exp(-1 / 2000), rel=1e-12)
+        assert 0.999 < g < 1, "τ=2000bar 时 γ 应接近 1，长持仓转移的 bootstrap 不被过度折扣"
+
+    def test_auto_gamma_scales_with_episode_bars(self):
+        g_short = train_round.resolve_gamma(None, 500)
+        g_long = train_round.resolve_gamma(None, 2000)
+        assert g_short < g_long, "单局越短，时间常数越小，γ 应越小"
+
+    def test_fallback_default_when_no_episode_bars(self):
+        assert train_round.resolve_gamma(None, None) == 0.99
+        assert train_round.resolve_gamma(0.0, 0) == 0.99

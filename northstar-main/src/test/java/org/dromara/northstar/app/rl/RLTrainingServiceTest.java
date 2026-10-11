@@ -188,7 +188,7 @@ class RLTrainingServiceTest {
 		assertEquals(1, vo.getTargetVersion(), "从零训练创建 v1");
 		assertEquals(RLAlgo.DQN, vo.getAlgo());
 		assertEquals(0.001, vo.getHyperParams().get("lr"));
-		assertEquals(0.99, vo.getHyperParams().get("gamma"), "未覆盖项取默认值");
+		assertEquals(0.0, vo.getHyperParams().get("gamma"), "未覆盖项取默认值（0=自动，τ 对齐单局 bar 数）");
 		assertTrue(modelStore.findVersion("dqn-demo", 1).isPresent());
 		assertEquals(1, modelStore.findModel("dqn-demo").orElseThrow().getLatestVersion());
 		long seed = modelStore.findVersion("dqn-demo", 1).orElseThrow().getTraining().getSeed();

@@ -1,4 +1,4 @@
-"""DQN 训练侧单元测试：网络结构、回放池 dt 支持、γ^dt 折扣、checkpoint 签名。"""
+"""DQN 训练侧单元测试：网络结构、回放池 dt 支持、γ^dt 折扣、年金校正、checkpoint 签名。"""
 import numpy as np
 import pytest
 import torch
@@ -85,6 +85,50 @@ class TestDqnTrainer:
         assert "exponent" in captured
         assert torch.allclose(captured["exponent"],
                               torch.full((4,), dt_val)), "折扣指数应为 dt"
+
+    def test_annuity_correction_scales_interval_reward(self, monkeypatch):
+        """年金校正：dt>1 的区间奖励按 (1-γ^dt)/((1-γ)·dt) 折算；terminated 转移的 target 即校正后奖励。"""
+        trainer = self._trainer()   # gamma=0.5
+        dt_val = 4.0
+        trainer.add_experiences(
+            np.zeros((8, 2), dtype=np.float32), np.zeros(8, dtype=np.int64),
+            np.ones(8, dtype=np.float32), np.zeros((8, 2), dtype=np.float32),
+            np.full(8, dt_val, dtype=np.float32), np.ones(8, dtype=np.float32))  # terminated=1 -> bootstrap 清零
+
+        captured = {}
+        real_loss = torch.nn.functional.smooth_l1_loss
+
+        def spy(input, target, **kw):
+            captured["target"] = target.detach().clone()
+            return real_loss(input, target, **kw)
+
+        monkeypatch.setattr(torch.nn.functional, "smooth_l1_loss", spy)
+        steps, loss = trainer.train_steps(1)
+        assert steps == 1
+        gamma, dt = 0.5, dt_val
+        annuity = (1 - gamma ** dt) / ((1 - gamma) * dt)
+        assert torch.allclose(captured["target"],
+                              torch.full((4,), annuity, dtype=torch.float32)), \
+            "target 应为年金校正后的奖励（bootstrap 已按 terminated 清零）"
+
+    def test_annuity_factor_is_one_for_unit_dt(self, monkeypatch):
+        """dt=1 时年金因子恒为 1，单 bar 转移行为与校正前一致。"""
+        trainer = self._trainer()
+        trainer.add_experiences(
+            np.zeros((8, 2), dtype=np.float32), np.zeros(8, dtype=np.int64),
+            np.ones(8, dtype=np.float32), np.zeros((8, 2), dtype=np.float32),
+            np.ones(8, dtype=np.float32), np.ones(8, dtype=np.float32))
+
+        captured = {}
+        real_loss = torch.nn.functional.smooth_l1_loss
+
+        def spy(input, target, **kw):
+            captured["target"] = target.detach().clone()
+            return real_loss(input, target, **kw)
+
+        monkeypatch.setattr(torch.nn.functional, "smooth_l1_loss", spy)
+        trainer.train_steps(1)
+        assert torch.allclose(captured["target"], torch.ones(4)), "dt=1 时校正因子为 1，target 即原始奖励"
 
     def test_checkpoint_round_trip_and_signature(self, tmp_path):
         trainer = self._trainer()

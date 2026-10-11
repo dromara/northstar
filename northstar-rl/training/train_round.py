@@ -11,6 +11,7 @@
 """
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -36,7 +37,21 @@ def _atomic_write_text(path, text):
     os.replace(tmp, str(path))
 
 
-def train_dqn(model_meta, version_dir, ver_meta, grad_steps, lr_override, seed):
+def resolve_gamma(hp_gamma, episode_bars):
+    """折扣因子解析：显式配置（>0）优先；否则按"时间常数 τ = 单局 bar 数"自动推导 γ = e^(-1/τ)。
+
+    γ 的时间常数须与 dt 的量纲（bar）匹配：固定 0.99 的 τ≈100 bar，单局较长时一次长持仓
+    转移就会把 bootstrap 打到 e^(-1) 量级，Q 退化为短视。τ 对齐 episode 长度后，
+    单局内的远期价值衰减被控制在温和区间，持仓时长偏好交给 reward shaping 表达。
+    """
+    if hp_gamma is not None and hp_gamma > 0:
+        return float(hp_gamma)
+    if episode_bars:
+        return math.exp(-1.0 / episode_bars)
+    return 0.99
+
+
+def train_dqn(model_meta, version_dir, ver_meta, grad_steps, lr_override, seed, episode_bars=None):
     from dqn import DqnTrainer
     from expstore import list_shards, load_shard
     from registry import build_network, network_spec
@@ -51,7 +66,7 @@ def train_dqn(model_meta, version_dir, ver_meta, grad_steps, lr_override, seed):
         state_dim, model_meta["action_dim"],
         net_factory=lambda s, a: build_network(model_name, s, a),
         lr=lr_override if lr_override is not None else hp.get("lr", 5e-4),
-        gamma=hp.get("gamma", 0.99),
+        gamma=resolve_gamma(hp.get("gamma"), episode_bars),
         batch_size=int(hp.get("batchSize", 128)),
         buffer_capacity=int(hp.get("bufferCapacity", 100_000)),
         min_buffer=int(hp.get("minBuffer", 500)),
@@ -127,7 +142,7 @@ def train_dqn(model_meta, version_dir, ver_meta, grad_steps, lr_override, seed):
                        json.dumps(ver_meta, ensure_ascii=False, indent=2))
 
     print(f"NEW_SAMPLES={new_samples} TRAINED_STEPS={steps} "
-          f"BUFFER_SIZE={trainer.buffer_size} LOSS={avg_loss:.6f}")
+          f"BUFFER_SIZE={trainer.buffer_size} LOSS={avg_loss:.6f} GAMMA={trainer.gamma:.8f}")
 
 
 def main():
@@ -138,6 +153,8 @@ def main():
     ap.add_argument("--lr", type=float, default=None,
                     help="覆盖版本 metadata 中的学习率（轮边界调参，恢复 checkpoint 后同样生效）")
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--episode-bars", type=int, default=None,
+                    help="单局最长 bar 数（Java 任务参数传入；γ<=0 时按 τ=该值 自动推导折扣因子）")
     args = ap.parse_args()
 
     model_dir = Path(args.model_dir)
@@ -151,7 +168,7 @@ def main():
 
     algo = model_meta.get("algo", "DQN").upper()
     if algo == "DQN":
-        train_dqn(model_meta, version_dir, ver_meta, args.grad_steps, args.lr, args.seed)
+        train_dqn(model_meta, version_dir, ver_meta, args.grad_steps, args.lr, args.seed, args.episode_bars)
     else:
         print(f"算法 {algo} 的训练侧实现将在 v2 提供（v1 仅支持 DQN）", file=sys.stderr)
         sys.exit(2)

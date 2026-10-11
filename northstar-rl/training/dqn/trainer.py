@@ -86,9 +86,16 @@ class DqnTrainer:
         rewards = torch.tensor(rewards, device=self.device)
         next_states = torch.tensor(next_states, device=self.device)
         # 不定长转移按 γ^dt 折扣，否则"持有 5 根赚 100"与"持有 50 根赚 100"被视为等价
+        dts = torch.clamp(torch.tensor(dts, device=self.device), min=1.0)
         discounts = torch.pow(
             torch.tensor(self.gamma, device=self.device),
-            torch.tensor(dts, device=self.device))
+            dts)
+        # 年金校正：区间奖励是 dt 根 bar 的不打折累加，按"区间内收益均匀累积"假设折算为等价打折回报，
+        # 消除"R 随 dt 全额累加、bootstrap 却按 γ^dt 衰减"的持仓时长不对称（dt=1 时因子恒为 1，行为不变）
+        if self.gamma < 1.0:
+            annuity = (1.0 - discounts) / ((1.0 - self.gamma) * dts)
+        else:
+            annuity = torch.ones_like(dts)
         terminated = torch.tensor(terminated, device=self.device)
 
         q_values = self.policy_net(states).gather(1, actions).squeeze(1)
@@ -96,7 +103,7 @@ class DqnTrainer:
         with torch.no_grad():
             next_actions = self.policy_net(next_states).argmax(dim=1, keepdim=True)
             next_q = self.target_net(next_states).gather(1, next_actions).squeeze(1)
-            targets = rewards + discounts * next_q * (1.0 - terminated)
+            targets = rewards * annuity + discounts * next_q * (1.0 - terminated)
 
         loss = torch.nn.functional.smooth_l1_loss(q_values, targets)
         self.optimizer.zero_grad()

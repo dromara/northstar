@@ -48,7 +48,7 @@
 
 算法差异（如 DQN 有 epsilon 三项、PPO 有裁剪率/熵系数）由各自的 Hyperparameter 类天然表达，前端零特判。
 
-**超参数键命名（v1 实际契约）**：键为 camelCase（`lr`、`gamma`、`epsilonStart`、`epsilonEnd`、`epsilonDecayRounds`、`batchSize`、`bufferCapacity`、`minBuffer`、`tau`、`maxGradSteps`），由 `DqnHyperParams`（`DynamicParams` 子类）统一定义，Java/Python/UI 三方共享同一套键。`minBuffer` 默认值三方（Java `DqnHyperParams`、Python 兜底、种子 metadata）统一为 500。
+**超参数键命名（v1 实际契约）**：键为 camelCase（`lr`、`gamma`、`epsilonStart`、`epsilonEnd`、`epsilonDecayRounds`、`batchSize`、`bufferCapacity`、`minBuffer`、`tau`、`maxGradSteps`），由 `DqnHyperParams`（`DynamicParams` 子类）统一定义，Java/Python/UI 三方共享同一套键。`minBuffer` 默认值三方（Java `DqnHyperParams`、Python 兜底、种子 metadata）统一为 500。`gamma` 默认 0 = 自动（τ 对齐单局 bar 数，见 §5.5）；已持久化的旧版本 metadata 中显式 `gamma=0.99` 仍按原语义生效，新旧任务可对比。
 
 ### 3.2 模型目录结构
 
@@ -165,7 +165,7 @@ public record RLModelSpec(
 |---|---|---|
 | `prevEquity` / `currEquity` | ModuleSandbox | 区间收益主成分 = `currEquity − prevEquity` |
 | `trades`（区间成交记录） | ModuleSandbox | **显式扣除交易成本**——回放是"最新价立即全成"，不扣成本模型会学到高频刷单策略 |
-| `dt`（间隔 bar 数） | MarketReplay 游标 | ① 奖励整形参考；② 写入 transition 供训练侧 `γ^dt` 折扣 |
+| `dt`（间隔 bar 数） | MarketReplay 游标 | ① 奖励整形参考；② 写入 transition 供训练侧 `γ^dt` 折扣与年金校正（见 §5.5 训练侧配套改动） |
 | `episodeEnd` | 环境 | 区分 truncated（数据耗尽，正常切完）与 terminated（权益击穿，真失败，通常配重罚） |
 
 策略的 `reward()` 是纯函数计算（不碰游标、不记账），止损只是普通决策点，不得与 terminated 混淆。
@@ -297,7 +297,8 @@ s' = observe(); R = 区间累计收益 - 交易成本
 
 **训练侧配套改动**：
 
-- 经验 CSV 增加 `dt` 列（间隔 bar 数）；DQN target 计算改为 `R + γ^dt · max Q(s')`——不定长转移必须按 `γ^Δt` 折扣，否则"持有 5 根赚 100"与"持有 50 根赚 100"被视为等价，模型学不到时间价值；
+- 经验 CSV 增加 `dt` 列（间隔 bar 数）；DQN target 计算改为 `R·a(dt) + γ^dt · max Q(s')`——不定长转移必须按 `γ^Δt` 折扣，否则"持有 5 根赚 100"与"持有 50 根赚 100"被视为等价，模型学不到时间价值；其中 `a(dt) = (1−γ^dt)/((1−γ)·dt)` 为**年金校正**因子：区间奖励 R 是 dt 根 bar 的不打折累加，按"区间内收益均匀累积"假设折算为等价打折回报，消除"R 随 dt 全额累加、bootstrap 却按 γ^dt 衰减"的持仓时长不对称（dt=1 时因子恒为 1，行为不变）；
+- **γ 的自动量纲（γ≤0 时生效）**：γ 的时间常数 τ=−1/ln γ 须与 dt 的量纲（bar）匹配——固定 0.99 的 τ≈100 bar，单局较长时一次长持仓转移就把 bootstrap 打到 e^(−1) 量级，Q 退化为短视。故 γ 配置 ≤0（`DqnHyperParams` 默认值）时按 **τ = 单局最长 bar 数**自动推导 γ=e^(−1/τ)（Java 经 `--episode-bars` 传任务参数，Python `resolve_gamma` 解析，显式正值 γ 优先）；单局内的远期价值衰减被控制在温和区间，持仓时长偏好交给 reward shaping（`dt` 已入 `RLRewardContext`）表达。每轮 stdout 输出 `GAMMA=…` 供复盘核对实际生效值；
 - **强制触发点**（纯事件触发的失效兜底）：
   - 超时触发：maxHoldingBars（如 240 根），防死行情里永不触发导致数据饿死；
   - 回合边界：数据耗尽时强制平仓并记录最后一条 transition（truncated 语义）；

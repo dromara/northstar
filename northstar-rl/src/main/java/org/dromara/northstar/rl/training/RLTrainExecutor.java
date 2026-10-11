@@ -18,9 +18,11 @@ public interface RLTrainExecutor {
 	 * @param gradSteps		本轮梯度更新步数
 	 * @param lrOverride	覆盖版本 metadata 中的学习率（轮边界调参；null 表示沿用）
 	 * @param seed			随机种子
+	 * @param episodeBars	单局最长 bar 数（任务参数；γ 配置为自动时 Python 端据此推导折扣因子）
 	 * @return				本轮训练结果
 	 */
-	RLTrainResult trainRound(Path modelDir, int version, int gradSteps, Double lrOverride, long seed) throws Exception;
+	RLTrainResult trainRound(Path modelDir, int version, int gradSteps, Double lrOverride, long seed,
+			int episodeBars) throws Exception;
 
 	/**
 	 * @param loss			本轮平均 loss（Python stdout 结构化输出解析而来）

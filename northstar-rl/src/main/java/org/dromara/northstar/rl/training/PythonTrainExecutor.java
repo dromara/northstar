@@ -34,8 +34,8 @@ public class PythonTrainExecutor implements RLTrainExecutor {
 	}
 
 	@Override
-	public RLTrainResult trainRound(Path modelDir, int version, int gradSteps, Double lrOverride, long seed)
-			throws IOException, InterruptedException {
+	public RLTrainResult trainRound(Path modelDir, int version, int gradSteps, Double lrOverride, long seed,
+			int episodeBars) throws IOException, InterruptedException {
 		if (!Files.isRegularFile(trainingDir.resolve("train_round.py"))) {
 			throw new IllegalStateException("训练脚本不存在: " + trainingDir.resolve("train_round.py").toAbsolutePath());
 		}
@@ -43,7 +43,8 @@ public class PythonTrainExecutor implements RLTrainExecutor {
 				"--model-dir", modelDir.toAbsolutePath().toString(),
 				"--version", String.valueOf(version),
 				"--grad-steps", String.valueOf(gradSteps),
-				"--seed", String.valueOf(seed));
+				"--seed", String.valueOf(seed),
+				"--episode-bars", String.valueOf(episodeBars));
 		if (lrOverride != null) {
 			pb.command().addAll(java.util.List.of("--lr", String.valueOf(lrOverride)));
 		}

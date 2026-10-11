@@ -11,7 +11,8 @@ import java.nio.file.Path;
 public class StubTrainExecutor implements org.dromara.northstar.rl.training.RLTrainExecutor {
 
 	@Override
-	public RLTrainResult trainRound(Path modelDir, int version, int gradSteps, Double lrOverride, long seed) {
+	public RLTrainResult trainRound(Path modelDir, int version, int gradSteps, Double lrOverride, long seed,
+			int episodeBars) {
 		return new RLTrainResult(Double.NaN, 0, 0);
 	}
 }

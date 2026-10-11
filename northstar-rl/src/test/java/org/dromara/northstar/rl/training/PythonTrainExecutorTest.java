@@ -65,7 +65,7 @@ class PythonTrainExecutorTest {
         PythonTrainExecutor executor = new PythonTrainExecutor("python", trainingDir);
 
         IllegalStateException e = assertThrows(IllegalStateException.class,
-                () -> executor.trainRound(Path.of("models/m"), 1, 300, null, 42));
+                () -> executor.trainRound(Path.of("models/m"), 1, 300, null, 42, 100));
         assertTrue(e.getMessage().contains("训练脚本不存在"), e.getMessage());
     }
 }

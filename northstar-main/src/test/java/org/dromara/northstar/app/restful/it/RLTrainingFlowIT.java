@@ -109,7 +109,7 @@ class RLTrainingFlowIT extends RestE2ESupport {
 					LocalDate to = inv.getArgument(3);
 					return syntheticBars(from, to);	// 数据源返回时间降序
 				});
-		when(trainExecutor.trainRound(any(Path.class), anyInt(), anyInt(), any(), anyLong()))
+		when(trainExecutor.trainRound(any(Path.class), anyInt(), anyInt(), any(), anyLong(), anyInt()))
 				.thenReturn(new RLTrainExecutor.RLTrainResult(0.123, 300, 100));
 		// 显式注册回放合约（应用启动时数据源替身尚未打桩，PlaybackGatewayFactory 不会注册任何合约）
 		mktCenter.addInstrument(new PlaybackContract(contract, dataSource));
@@ -302,7 +302,7 @@ class RLTrainingFlowIT extends RestE2ESupport {
 	void pauseResumeStopLifecycle() throws Exception {
 		Auth auth = login();
 		// 慢速桩执行器让任务停留在运行中，便于观测暂停/继续
-		when(trainExecutor.trainRound(any(Path.class), anyInt(), anyInt(), any(), anyLong()))
+		when(trainExecutor.trainRound(any(Path.class), anyInt(), anyInt(), any(), anyLong(), anyInt()))
 				.thenAnswer(_ -> {
 					Thread.sleep(300);
 					return new RLTrainExecutor.RLTrainResult(0.1, 300, 100);

@@ -87,7 +87,7 @@ class RLTrainingRunnerTest {
 					.thenAnswer(inv -> new TradingEnvironment.SampleStats(10, 5, 25, inv.getArgument(1)));
 			when(env.evaluate()).thenReturn(new TradingEnvironment.EvalOutcome(List.of(), 100_000, 100_000));
 		}
-		when(trainExecutor.trainRound(any(), anyInt(), anyInt(), any(), anyLong()))
+		when(trainExecutor.trainRound(any(), anyInt(), anyInt(), any(), anyLong(), anyInt()))
 				.thenReturn(new RLTrainExecutor.RLTrainResult(0.5, 300, 1000));
 	}
 
@@ -205,7 +205,7 @@ class RLTrainingRunnerTest {
 	void hyperParamChangeAtRoundBoundaryTakesEffectNextRound() throws Exception {
 		record.setTotalRounds(2);
 		List<Double> lrUsed = new ArrayList<>();
-		when(trainExecutor.trainRound(any(), anyInt(), anyInt(), any(), anyLong())).thenAnswer(inv -> {
+		when(trainExecutor.trainRound(any(), anyInt(), anyInt(), any(), anyLong(), anyInt())).thenAnswer(inv -> {
 			lrUsed.add(inv.getArgument(3));
 			// 第一轮训练期间修改超参数（模拟 UI 轮边界调参），第二轮应生效
 			record.getHyperParams().put("epsilonStart", 0.0);

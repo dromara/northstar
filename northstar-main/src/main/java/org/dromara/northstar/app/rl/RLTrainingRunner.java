@@ -235,7 +235,8 @@ public class RLTrainingRunner {
 		// 2) Python 单轮训练：先关闭全部 Agent 句柄（规避 Windows 文件锁），训练完成后同步刷新
 		envs.forEach(TradingEnvironment::markAgentStale);
 		RLTrainExecutor.RLTrainResult result = trainExecutor.trainRound(
-				modelStore.modelDir(modelId), targetVersion(), hp.gradSteps(transitions), lr, roundSeed);
+				modelStore.modelDir(modelId), targetVersion(), hp.gradSteps(transitions), lr, roundSeed,
+				record.getMaxEpisodeBars());
 		envs.forEach(TradingEnvironment::reloadAgent);
 
 		// 3) 验证时段评估（训练随机、评估固定）

@@ -43,7 +43,7 @@ class DqnHyperParamsTest {
     void defaultsAreExposedAsMap() {
         Map<String, Double> defaults = RLAlgorithms.hyperParamDefaults(RLAlgo.DQN);
         assertEquals(5e-4, defaults.get("lr"), 1e-12);
-        assertEquals(0.99, defaults.get("gamma"), 1e-12);
+        assertEquals(0.0, defaults.get("gamma"), 1e-12, "γ 默认 0 = 自动（τ 对齐单局 bar 数）");
         assertEquals(128, defaults.get("batchSize"), 1e-12);
     }
 
