@@ -3,6 +3,7 @@ package org.dromara.northstar.app.rl;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.dromara.northstar.rl.agent.RLModelLoader;
 import org.dromara.northstar.rl.model.RLModelStore;
 import org.dromara.northstar.rl.training.PythonTrainExecutor;
 import org.dromara.northstar.rl.training.RLTrainExecutor;
@@ -26,9 +27,11 @@ public class RLConfig {
 	@Bean
 	RLModelStore rlModelStore(@Value("${northstar.rl.models-root:models}") String modelsRoot,
 			ApplicationContext appCtx) {
-		Path dir = firstExisting(modelsRoot, "models", "northstar-rl/models", "../northstar-rl/models");
+		Path dir = RLModelStore.resolveRoot(modelsRoot);
 		log.info("RL 模型根目录: {}", dir.toAbsolutePath());
 		RLModelStore store = new RLModelStore(dir);
+		// 发布给策略侧实盘加载（RLModelLoader），保证训练/实盘/配置三方同根目录
+		RLModelLoader.publishModelsRoot(dir);
 		// 注册全部 RL 策略：模型级 metadata 缺失时可按策略现场 spec 现场重建（bootstrap）
 		appCtx.getBeansWithAnnotation(StrategicComponent.class).values().stream()
 				.filter(RLStrategy.class::isInstance)

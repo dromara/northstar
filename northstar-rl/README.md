@@ -179,8 +179,11 @@ RL 策略实现 `RLStrategy` 接口（见 `RlTestStrategy` 示例），需声明
 策略绑定的模型名必须与 Python 端 `training/registry.py` 的注册 key 一致，
 网络结构以 Python 注册表为准，Java 不参与定义。训练任务通过监控台
 「交易自动化 → 强化学习训练」创建（REST 契约见 DESIGN.md §6.3）。
-实盘模组绑定固定版本号：在策略初始化参数中配置 `推理模型版本目录`
-（如 `models/dqn-demo/versions/v1`），模组加载时校验 specHash，不一致快速失败。
+实盘模组绑定固定版本号：在策略初始化参数中配置 `推理模型版本号`
+（正整数指定版本，0 表示不启用推理；模型名即 `modelName()`，版本目录由框架按
+`{modelsRoot}/{modelName}/versions/v{n}` 契约自动寻址，modelsRoot 与训练侧同源），
+模组加载时校验 specHash，不一致快速失败。策略代码侧的统一入口为
+`RLModelLoader.loadLiveAgent(strategy, actionType, version)`。
 
 ## 常见问题
 

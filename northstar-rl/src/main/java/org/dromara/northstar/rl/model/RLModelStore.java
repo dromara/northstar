@@ -43,6 +43,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RLModelStore {
 
+	/** 模型根目录候选（与 northstar-main RLConfig 的装配规则保持一致） */
+	private static final List<String> ROOT_CANDIDATES = List.of("models", "northstar-rl/models", "../northstar-rl/models");
+
 	private final Path root;
 	/** 已注册策略（modelName -> 策略实例）：listModels 遇到无 metadata 的目录时据此现场重建 */
 	private final Map<String, RLStrategy> strategies = new ConcurrentHashMap<>();
@@ -62,6 +65,28 @@ public class RLModelStore {
 
 	public Path root() {
 		return root;
+	}
+
+	/**
+	 * 解析模型根目录（Spring 装配与策略实盘加载共用的统一规则）：
+	 * 环境变量 NS_RL_MODELS_ROOT 覆盖优先，其次配置值，最后按候选路径顺序回退
+	 * （工作目录 models → 仓库布局 northstar-rl/models → ../northstar-rl/models）；
+	 * 都不存在时返回配置值或默认 "models"（由调用方决定创建或报错）。
+	 */
+	public static Path resolveRoot(String configured) {
+		String env = System.getenv("NS_RL_MODELS_ROOT");
+		if (env != null && !env.isBlank()) {
+			return Path.of(env.trim());
+		}
+		if (configured != null && !configured.isBlank() && Files.isDirectory(Path.of(configured))) {
+			return Path.of(configured);
+		}
+		for (String c : ROOT_CANDIDATES) {
+			if (Files.isDirectory(Path.of(c))) {
+				return Path.of(c);
+			}
+		}
+		return Path.of(configured == null || configured.isBlank() ? "models" : configured);
 	}
 
 	public Path modelDir(String modelId) {

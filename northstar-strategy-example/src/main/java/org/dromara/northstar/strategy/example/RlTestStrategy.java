@@ -1,6 +1,5 @@
 package org.dromara.northstar.strategy.example;
 
-import java.nio.file.Path;
 import java.util.List;
 
 import org.dromara.northstar.common.constant.FieldType;
@@ -17,8 +16,7 @@ import org.dromara.northstar.indicator.helper.SimpleValueIndicator;
 import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.indicator.trend.MAIndicator;
 import org.dromara.northstar.rl.agent.DqnAgent;
-import org.dromara.northstar.rl.model.RLModelMetadata;
-import org.dromara.northstar.rl.model.RLVersionMetadata;
+import org.dromara.northstar.rl.agent.RLModelLoader;
 import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.IModuleStrategyContext;
 import org.dromara.northstar.strategy.StrategicComponent;
@@ -63,8 +61,8 @@ public class RlTestStrategy extends AbstractStrategy implements RLStrategy {
 		@Setting(label = "触发灵敏度", type = FieldType.NUMBER, order = 10, unit = "%")
 		private double observeThreshold = 0.2;	// 单bar涨跌幅超过该阈值（百分比）即触发决策点
 
-		@Setting(label = "推理模型版本目录", order = 20, placeholder = "如 models/dqn-demo/versions/v1，留空则实盘不启用推理", required = false)
-		private String modelVersionDir = "";
+		@Setting(label = "推理模型版本号", type = FieldType.NUMBER, order = 20, placeholder = "正整数指定版本；0 表示不启用推理", required = false)
+		private int modelVersion = 0;
 	}
 
 	@Override
@@ -194,7 +192,7 @@ public class RlTestStrategy extends AbstractStrategy implements RLStrategy {
 	@Override
 	public void onMergedBar(Bar bar) {
 		// 实盘路径：与训练环境执行完全相同的钩子代码路径（训推一致）
-		if (!params.modelVersionDir.isBlank() && shouldObserve(ctx, bar.contract())) {
+		if (params.modelVersion > 0 && shouldObserve(ctx, bar.contract())) {
 			try {
 				TradeAction action = liveAgent().act(observe(ctx, bar.contract()));
 				onAction(action, ctx, bar.contract());
@@ -206,24 +204,8 @@ public class RlTestStrategy extends AbstractStrategy implements RLStrategy {
 
 	private synchronized DqnAgent<TradeAction> liveAgent() {
 		if (liveAgent == null) {
-			try {
-				// 策略演进防护：模组加载推理时校验 specHash（其余校验时机：创建训练任务、fork 版本、单元测试）
-				Path versionDir = Path.of(params.modelVersionDir);
-				RLModelMetadata modelMeta = RLModelMetadata.load(versionDir.getParent().getParent());
-				RLVersionMetadata verMeta = RLVersionMetadata.load(versionDir);
-				if (!rlSpec().specHash().equals(modelMeta.getSpecHash())
-						|| !rlSpec().specHash().equals(verMeta.getSpecHash())) {
-					// 校验失败输出结构化 diff（旧 metadata 无 features 字段时 diff 为空，仅报 hash 不一致）
-					List<String> diffs = modelMeta.diffSpec(rlSpec());
-					throw new IllegalStateException("模型规格与当前策略不一致（specHash 校验失败），请更换匹配的模型版本"
-							+ (diffs.isEmpty() ? "" : "：\n" + String.join("\n", diffs)));
-				}
-				liveAgent = DqnAgent.fromVersionDir(versionDir, TradeAction.class);
-			} catch (IllegalStateException e) {
-				throw e;
-			} catch (Exception e) {
-				throw new IllegalStateException("RL 推理模型加载失败: " + params.modelVersionDir, e);
-			}
+			// 模型名来自 modelName()，版本目录由框架按目录契约自动解析，并校验 specHash（策略演进防护）
+			liveAgent = RLModelLoader.loadLiveAgent(this, TradeAction.class, params.modelVersion);
 		}
 		return liveAgent;
 	}

@@ -175,6 +175,7 @@ public record RLModelSpec(
 - `specHash` = 对 `features（name+normalizer，顺序敏感）+ actions + preprocessing` 稳定序列化后取 SHA-256 前 16 位（**不含模型名**），写入模型级与版本级 metadata；
 - 模型级 metadata 是传输协议而非身份载体，因此**创建训练任务不再因 specHash 不一致失败**：入口先 `syncModel`，陈旧 metadata 被现场 spec 重写（保留 `latest_version` 与预处理统计量，见 §3.3）；
 - 快速失败的校验时机收敛到三处：**fork 版本**（`baseVersion > 0` 时父版本 specHash 必须与策略现场规格一致，否则拒绝 fork）、**模组加载模型推理**、**单元测试**（golden specHash）；
+- **实盘加载寻址归框架**：策略侧只需提供模型名（`modelName()`）与版本号，版本目录由 `RLModelLoader` 按 `models/{modelName}/versions/v{n}` 契约自动解析（模型根目录与训练侧同源：优先取 Spring 装配发布值，其次 `NS_RL_MODELS_ROOT` 环境变量与候选路径回退），寻址后先做模型级/版本级 specHash 校验再加载权重，用户无需手填目录路径；
 - 校验失败输出**结构化 diff**（哪个特征变了/新增了什么），不是只报 hash mismatch——模型级 metadata 持久化了特征清单（§3.3 的 `features` 字段），校验点据此与当前策略规格逐项比对；旧版 metadata 无特征清单时退化为 hash 提示；
 - 处置路径只有两条：有意变更 → 以新规格从零训练新版本（或创建新模型）；无意变更 → 按 diff 回退策略代码；
 - 配套单测模板：固定输入快照 → `observe()` 输出与 golden 快照逐位比对（specHash 只钉形状，observe 的特征计算逻辑漂移由 golden 测试兜底），让无意识改动在开发期暴露。
