@@ -60,10 +60,10 @@ public interface IModuleStrategyContext {
 	 */
 	Logger getLogger(Class<?> clz);
 	/**
-	 * 获取默认交易交易量
+	 * 获取默认交易交易量（允许小数，如股票/加密货币的零碎股）
 	 * @return
 	 */
-	int getDefaultVolume();
+	double getDefaultVolume();
 	/**
 	 * 停用模组策略
 	 * @param enabled

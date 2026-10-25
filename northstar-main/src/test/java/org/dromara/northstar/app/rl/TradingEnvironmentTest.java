@@ -144,7 +144,7 @@ public class TradingEnvironmentTest {
 		// maxHoldingBars 取 10：初始决策点改为"指标就绪或强触发上限"后才观测（预热第四层收口），
 		// 上限须小于单局 bar 数上限(120)，否则低波动合成行情下整局无决策点、零采样
 		return new TradingEnvironment(gatewayContract, bars, 120, 300, strategy, agent, 0,
-				"rl-test", new TradingEnvironment.RLEnvConfig(100_000, 60, 10, 0.5, 120));
+				"rl-test", new TradingEnvironment.RLEnvConfig(100_000, 60, 10, 0.5, 120, 1));
 	}
 
 	@Test
@@ -273,7 +273,7 @@ public class TradingEnvironmentTest {
 		List<Bar> downBars = synthBars(1, 100, i -> 4000 - i * 30);
 		TradingEnvironment env = new TradingEnvironment(gatewayContract, downBars, 20, 99,
 				new RlTestStrategy(), fixedActionAgent(TradeAction.BUY), 0, "rl-ruin",
-				new TradingEnvironment.RLEnvConfig(100_000, 20, 5, 0.02, 500));
+				new TradingEnvironment.RLEnvConfig(100_000, 20, 5, 0.02, 500, 1));
 
 		TradingEnvironment.SampleStats stats;
 		List<String[]> rows;
@@ -299,7 +299,7 @@ public class TradingEnvironmentTest {
 		List<Bar> flatBars = synthBars(3, 100, _ -> 3000);
 		TradingEnvironment env = new TradingEnvironment(gatewayContract, flatBars, 20, 299,
 				new RlTestStrategy(), fixedActionAgent(TradeAction.HOLD), 0, "rl-flat",
-				new TradingEnvironment.RLEnvConfig(100_000, 20, 10, 0.9, 500));
+				new TradingEnvironment.RLEnvConfig(100_000, 20, 10, 0.9, 500, 1));
 
 		TradingEnvironment.SampleStats stats;
 		List<String[]> rows;

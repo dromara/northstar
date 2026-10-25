@@ -36,6 +36,6 @@ public class BacktestModuleVO {
 	
 	private Double winRate;
 	
-	private Integer tradeSize;
+	private Double tradeSize;
 	
 }

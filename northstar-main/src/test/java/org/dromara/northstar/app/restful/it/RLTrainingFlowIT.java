@@ -169,6 +169,7 @@ class RLTrainingFlowIT extends RestE2ESupport {
 				.maxHoldingBars(240)
 				.ruinThreshold(0.5)
 				.maxEpisodeBars(2000)
+				.defaultVolume(1.0)
 				.hyperParams(Map.of("lr", 0.0005))
 				.build();
 	}

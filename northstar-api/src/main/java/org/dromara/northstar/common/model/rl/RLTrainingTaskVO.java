@@ -40,6 +40,8 @@ public class RLTrainingTaskVO {
 	private Double ruinThreshold;
 	/** 单局最长 bar 数（采样预算） */
 	private Integer maxEpisodeBars;
+	/** 默认开仓数量（正数，允许小数） */
+	private Double defaultVolume;
 	private RLTrainingStatus status;
 	private Integer currentRound;
 	/** 数据加载进度：已就绪合约数（含跳过） */

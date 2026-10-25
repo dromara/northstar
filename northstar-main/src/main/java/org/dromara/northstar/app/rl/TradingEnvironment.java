@@ -41,9 +41,10 @@ public class TradingEnvironment {
 	 * @param maxHoldingBars	决策点超时强触发（防死行情里永不触发导致数据饿死）
 	 * @param ruinThreshold		权益击穿阈值（相对初始资金的最大回撤比例，击穿为 terminated 真失败）
 	 * @param maxEpisodeBars	单局最长 bar 数（采样预算）
+	 * @param defaultVolume		默认开仓数量（沙箱模组默认下单量，正数，允许小数）
 	 */
 	public record RLEnvConfig(double initBalance, int warmupBars, int maxHoldingBars, double ruinThreshold,
-			int maxEpisodeBars) {
+			int maxEpisodeBars, double defaultVolume) {
 	}
 
 	/** 单轮采样统计 */
@@ -118,7 +119,7 @@ public class TradingEnvironment {
 		}
 		String moduleName = moduleNamePrefix + "-eval";
 		RLModuleSandbox sandbox = RLModuleSandbox.create(moduleName, strategyTemplate, contract,
-				config.initBalance(), 1, dataSource);
+				config.initBalance(), config.defaultVolume(), dataSource);
 		replay.locate(validationStartIdx, replay.size() - validationStartIdx, config.warmupBars());
 		runLoop(sandbox, 0.0, 0, null, new Random(0), true);
 		return new EvalOutcome(sandbox.accountRepo().findDealRecords(moduleName),
@@ -129,7 +130,7 @@ public class TradingEnvironment {
 			ExperienceStore store, Random rng, boolean greedy) {
 		String moduleName = "%s-r%d-c%d".formatted(moduleNamePrefix, round, contractIdx);
 		RLModuleSandbox sandbox = RLModuleSandbox.create(moduleName, strategyTemplate, contract,
-				config.initBalance(), 1, dataSource);
+				config.initBalance(), config.defaultVolume(), dataSource);
 		replay.locate(startIdx, length, config.warmupBars());
 		return runLoop(sandbox, epsilon, round, store, rng, greedy);
 	}

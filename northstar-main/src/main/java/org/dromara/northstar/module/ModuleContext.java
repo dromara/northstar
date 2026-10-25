@@ -272,7 +272,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public int getDefaultVolume() {
+	public double getDefaultVolume() {
 		return moduleDescription.getDefaultVolume();
 	}
 

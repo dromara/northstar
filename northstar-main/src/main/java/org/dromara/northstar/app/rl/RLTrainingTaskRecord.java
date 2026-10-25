@@ -43,6 +43,8 @@ public class RLTrainingTaskRecord {
 	private double ruinThreshold;
 	/** 单局最长 bar 数（采样预算） */
 	private int maxEpisodeBars;
+	/** 默认开仓数量（正数，允许小数） */
+	private double defaultVolume;
 	private Map<String, Double> hyperParams;
 	private RLTrainingStatus status;
 	private int currentRound;

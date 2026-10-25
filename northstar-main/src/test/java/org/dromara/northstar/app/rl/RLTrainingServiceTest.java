@@ -102,6 +102,7 @@ class RLTrainingServiceTest {
 				.maxHoldingBars(240)
 				.ruinThreshold(0.5)
 				.maxEpisodeBars(2000)
+				.defaultVolume(1.0)
 				.hyperParams(new HashMap<>(Map.of("lr", 0.001)))
 				.build();
 	}
@@ -178,6 +179,10 @@ class RLTrainingServiceTest {
 		RLTrainingTaskDTO badEpisodeBars = dto();
 		badEpisodeBars.setMaxEpisodeBars(0);
 		assertThrows(IllegalArgumentException.class, () -> service.createTask(badEpisodeBars));
+
+		RLTrainingTaskDTO badVolume = dto();
+		badVolume.setDefaultVolume(0.0);
+		assertThrows(IllegalArgumentException.class, () -> service.createTask(badVolume));
 	}
 
 	@Test
@@ -845,6 +850,7 @@ class RLTrainingServiceTest {
 				.maxHoldingBars(vo.getMaxHoldingBars())
 				.ruinThreshold(vo.getRuinThreshold())
 				.maxEpisodeBars(vo.getMaxEpisodeBars())
+				.defaultVolume(vo.getDefaultVolume())
 				.hyperParams(new HashMap<>(vo.getHyperParams()))
 				.status(vo.getStatus())
 				.currentRound(vo.getCurrentRound())

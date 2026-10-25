@@ -171,6 +171,8 @@ public class RLTrainingService implements CommandLineRunner {
 				"权益击穿阈值必须在 (0, 1) 区间内");
 		Assert.notNull(dto.getMaxEpisodeBars(), "单局最长 bar 数不能为空");
 		Assert.isTrue(dto.getMaxEpisodeBars() >= 1, "单局最长 bar 数至少为 1");
+		Assert.notNull(dto.getDefaultVolume(), "默认开仓数量不能为空");
+		Assert.isTrue(dto.getDefaultVolume() > 0, "默认开仓数量必须大于 0");
 
 		// 三个起始日期严格递增：预热=[预热起始, 训练起始)、训练=[训练起始, 验证起始)、验证=[验证起始, 数据末日]
 		LocalDate warmupStart = LocalDate.parse(dto.getWarmupStartDate(), DateTimeConstant.D_FORMAT_FORMATTER);
@@ -238,6 +240,7 @@ public class RLTrainingService implements CommandLineRunner {
 				.maxHoldingBars(dto.getMaxHoldingBars())
 				.ruinThreshold(dto.getRuinThreshold())
 				.maxEpisodeBars(dto.getMaxEpisodeBars())
+				.defaultVolume(dto.getDefaultVolume())
 				.hyperParams(hyperParams)
 				.status(RLTrainingStatus.CREATED)
 				.currentRound(0)
@@ -639,7 +642,8 @@ public class RLTrainingService implements CommandLineRunner {
 			envs.add(new TradingEnvironment(ic, bars, trainStartIdx, validationStartIdx,
 					strategy, agent, idx++, "rl-" + record.getTaskId().substring(0, 8),
 					new TradingEnvironment.RLEnvConfig(record.getInitBalance(), warmupBars,
-							record.getMaxHoldingBars(), record.getRuinThreshold(), record.getMaxEpisodeBars())));
+							record.getMaxHoldingBars(), record.getRuinThreshold(), record.getMaxEpisodeBars(),
+							record.getDefaultVolume() > 0 ? record.getDefaultVolume() : 1)));
 		}
 		return new RLTrainingRunner(record, envs, modelStore, trainExecutor, trainLock,
 				() -> findRecord(record.getTaskId()), this::persistQuietly, this::notify);
@@ -726,6 +730,7 @@ public class RLTrainingService implements CommandLineRunner {
 				.maxHoldingBars(r.getMaxHoldingBars())
 				.ruinThreshold(r.getRuinThreshold())
 				.maxEpisodeBars(r.getMaxEpisodeBars())
+				.defaultVolume(r.getDefaultVolume())
 				.status(r.getStatus())
 				.currentRound(r.getCurrentRound())
 				.dataLoadedContracts(r.getDataLoadedContracts())

@@ -103,7 +103,7 @@ class BacktestRunnerTest {
 		when(ctx.getModuleDescription()).thenReturn(ModuleDescription.builder()
 				.name("testModule").initBalance(100_000).build());
 		when(ctx.bindedContracts()).thenReturn(List.of(contract));
-		when(ctx.getDefaultVolume()).thenReturn(1);
+		when(ctx.getDefaultVolume()).thenReturn(1.0);
 		ModuleAccount account = mock(ModuleAccount.class);
 		when(account.getPositions()).thenReturn(List.of());
 		when(ctx.getModuleAccount()).thenReturn(account);

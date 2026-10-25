@@ -70,7 +70,7 @@ public class RLModuleSandbox {
 	 * 装配一个沙箱（策略全新实例，InitParams 取默认值）。
 	 */
 	public static RLModuleSandbox create(String moduleName, RLStrategy strategyTemplate, Contract contract,
-			double initBalance, int defaultVolume, IDataSource dataSource) {
+			double initBalance, double defaultVolume, IDataSource dataSource) {
 		RLStrategy strategy = newStrategyInstance(strategyTemplate);
 		InMemoryAccountRepository accountRepo = new InMemoryAccountRepository();
 

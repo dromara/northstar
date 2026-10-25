@@ -43,6 +43,8 @@ public class RLTrainingTaskDTO {
 	private Double ruinThreshold;
 	/** 单局最长 bar 数（采样预算，>=1） */
 	private Integer maxEpisodeBars;
+	/** 默认开仓数量（正数，允许小数） */
+	private Double defaultVolume;
 	/** 超参数取值表（字段清单由模型的 Hyperparameter 类定义） */
 	private Map<String, Double> hyperParams;
 	/** 显式降级路径：baseVersion > 0 时设为 false 表示不继承权重从零训练（血缘仍记录父版本） */

@@ -51,10 +51,10 @@ public class ModuleDescription {
 	 */
 	private double initBalance;
 	/**
-	 * 默认交易量
+	 * 默认交易量（正数，允许小数）
 	 */
 	@Builder.Default
-	private int defaultVolume = 1;
+	private double defaultVolume = 1;
 	/**
 	 * 下单超价设置
 	 */
